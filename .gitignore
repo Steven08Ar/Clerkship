@@ -34,3 +34,7 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+#Databases
+/backend/database/postgres/data/
+/backend/database/mongo/data/
