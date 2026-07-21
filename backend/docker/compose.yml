@@ -1,5 +1,6 @@
 services:
 
+  #POSTGRESSQL
   postgres:
 
     image: postgres:17
@@ -18,3 +19,28 @@ services:
       - ../database/postgres/data:/var/lib/postgresql/data
 
       - ../database/postgres/init:/docker-entrypoint-initdb.d
+
+
+  #MONGODB
+  mongodb:
+
+    image: mongo:8.0
+  
+    container_name: medical_mongodb
+  
+    restart: unless-stopped
+  
+    env_file:
+      - ../.env
+  
+    ports:
+      - "${MONGO_PORT}:27017"
+  
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_INITDB_ROOT_USERNAME}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD}
+      MONGO_INITDB_DATABASE: ${MONGO_DATABASE}
+  
+    volumes:
+      - ../database/mongo/data:/data/db
+      - ../database/mongo/init:/docker-entrypoint-initdb.d

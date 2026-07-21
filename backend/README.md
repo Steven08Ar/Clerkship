@@ -12,3 +12,7 @@ psql -U postgres_admin -h localhost -d medical_simulator
 \c medical_simulator  
 \dt  
 \q  
+
+## Entrar a base de datos mongo
+docker exec -it medical_mongodb mongosh
+show collections
