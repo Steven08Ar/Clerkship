@@ -71,12 +71,6 @@ const PANEL: Record<string, PanelSection> = {
       },
     ],
   },
-  cronograma: {
-    flat: [
-      { label: 'Definición Técnica & Stack', route: '/cronograma' },
-      { label: 'Cronograma 16 Semanas',      route: '/cronograma' },
-    ],
-  },
 };
 
 /* ── Helpers ────────────────────────────────────────────────── */

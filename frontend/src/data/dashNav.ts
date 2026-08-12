@@ -1,6 +1,6 @@
 import {
   LayoutDashboard, FileText,
-  Clock, Library, PersonStanding, Calendar,
+  Clock, Library, PersonStanding,
 } from 'lucide-react';
 import type { ComponentType } from 'react';
 
@@ -17,5 +17,4 @@ export const DASH_NAV: NavTab[] = [
   { id: 'historial',  label: 'Historial',  Icon: Clock,           route: '/historial'  },
   { id: 'biblioteca', label: 'Biblioteca', Icon: Library,         route: '/biblioteca' },
   { id: 'anatomia',   label: 'Anatomía',   Icon: PersonStanding,  route: '/anatomia'   },
-  { id: 'cronograma', label: 'Cronograma', Icon: Calendar,        route: '/cronograma' },
 ];
