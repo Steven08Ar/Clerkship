@@ -1,26 +1,35 @@
 /* ══════════════════════════════════════════════════════════
-   REGISTRO TÉCNICO Y CRONOGRAMA — Estilo Registro Compacto & Ligero
+   REGISTRO TÉCNICO Y CRONOGRAMA — Estilo Split Screen sin Scroll General
    ══════════════════════════════════════════════════════════ */
 
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap');
+
+.crono-compact-root,
+.crono-compact-root * {
+  font-family: 'Poppins', -apple-system, BlinkMacSystemFont, sans-serif !important;
+  box-sizing: border-box;
+}
+
 .crono-compact-root {
-  min-height: 100vh;
+  height: 100vh;
+  max-height: 100vh;
+  overflow: hidden;
   background: #F8FAFC;
   color: #0F172A;
-  font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
-  padding: 24px 16px 48px;
+  padding: 16px 24px;
   display: flex;
   flex-direction: column;
-  align-items: center;
 }
 
 /* Header Superior Super Compacto */
 .crono-top-bar {
   width: 100%;
-  max-width: 900px;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 20px;
+  height: 44px;
+  flex-shrink: 0;
+  margin-bottom: 12px;
 }
 
 .crono-brand-btn {
@@ -29,7 +38,7 @@
   gap: 8px;
   background: transparent;
   border: none;
-  font-size: 1rem;
+  font-size: 1.05rem;
   font-weight: 800;
   color: #0F172A;
   cursor: pointer;
@@ -39,7 +48,7 @@
   display: flex;
   align-items: center;
   gap: 6px;
-  font-size: 0.82rem;
+  font-size: 0.8rem;
   font-weight: 700;
   color: #64748B;
   background: #FFFFFF;
@@ -55,72 +64,32 @@
   border-color: #1976D2;
 }
 
-/* Card Principal Tipo Formulario de Registro */
-.crono-register-card {
-  width: 100%;
-  max-width: 900px;
+/* Pestañas de Navegación Compactas */
+.crono-nav-tabs-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 42px;
+  flex-shrink: 0;
+  margin-bottom: 12px;
   background: #FFFFFF;
   border: 1px solid #E2E8F0;
-  border-radius: 20px;
-  box-shadow: 0 4px 16px rgba(15, 23, 42, 0.04);
-  padding: 28px;
-  box-sizing: border-box;
+  border-radius: 14px;
+  padding: 4px 8px;
 }
 
-/* Header del Formulario */
-.crono-form-header {
-  text-align: center;
-  margin-bottom: 24px;
-}
-
-.crono-mini-tag {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 3px 10px;
-  border-radius: 9999px;
-  background: #E3F2FD;
-  color: #0D47A1;
-  font-size: 0.7rem;
-  font-weight: 800;
-  text-transform: uppercase;
-  margin-bottom: 8px;
-}
-
-.crono-form-title {
-  font-size: 1.5rem;
-  font-weight: 800;
-  color: #0F172A;
-  margin: 0 0 6px;
-  letter-spacing: -0.02em;
-}
-
-.crono-form-desc {
-  font-size: 0.85rem;
-  color: #64748B;
-  margin: 0;
-}
-
-/* Pestañas de Navegación Compactas */
 .crono-nav-tabs {
   display: flex;
-  justify-content: center;
   gap: 6px;
-  background: #F1F5F9;
-  padding: 4px;
-  border-radius: 12px;
-  margin-bottom: 24px;
 }
 
 .crono-nav-tab {
-  flex: 1;
   display: flex;
   align-items: center;
-  justify-content: center;
   gap: 6px;
-  padding: 8px 16px;
+  padding: 6px 16px;
   border-radius: 9px;
-  font-size: 0.85rem;
+  font-size: 0.82rem;
   font-weight: 700;
   color: #64748B;
   background: transparent;
@@ -130,17 +99,68 @@
 }
 
 .crono-nav-tab.active {
-  background: #FFFFFF;
+  background: #F0F7FF;
   color: #1976D2;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+  border: 1px solid #BFDBFE;
 }
 
-/* Selector de Integrante (4 Mentes) Compacto */
+/* ══════════════════════════════════════════════════════════
+   SPLIT SCREEN WORKSPACE (DOS COLUMNAS INDEPENDIENTES)
+   ══════════════════════════════════════════════════════════ */
+.crono-split-container {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  height: calc(100vh - 130px);
+  overflow: hidden;
+  flex: 1;
+}
+
+.crono-col-left,
+.crono-col-right {
+  height: 100%;
+  overflow-y: auto;
+  padding-right: 6px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.crono-col-left::-webkit-scrollbar,
+.crono-col-right::-webkit-scrollbar {
+  width: 5px;
+}
+
+.crono-col-left::-webkit-scrollbar-thumb,
+.crono-col-right::-webkit-scrollbar-thumb {
+  background: #CBD5E1;
+  border-radius: 9999px;
+}
+
+/* Tarjetas de Contenedor */
+.crono-panel-card {
+  background: #FFFFFF;
+  border: 1px solid #E2E8F0;
+  border-radius: 16px;
+  padding: 18px;
+}
+
+.crono-panel-header {
+  font-size: 0.95rem;
+  font-weight: 800;
+  color: #0F172A;
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* Selector de las 4 Mentes Maestras */
 .reg-member-selector-row {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(2, 1fr);
   gap: 8px;
-  margin-bottom: 20px;
+  margin-bottom: 12px;
 }
 
 .reg-member-chip {
@@ -166,7 +186,7 @@
 }
 
 .reg-chip-name {
-  font-size: 0.85rem;
+  font-size: 0.88rem;
   font-weight: 800;
   color: #0F172A;
   white-space: nowrap;
@@ -182,19 +202,21 @@
   text-overflow: ellipsis;
 }
 
-/* Secciones de Tecnologías Compactas */
+/* Categorías de Tecnologías */
 .tech-compact-group {
-  margin-bottom: 18px;
+  margin-bottom: 14px;
 }
 
 .tech-compact-title {
-  font-size: 0.85rem;
+  font-size: 0.8rem;
   font-weight: 800;
   color: #334155;
-  margin-bottom: 8px;
+  margin-bottom: 6px;
   display: flex;
   align-items: center;
   gap: 6px;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
 }
 
 .tech-compact-chips-grid {
@@ -204,11 +226,11 @@
 }
 
 .tech-chip-item {
-  padding: 6px 12px;
+  padding: 5px 10px;
   border-radius: 8px;
   background: #F8FAFC;
   border: 1px solid #E2E8F0;
-  font-size: 0.8rem;
+  font-size: 0.78rem;
   font-weight: 600;
   color: #334155;
   cursor: pointer;
@@ -230,28 +252,27 @@
   font-weight: 700;
 }
 
-/* Campos de Formulario Compactos */
+/* Campos de Formulario */
 .reg-field-group {
-  margin-bottom: 16px;
+  margin-bottom: 12px;
 }
 
 .reg-field-label {
   display: block;
-  font-size: 0.82rem;
+  font-size: 0.8rem;
   font-weight: 700;
   color: #334155;
-  margin-bottom: 6px;
+  margin-bottom: 4px;
 }
 
 .reg-field-input {
   width: 100%;
-  padding: 9px 13px;
+  padding: 8px 12px;
   border-radius: 10px;
   border: 1px solid #CBD5E1;
   background: #FFFFFF;
-  font-size: 0.85rem;
+  font-size: 0.82rem;
   color: #0F172A;
-  font-family: inherit;
   box-sizing: border-box;
   transition: border-color 0.2s;
 }
@@ -262,26 +283,26 @@
 }
 
 .reg-field-textarea {
-  min-height: 60px;
+  min-height: 54px;
   resize: vertical;
 }
 
-/* Botón de Guardado Compacto */
+/* Botón de Guardado */
 .reg-submit-bar {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-top: 20px;
-  padding-top: 16px;
+  margin-top: 14px;
+  padding-top: 12px;
   border-top: 1px solid #E2E8F0;
 }
 
 .reg-save-btn {
-  padding: 9px 22px;
+  padding: 8px 20px;
   border-radius: 10px;
   background: #1976D2;
   color: #FFFFFF;
-  font-size: 0.85rem;
+  font-size: 0.82rem;
   font-weight: 700;
   border: none;
   cursor: pointer;
@@ -295,63 +316,72 @@
   background: #0D47A1;
 }
 
-/* Resumen Compacto */
-.reg-summary-compact {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 10px;
-  margin-top: 24px;
-  padding-top: 20px;
-  border-top: 1px dashed #E2E8F0;
-}
-
-.reg-summary-item {
-  background: #F8FAFC;
-  border-radius: 12px;
+/* Columna Derecha: Tarjetas del Resumen Consolidado */
+.reg-summary-item-card {
+  background: #FFFFFF;
+  border-radius: 14px;
   border: 1px solid #E2E8F0;
-  padding: 12px;
+  padding: 14px;
+  margin-bottom: 12px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.02);
 }
 
-/* ══════════════════════════════════════════════════════════
-   CRONOGRAMA COMPACTO Y LIGERO
-   ══════════════════════════════════════════════════════════ */
+.reg-summary-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 4px;
+}
+
+.reg-summary-name {
+  font-size: 0.9rem;
+  font-weight: 800;
+  color: #0F172A;
+}
+
+.reg-summary-tag {
+  font-size: 0.68rem;
+  font-weight: 800;
+  color: #0284C7;
+  background: #E0F2FE;
+  padding: 2px 8px;
+  border-radius: 6px;
+}
+
+.reg-summary-rol {
+  font-size: 0.76rem;
+  color: #64748B;
+  margin-bottom: 8px;
+}
+
+/* Cronograma Vista */
 .crono-compact-bar {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  background: #F8FAFC;
-  padding: 12px 16px;
+  background: #FFFFFF;
+  padding: 10px 14px;
   border-radius: 12px;
   border: 1px solid #E2E8F0;
-  margin-bottom: 16px;
+  margin-bottom: 12px;
 }
 
 .crono-week-compact-item {
   background: #FFFFFF;
   border-radius: 12px;
   border: 1px solid #E2E8F0;
-  margin-bottom: 10px;
-  padding: 12px 16px;
-}
-
-.crono-week-compact-title {
-  font-size: 0.9rem;
-  font-weight: 800;
-  color: #0F172A;
   margin-bottom: 8px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
+  padding: 10px 14px;
 }
 
 .crono-compact-act-row {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 6px 0;
+  padding: 5px 0;
   border-bottom: 1px solid #F1F5F9;
-  font-size: 0.82rem;
-  gap: 12px;
+  font-size: 0.78rem;
+  gap: 10px;
 }
 
 .crono-compact-act-row:last-child {
@@ -361,7 +391,7 @@
 .crono-compact-btn {
   padding: 3px 10px;
   border-radius: 9999px;
-  font-size: 0.74rem;
+  font-size: 0.72rem;
   font-weight: 700;
   border: none;
   cursor: pointer;
@@ -370,7 +400,8 @@
 .crono-compact-btn.done { background: #ECFDF5; color: #047857; }
 .crono-compact-btn.pending { background: #F1F5F9; color: #64748B; }
 
-@media (max-width: 768px) {
-  .reg-member-selector-row { grid-template-columns: repeat(2, 1fr); }
-  .reg-summary-compact { grid-template-columns: 1fr; }
+@media (max-width: 900px) {
+  .crono-compact-root { height: auto; max-height: none; overflow: auto; }
+  .crono-split-container { grid-template-columns: 1fr; height: auto; overflow: visible; }
+  .crono-col-left, .crono-col-right { height: auto; overflow: visible; }
 }
