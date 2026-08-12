@@ -7,7 +7,7 @@ import {
   ShieldCheck, Database, BrainCircuit,
   Users, CheckCircle2, FlaskConical, MapPin,
   Code, Layout, Cloud, Cpu, Sparkles, User, FileText,
-  Network, ArrowLeft, ChevronRight, BookOpen, FileSpreadsheet
+  Network, ChevronRight, BookOpen, FileSpreadsheet
 } from 'lucide-react';
 
 /* ══════════════════════════════════════════════════════
@@ -137,28 +137,38 @@ export default function ProyectoPage() {
       {/* Interactive Floating Background Canvas (Fixed behind everything) */}
       <InteractiveBackgroundCanvas />
 
-      {/* ── Fixed Floating Header / Navbar ── */}
-      <header className="lp-nav">
-        <a href="/" className="lp-brand">
-          <img src={logoUrl} alt="Clerkship Logo" className="lp-logo" />
-          <span className="lp-brand-name">Clerkship</span>
-        </a>
-
-        <div className="lp-navlinks">
-          <a href="/" className="lp-navlink">Inicio</a>
-          <button className="lp-navlink" onClick={() => scrollTo('problema')}>El Problema</button>
-          <button className="lp-navlink" onClick={() => scrollTo('hipotesis')}>Hipótesis</button>
-          <button className="lp-navlink" onClick={() => scrollTo('objetivos')}>Objetivos</button>
-          <button className="lp-navlink" onClick={() => scrollTo('marcos')}>Marcos Teóricos</button>
-          <button className="lp-navlink" onClick={() => scrollTo('metodologia-proy')}>Metodología IA</button>
-          <button className="lp-navlink" onClick={() => scrollTo('equipo-proy')}>Equipo</button>
+      {/* ── Navbar ── */}
+      <nav className="lp-nav">
+        <div className="lp-nav-left">
+          <a href="/" className="lp-logo">
+            <img src={logoUrl} alt="Clerkship" className="lp-logo-img" />
+            Clerkship
+          </a>
         </div>
 
-        <a href="/" className="lp-nav-cta">
-          <ArrowLeft size={16} />
-          Volver al Home
-        </a>
-      </header>
+        <div className="lp-navlinks-wrap">
+          <div className="lp-navlinks">
+            <a href="/" className="lp-navlink">Inicio</a>
+            <a href="/#tecnologia" className="lp-navlink">Casos clínicos</a>
+            <a href="/proyecto" className="lp-navlink lp-navlink-on">Cómo funciona</a>
+          </div>
+          <button className="lp-menu-btn">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+              <line x1="4" y1="8" x2="20" y2="8" />
+              <line x1="4" y1="16" x2="20" y2="16" />
+            </svg>
+          </button>
+        </div>
+
+        <div className="lp-nav-actions">
+          <div className="lp-lang-toggle">
+            <span className="lp-lang-on">ES</span>
+            <div className="lp-lang-switch"></div>
+          </div>
+          <a href="/login" className="lp-btn-outline">Ingresar</a>
+          <a href="/register" className="lp-btn-solid">Registrarse</a>
+        </div>
+      </nav>
 
       {/* ══════════════════════════════════════════════
           Hero Section
@@ -534,21 +544,15 @@ export default function ProyectoPage() {
           Footer
       ══════════════════════════════════════════════ */}
       <footer className="lp-footer">
-        <div className="lp-foot-top">
-          <a href="/" className="lp-brand">
-            <img src={logoUrl} alt="Clerkship" className="lp-logo" />
-            <span className="lp-brand-name">Clerkship</span>
-          </a>
-          <div className="lp-foot-links">
-            <a href="/" className="lp-foot-link">Inicio</a>
-            <button className="lp-foot-link" onClick={() => scrollTo('problema')}>El Problema</button>
-            <button className="lp-foot-link" onClick={() => scrollTo('metodologia-proy')}>Metodología IA</button>
-            <button className="lp-foot-link" onClick={() => scrollTo('equipo-proy')}>Equipo</button>
-          </div>
+        <span className="lp-footer-copy">© 2026 Clerkship · Proyecto de Grado</span>
+        <div className="lp-tagline">
+          <img src="/corazon_signos.svg" alt="" className="lp-tagline-ico" />
+          <span>Sistema para la mejora del aprendizaje en la salud</span>
         </div>
-        <div className="lp-foot-bottom">
-          <p className="lp-copy">© 2026 Clerkship · Universidad Autónoma de Bucaramanga (UNAB). Todos los derechos reservados.</p>
-        </div>
+        <a href="https://github.com/Steven08Ar/Prototipo-clinico"
+          target="_blank" rel="noreferrer" className="lp-gh">
+          <img src="/github.svg" alt="GitHub" />
+        </a>
       </footer>
     </div>
   );
