@@ -357,7 +357,7 @@ export default function LandingPage() {
           <div style={{ position: 'absolute', top: '63px', left: '24px', right: '24px', height: '2px', background: '#E2E8F0', zIndex: 0 }}>
             {/* Animated Progress Line */}
             <motion.div 
-              style={{ position: 'absolute', top: '0', left: '0', bottom: '0', zIndex: 1, background: '#0E1117' }}
+              style={{ position: 'absolute', top: '0', left: '0', bottom: '0', zIndex: 1, background: '#1976D2' }}
               animate={{ width: `${(activeMetStep / (MET_STEPS.length - 1)) * 100}%` }}
               transition={{ duration: 0.6, ease: 'easeInOut' }}
             />
@@ -379,11 +379,11 @@ export default function LandingPage() {
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    background: isActive ? '#0E1117' : (isPast ? '#0E1117' : '#FFFFFF'),
+                    background: isActive ? '#1976D2' : (isPast ? '#0D47A1' : '#FFFFFF'),
                     color: isActive || isPast ? '#FFFFFF' : '#94A3B8',
                     cursor: 'pointer',
-                    border: isPast ? `2px solid #0E1117` : `2px solid #E2E8F0`,
-                    boxShadow: isActive ? '0 0 0 8px rgba(14, 17, 23, 0.08)' : 'none'
+                    border: isPast ? `2px solid #0D47A1` : `2px solid #E2E8F0`,
+                    boxShadow: isActive ? '0 0 0 8px rgba(25, 118, 210, 0.08)' : 'none'
                   }}
                   animate={{
                     scale: isActive ? 1.15 : 1,
@@ -395,7 +395,7 @@ export default function LandingPage() {
                 </motion.div>
 
                 {/* Node Label */}
-                <div style={{ marginTop: '16px', fontWeight: isActive ? 700 : 600, color: isActive ? '#0E1117' : '#94A3B8', fontSize: '0.85rem', transition: 'all 0.3s' }}>
+                <div style={{ marginTop: '16px', fontWeight: isActive ? 700 : 600, color: isActive ? '#0D47A1' : '#94A3B8', fontSize: '0.85rem', transition: 'all 0.3s' }}>
                   {step.title}
                 </div>
 
@@ -422,10 +422,10 @@ export default function LandingPage() {
                           background: '#FFFFFF',
                           padding: '24px',
                           borderRadius: '16px',
-                          boxShadow: '0 20px 40px -10px rgba(0,0,0,0.08)',
+                          boxShadow: '0 20px 40px -10px rgba(13,71,161,0.12)',
                           width: '100%',
                           textAlign: 'left',
-                          border: '1px solid rgba(0,0,0,0.04)',
+                          border: '1px solid #E3F2FD',
                           position: 'relative'
                         }}
                       >
