@@ -77,12 +77,15 @@ export default function ConsentPage() {
   const [accepted, setAccepted] = useState(false);
   const [showError, setShowError] = useState(false);
 
-  // Minimal loading & transition states
-  const [isPreparing, setIsPreparing] = useState(false);
+  // Estados de la transición cinematográfica
+  // 'idle' | 'loading' | 'success' | 'crossfade' | 'done'
+  const [transitionPhase, setTransitionPhase] = useState<'idle' | 'loading' | 'success' | 'crossfade' | 'done'>('idle');
   const [msgIdx, setMsgIdx] = useState(0);
-  const [isFinished, setIsFinished] = useState(false);
-  const [showDashboardBehind, setShowDashboardBehind] = useState(false);
-  const [isFadingOut, setIsFadingOut] = useState(false);
+
+  // Tiempos configurables de la animación
+  const PHRASE_INTERVAL = 1500;  // Cambiar frases cada 1.5s
+  const SUCCESS_HOLD    = 1000;  // Permanencia de 1.0s para "¡Creado exitosamente!"
+  const CROSSFADE_TIME  = 800;   // Duración del desvanecimiento cinematográfico (800ms)
 
   function toggleSection(i: number) {
     setOpenIdx(prev => (prev === i ? null : i));
@@ -91,33 +94,34 @@ export default function ConsentPage() {
   function handleAccept() {
     if (!accepted) { setShowError(true); return; }
     localStorage.setItem('clerkship_consent', 'accepted');
-    setIsPreparing(true);
 
-    // 1. Cambiar frases dinámicas cada 1.5s
+    // 1. Fase de Carga (Dashboard montado detrás a opacity 0)
+    setTransitionPhase('loading');
+
     let step = 0;
     const msgInterval = setInterval(() => {
       step++;
       if (step < LOADING_MESSAGES.length) {
         setMsgIdx(step);
       }
-    }, 1500);
+    }, PHRASE_INTERVAL);
 
-    // 2. Transcurridos 3.0s de preparación, mostrar "¡Creado exitosamente!" con chulo verde
+    // 2. Transcurridos 3.0s, pasar a fase 'success' (Chulo verde + "¡Creado exitosamente!")
     setTimeout(() => {
       clearInterval(msgInterval);
-      setIsFinished(true);
+      setTransitionPhase('success');
 
-      // 3. Estar ahí durante EXACTAMENTE 1.0 SEGUNDO (1000ms) mostrando "Creado exitosamente"
+      // 3. Estar ahí durante EXACTAMENTE 1.0 SEGUNDO (1000ms)
       setTimeout(() => {
-        // 4. Montar el Dashboard de fondo e iniciar el desvanecimiento (fade-out)
-        setShowDashboardBehind(true);
-        setIsFadingOut(true);
+        // 4. Iniciar Crossfade Cinematográfico (opacity: 1 -> 0 en Loading, opacity: 0 -> 1 en Dashboard)
+        setTransitionPhase('crossfade');
 
-        // 5. Al concluir el desvanecimiento suave (850ms), navegar a /dashboard
+        // 5. Tras concluir los 800ms de desvanecimiento, navegar formalmente a /dashboard
         setTimeout(() => {
+          setTransitionPhase('done');
           navigate('/dashboard', { replace: true });
-        }, 850);
-      }, 1000);
+        }, CROSSFADE_TIME + 20);
+      }, SUCCESS_HOLD);
     }, 3000);
   }
 
@@ -129,9 +133,9 @@ export default function ConsentPage() {
   return (
     <div className="cp-shell">
 
-      {/* ── Dashboard de Fondo montado durante el desvanecimiento ────────────── */}
-      {showDashboardBehind && (
-        <div className="cp-dashboard-behind">
+      {/* ── Capa Inferior: Dashboard (Montado detrás a opacity: 0 → 1) ────────────── */}
+      {transitionPhase !== 'idle' && (
+        <div className={`crossfade-dashboard-layer${transitionPhase === 'crossfade' || transitionPhase === 'done' ? ' is-visible' : ''}`}>
           <DashboardPage />
         </div>
       )}
@@ -281,80 +285,72 @@ export default function ConsentPage() {
         </motion.div>
       </div>
 
-      {/* ── Overlay de Carga Médica Sencilla y Minimalista ────────────────────── */}
-      <AnimatePresence>
-        {isPreparing && (
-          <motion.div 
-            className={`cp-minimal-overlay${isFadingOut ? ' is-fading' : ''}`}
-            initial={{ opacity: 0 }}
-            animate={{ opacity: isFadingOut ? 0 : 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: isFadingOut ? 0.85 : 0.4, ease: 'easeInOut' }}
-          >
-            <div className="cp-minimal-content">
-              {/* Círculo puro de carga que se transforma en chulo */}
-              <div className="cp-minimal-circle-wrap">
-                {!isFinished ? (
-                  <motion.div
-                    key="spinner"
-                    className="cp-pure-spinner"
-                    initial={{ scale: 0.8, opacity: 0 }}
-                    animate={{ scale: 1, opacity: 1 }}
-                    exit={{ scale: 0.8, opacity: 0 }}
-                    transition={{ duration: 0.3 }}
-                  />
-                ) : (
-                  <motion.div
-                    key="check"
-                    className="cp-finished-circle"
-                    initial={{ scale: 0.4, opacity: 0 }}
-                    animate={{ scale: 1, opacity: 1 }}
-                    transition={{ type: 'spring', stiffness: 350, damping: 16 }}
-                  >
-                    <CheckCircle2 size={36} className="cp-finished-check-svg" />
-                  </motion.div>
-                )}
-              </div>
-
-              {/* Título y Frases Dinámicas (Cada 1.5s) */}
-              {!isFinished ? (
-                <div className="cp-minimal-text-wrap">
-                  <h2 className="cp-minimal-title">
-                    Dejando todo listo para que tengas la mejor experiencia...
-                  </h2>
-
-                  <div className="cp-phrase-box">
-                    <AnimatePresence mode="wait">
-                      <motion.p
-                        key={msgIdx}
-                        initial={{ opacity: 0, y: 8 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: -8 }}
-                        transition={{ duration: 0.35, ease: 'easeOut' }}
-                        className="cp-phrase-text"
-                      >
-                        {LOADING_MESSAGES[msgIdx]}
-                      </motion.p>
-                    </AnimatePresence>
-                  </div>
-                </div>
+      {/* ── Capa Superior: Loading Screen (Superpuesta a opacity: 1 → 0) ──────────── */}
+      {transitionPhase !== 'idle' && transitionPhase !== 'done' && (
+        <div className={`crossfade-loading-layer${transitionPhase === 'crossfade' ? ' is-fading-out' : ''}`}>
+          <div className="cp-minimal-content">
+            {/* Círculo que se transforma en chulo verde */}
+            <div className="cp-minimal-circle-wrap">
+              {transitionPhase === 'loading' ? (
+                <motion.div
+                  key="spinner"
+                  className="cp-pure-spinner"
+                  initial={{ scale: 0.8, opacity: 0 }}
+                  animate={{ scale: 1, opacity: 1 }}
+                  exit={{ scale: 0.8, opacity: 0 }}
+                  transition={{ duration: 0.3 }}
+                />
               ) : (
                 <motion.div
-                  initial={{ opacity: 0, y: 8 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.4 }}
-                  className="cp-minimal-text-wrap"
+                  key="check"
+                  className="cp-finished-circle"
+                  initial={{ scale: 0.4, opacity: 0 }}
+                  animate={{ scale: 1, opacity: 1 }}
+                  transition={{ type: 'spring', stiffness: 350, damping: 16 }}
                 >
-                  <h2 className="cp-minimal-title success">¡Creado exitosamente!</h2>
-                  <p className="cp-phrase-text success">
-                    Tu entorno agéntico de simulación está listo. Entrando al panel de control...
-                  </p>
+                  <CheckCircle2 size={36} className="cp-finished-check-svg" />
                 </motion.div>
               )}
             </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+
+            {/* Frases dinámicas (1.5s) o mensaje de éxito */}
+            {transitionPhase === 'loading' ? (
+              <div className="cp-minimal-text-wrap">
+                <h2 className="cp-minimal-title">
+                  Dejando todo listo para que tengas la mejor experiencia...
+                </h2>
+
+                <div className="cp-phrase-box">
+                  <AnimatePresence mode="wait">
+                    <motion.p
+                      key={msgIdx}
+                      initial={{ opacity: 0, y: 8 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -8 }}
+                      transition={{ duration: 0.35, ease: 'easeOut' }}
+                      className="cp-phrase-text"
+                    >
+                      {LOADING_MESSAGES[msgIdx]}
+                    </motion.p>
+                  </AnimatePresence>
+                </div>
+              </div>
+            ) : (
+              <motion.div
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.4 }}
+                className="cp-minimal-text-wrap"
+              >
+                <h2 className="cp-minimal-title success">¡Creado exitosamente!</h2>
+                <p className="cp-phrase-text success">
+                  Tu entorno agéntico de simulación está listo. Entrando al panel de control...
+                </p>
+              </motion.div>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
