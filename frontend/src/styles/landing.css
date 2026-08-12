@@ -111,11 +111,38 @@ ul { list-style: none; }
 img { display: block; }
 
 /* ═══════════════════════════════════════════════════════════
+   Animación de Fondo Sutil en Azules
+   ═══════════════════════════════════════════════════════════ */
+@keyframes blueGlowFlow {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+@keyframes floatOrb1 {
+  0%, 100% { transform: translate(0, 0) scale(1); opacity: 0.5; }
+  50% { transform: translate(140px, 90px) scale(1.15); opacity: 0.75; }
+}
+
+@keyframes floatOrb2 {
+  0%, 100% { transform: translate(0, 0) scale(1); opacity: 0.45; }
+  50% { transform: translate(-120px, -70px) scale(1.2); opacity: 0.7; }
+}
+
+/* ═══════════════════════════════════════════════════════════
    Root — scrollable page
    ═══════════════════════════════════════════════════════════ */
 .lp-root {
   min-height: 100vh;
-  background: var(--bg);
+  position: relative;
+  overflow-x: hidden;
+  background: #FAFAFA;
   font-family: var(--font);
   user-select: none;
   -webkit-user-select: none;
@@ -246,8 +273,10 @@ img { display: block; }
   display: grid;
   grid-template-columns: 1fr 50%;
   padding: 100px 24px 80px 48px;
-  background: #F1F5F9;
+  background: transparent;
   overflow: hidden;
+  position: relative;
+  z-index: 1;
 }
 
 .lp-hero-new-left {
@@ -729,13 +758,15 @@ img { display: block; }
 }
 
 .lp-ab-container {
-  background: #F1F5F9;
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(16px);
   border-radius: 32px;
   padding: 60px;
   display: flex;
   flex-direction: column;
   gap: 50px;
-  border: 1px solid #CFD8DC;
+  border: 1.5px solid #BFDBFE;
+  box-shadow: 0 16px 40px rgba(13, 71, 161, 0.07);
 }
 
 /* Top Row */
@@ -759,7 +790,7 @@ img { display: block; }
 
 .lp-ab-divider {
   height: 2px;
-  background: rgba(0,0,0,0.03);
+  background: rgba(13, 71, 161, 0.08);
   width: 100%;
 }
 
@@ -786,20 +817,21 @@ img { display: block; }
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 10px 30px rgba(0,0,0,0.03);
+  border: 1.5px solid #93C5FD;
+  box-shadow: 0 8px 24px rgba(25, 118, 210, 0.12);
   flex-shrink: 0;
 }
 
 .lp-ab-lime-circle {
   width: 48px;
   height: 48px;
-  background: #E3F2FD;
+  background: #1976D2;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #1976D2;
-  border: 1px solid #BBDEFB;
+  color: #FFFFFF;
+  box-shadow: 0 4px 14px rgba(25, 118, 210, 0.35);
 }
 
 .lp-ab-stat-text {
