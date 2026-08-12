@@ -7,6 +7,7 @@ import {
   CheckCircle2
 } from 'lucide-react';
 import logoUrl from '../../assets/Logo Clerkship.svg';
+import DashboardPage from '../dashboard/DashboardPage';
 
 /* ── Datos ─────────────────────────────────────────────── */
 interface ConsentSection {
@@ -60,10 +61,10 @@ const sections: ConsentSection[] = [
 
 const LOADING_MESSAGES = [
   'Creando tu perfil clínico y espacio de trabajo...',
-  'Inicializando agentes de Inteligencia Artificial (LLM + RAG)...',
-  'Cargando corpus de simulación del sistema gastrointestinal...',
-  'Configurando motor pedagógico de retroalimentación formativa...',
-  'Optimizando tu panel de control y métricas de aprendizaje...',
+  'Inicializando agentes de Inteligencia Artificial...',
+  'Cargando casos del sistema gastrointestinal...',
+  'Configurando motor de retroalimentación formativa...',
+  'Optimizando tu panel de control y métricas...',
   '¡Casi listo! Preparando tu primer caso clínico...'
 ];
 
@@ -76,10 +77,12 @@ export default function ConsentPage() {
   const [accepted, setAccepted] = useState(false);
   const [showError, setShowError] = useState(false);
 
-  // Minimal loading states
+  // Minimal loading & transition states
   const [isPreparing, setIsPreparing] = useState(false);
   const [msgIdx, setMsgIdx] = useState(0);
   const [isFinished, setIsFinished] = useState(false);
+  const [showDashboardBehind, setShowDashboardBehind] = useState(false);
+  const [isFadingOut, setIsFadingOut] = useState(false);
 
   function toggleSection(i: number) {
     setOpenIdx(prev => (prev === i ? null : i));
@@ -90,7 +93,7 @@ export default function ConsentPage() {
     localStorage.setItem('clerkship_consent', 'accepted');
     setIsPreparing(true);
 
-    // Change phrase every 1.5 seconds (1500ms)
+    // 1. Cambiar frases dinámicas cada 1.5s
     let step = 0;
     const msgInterval = setInterval(() => {
       step++;
@@ -99,16 +102,23 @@ export default function ConsentPage() {
       }
     }, 1500);
 
-    // Guaranteed minimum duration (3 seconds = 2 full phrase steps at 1.5s each)
+    // 2. Transcurridos 3.0s de preparación, mostrar "¡Creado exitosamente!" con chulo verde
     setTimeout(() => {
       clearInterval(msgInterval);
-      setIsFinished(true); // Morph single medical circle into green checkmark
+      setIsFinished(true);
 
-      // After 1.2s of displaying checkmark animation, navigate smoothly to dashboard
+      // 3. Estar ahí durante EXACTAMENTE 1.0 SEGUNDO (1000ms) mostrando "Creado exitosamente"
       setTimeout(() => {
-        navigate('/dashboard', { replace: true });
-      }, 1200);
-    }, 3200);
+        // 4. Montar el Dashboard de fondo e iniciar el desvanecimiento (fade-out)
+        setShowDashboardBehind(true);
+        setIsFadingOut(true);
+
+        // 5. Al concluir el desvanecimiento suave (850ms), navegar a /dashboard
+        setTimeout(() => {
+          navigate('/dashboard', { replace: true });
+        }, 850);
+      }, 1000);
+    }, 3000);
   }
 
   function handleReject() {
@@ -118,6 +128,13 @@ export default function ConsentPage() {
 
   return (
     <div className="cp-shell">
+
+      {/* ── Dashboard de Fondo montado durante el desvanecimiento ────────────── */}
+      {showDashboardBehind && (
+        <div className="cp-dashboard-behind">
+          <DashboardPage />
+        </div>
+      )}
 
       {/* ── Navbar ─────────────────────────────────────── */}
       <nav className="cp-nav">
@@ -268,11 +285,11 @@ export default function ConsentPage() {
       <AnimatePresence>
         {isPreparing && (
           <motion.div 
-            className="cp-minimal-overlay"
+            className={`cp-minimal-overlay${isFadingOut ? ' is-fading' : ''}`}
             initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
+            animate={{ opacity: isFadingOut ? 0 : 1 }}
             exit={{ opacity: 0 }}
-            transition={{ duration: 0.4 }}
+            transition={{ duration: isFadingOut ? 0.85 : 0.4, ease: 'easeInOut' }}
           >
             <div className="cp-minimal-content">
               {/* Círculo puro de carga que se transforma en chulo */}

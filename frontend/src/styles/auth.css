@@ -844,6 +844,14 @@
 /* ══════════════════════════════════════════════════════════
    Pantalla de Carga Médica Sencilla y Minimalista (Consent -> Dashboard)
    ══════════════════════════════════════════════════════════ */
+.cp-dashboard-behind {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  z-index: 9999;
+  background: #F8FAFC;
+  overflow: auto;
+}
+
 .cp-minimal-overlay {
   position: fixed;
   top: 0; left: 0; right: 0; bottom: 0;
@@ -853,6 +861,14 @@
   justify-content: center;
   background: #FAFAFA;
   padding: 24px;
+  opacity: 1;
+  transition: opacity 0.85s ease-in-out;
+  pointer-events: auto;
+}
+
+.cp-minimal-overlay.is-fading {
+  opacity: 0 !important;
+  pointer-events: none !important;
 }
 
 .cp-minimal-content {
