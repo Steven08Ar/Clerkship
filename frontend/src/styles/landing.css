@@ -729,12 +729,13 @@ img { display: block; }
 }
 
 .lp-ab-container {
-  background: #F0F2F6; /* Matching surface2 or similar gray */
+  background: #F1F5F9;
   border-radius: 32px;
   padding: 60px;
   display: flex;
   flex-direction: column;
   gap: 50px;
+  border: 1px solid #CFD8DC;
 }
 
 /* Top Row */
@@ -792,12 +793,13 @@ img { display: block; }
 .lp-ab-lime-circle {
   width: 48px;
   height: 48px;
-  background: #D4FF2E;
+  background: #E3F2FD;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: var(--ink);
+  color: #1976D2;
+  border: 1px solid #BBDEFB;
 }
 
 .lp-ab-stat-text {
