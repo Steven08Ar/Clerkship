@@ -85,7 +85,7 @@ export default function ConsentPage() {
   // Tiempos configurables de la animación
   const PHRASE_INTERVAL = 1500;  // Cambiar frases cada 1.5s
   const SUCCESS_HOLD    = 1000;  // Permanencia de 1.0s para "¡Creado exitosamente!"
-  const CROSSFADE_TIME  = 1200;  // Duración del desvanecimiento cinematográfico ultra-suave (1.2s)
+  const CROSSFADE_TIME  = 1800;  // Duración del desvanecimiento cinematográfico prolongado (1.8s)
 
   function toggleSection(i: number) {
     setOpenIdx(prev => (prev === i ? null : i));
@@ -113,10 +113,10 @@ export default function ConsentPage() {
 
       // 3. Estar ahí durante EXACTAMENTE 1.0 SEGUNDO (1000ms)
       setTimeout(() => {
-        // 4. Iniciar Crossfade Cinematográfico ultra-suave (1.2s)
+        // 4. Iniciar Crossfade Cinematográfico de 1.8s (opacity: 1 -> 0 en Loading, opacity: 0 -> 1 en Dashboard)
         setTransitionPhase('crossfade');
 
-        // 5. Tras concluir los 1200ms de desvanecimiento, navegar a /dashboard
+        // 5. Tras concluir los 1800ms de desvanecimiento, navegar a /dashboard
         setTimeout(() => {
           setTransitionPhase('done');
           navigate('/dashboard', { replace: true });
@@ -138,150 +138,155 @@ export default function ConsentPage() {
         <DashboardPage />
       </div>
 
-      {/* ── Navbar ─────────────────────────────────────── */}
-      <nav className="cp-nav">
-        <button className="cp-logo" onClick={() => navigate('/')}>
-          <img src={logoUrl} alt="Clerkship" />
-          Clerkship
-        </button>
-        <span className="cp-pill">
-          <FileText size={12} />
-          Consentimiento informado
-        </span>
-      </nav>
+      {/* ── Formulario de Consentimiento y Navbar (Ocultos durante la carga) ──────── */}
+      {transitionPhase === 'idle' && (
+        <>
+          {/* Navbar */}
+          <nav className="cp-nav">
+            <button className="cp-logo" onClick={() => navigate('/')}>
+              <img src={logoUrl} alt="Clerkship" />
+              Clerkship
+            </button>
+            <span className="cp-pill">
+              <FileText size={12} />
+              Consentimiento informado
+            </span>
+          </nav>
 
-      {/* ── Cuerpo ─────────────────────────────────────── */}
-      <div className="cp-body">
-        <motion.div
-          className="cp-wrap"
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.45, ease: 'easeOut' }}
-        >
-          {/* Header */}
-          <div className="cp-header">
-            <p className="cp-pretitle">Decreto 1377 de 2013 · Ley 1581 de 2012</p>
-            <h1 className="cp-title">Autorización para tratamiento<br />de datos personales</h1>
-            <p className="cp-meta">
-              Lea cada sección antes de aceptar. Este documento es requerido para
-              participar en el prototipo de investigación.
-            </p>
-          </div>
+          {/* Cuerpo */}
+          <div className="cp-body">
+            <motion.div
+              className="cp-wrap"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.45, ease: 'easeOut' }}
+            >
+              {/* Header */}
+              <div className="cp-header">
+                <p className="cp-pretitle">Decreto 1377 de 2013 · Ley 1581 de 2012</p>
+                <h1 className="cp-title">Autorización para tratamiento<br />de datos personales</h1>
+                <p className="cp-meta">
+                  Lea cada sección antes de aceptar. Este documento es requerido para
+                  participar en el prototipo de investigación.
+                </p>
+              </div>
 
-          {/* Acordeón */}
-          <div className="cp-sections">
-            {sections.map(({ Icon, title, content, list, alert }, i) => (
-              <div key={i} className="cp-section">
-                <button
-                  className={`cp-sec-btn${openIdx === i ? ' open' : ''}`}
-                  onClick={() => toggleSection(i)}
-                  aria-expanded={openIdx === i}
-                >
-                  <div className="cp-sec-left">
-                    <div className="cp-sec-icon">
-                      <Icon size={16} />
-                    </div>
-                    <span className="cp-sec-label">{title}</span>
-                  </div>
-                  <ChevronDown
-                    size={16}
-                    className={`cp-chevron${openIdx === i ? ' open' : ''}`}
-                  />
-                </button>
-
-                <AnimatePresence initial={false}>
-                  {openIdx === i && (
-                    <motion.div
-                      className="cp-sec-body"
-                      initial={{ height: 0, opacity: 0 }}
-                      animate={{ height: 'auto', opacity: 1 }}
-                      exit={{ height: 0, opacity: 0 }}
-                      transition={{ duration: 0.26, ease: 'easeInOut' }}
+              {/* Acordeón */}
+              <div className="cp-sections">
+                {sections.map(({ Icon, title, content, list, alert }, i) => (
+                  <div key={i} className="cp-section">
+                    <button
+                      className={`cp-sec-btn${openIdx === i ? ' open' : ''}`}
+                      onClick={() => toggleSection(i)}
+                      aria-expanded={openIdx === i}
                     >
-                      <div className="cp-content">
-                        {content && <p className="cp-text">{content}</p>}
-                        {list && (
-                          <ul className="cp-list">
-                            {list.map((item, j) => (
-                              <li key={j} className="cp-list-item">{item}</li>
-                            ))}
-                          </ul>
-                        )}
-                        {alert && (
-                          <div className="cp-alert">
-                            <AlertCircle size={14} style={{ flexShrink: 0, marginTop: 1 }} />
-                            <span>{alert}</span>
-                          </div>
-                        )}
+                      <div className="cp-sec-left">
+                        <div className="cp-sec-icon">
+                          <Icon size={16} />
+                        </div>
+                        <span className="cp-sec-label">{title}</span>
                       </div>
-                    </motion.div>
+                      <ChevronDown
+                        size={16}
+                        className={`cp-chevron${openIdx === i ? ' open' : ''}`}
+                      />
+                    </button>
+
+                    <AnimatePresence initial={false}>
+                      {openIdx === i && (
+                        <motion.div
+                          className="cp-sec-body"
+                          initial={{ height: 0, opacity: 0 }}
+                          animate={{ height: 'auto', opacity: 1 }}
+                          exit={{ height: 0, opacity: 0 }}
+                          transition={{ duration: 0.26, ease: 'easeInOut' }}
+                        >
+                          <div className="cp-content">
+                            {content && <p className="cp-text">{content}</p>}
+                            {list && (
+                              <ul className="cp-list">
+                                {list.map((item, j) => (
+                                  <li key={j} className="cp-list-item">{item}</li>
+                                ))}
+                              </ul>
+                            )}
+                            {alert && (
+                              <div className="cp-alert">
+                                <AlertCircle size={14} style={{ flexShrink: 0, marginTop: 1 }} />
+                                <span>{alert}</span>
+                              </div>
+                            )}
+                          </div>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+                  </div>
+                ))}
+              </div>
+
+              {/* Zona de aceptación */}
+              <div className="cp-accept">
+                <div
+                  className="cp-check-row"
+                  onClick={() => { setAccepted(v => !v); setShowError(false); }}
+                  role="checkbox"
+                  aria-checked={accepted}
+                  tabIndex={0}
+                  onKeyDown={e => e.key === ' ' && setAccepted(v => !v)}
+                >
+                  <span className="cp-check-icon">
+                    {accepted
+                      ? <CheckSquare size={20} style={{ color: 'var(--ink)' }} />
+                      : <Square size={20} style={{ color: showError ? '#ef4444' : 'var(--ink3)' }} />
+                    }
+                  </span>
+                  <span className={`cp-check-text${showError && !accepted ? ' error' : ''}`}>
+                    He leído y comprendido la información anterior. Autorizo el
+                    tratamiento de mis datos personales con los propósitos y
+                    condiciones descritos, conforme al Decreto 1377 de 2013 y la
+                    Ley 1581 de 2012.
+                  </span>
+                </div>
+                <AnimatePresence>
+                  {showError && !accepted && (
+                    <motion.p
+                      className="cp-check-error"
+                      initial={{ opacity: 0, y: -4 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -4 }}
+                      transition={{ duration: 0.2 }}
+                    >
+                      <AlertCircle size={12} />
+                      Debes aceptar los términos para continuar.
+                    </motion.p>
                   )}
                 </AnimatePresence>
               </div>
-            ))}
-          </div>
 
-          {/* Zona de aceptación */}
-          <div className="cp-accept">
-            <div
-              className="cp-check-row"
-              onClick={() => { setAccepted(v => !v); setShowError(false); }}
-              role="checkbox"
-              aria-checked={accepted}
-              tabIndex={0}
-              onKeyDown={e => e.key === ' ' && setAccepted(v => !v)}
-            >
-              <span className="cp-check-icon">
-                {accepted
-                  ? <CheckSquare size={20} style={{ color: 'var(--ink)' }} />
-                  : <Square size={20} style={{ color: showError ? '#ef4444' : 'var(--ink3)' }} />
-                }
-              </span>
-              <span className={`cp-check-text${showError && !accepted ? ' error' : ''}`}>
-                He leído y comprendido la información anterior. Autorizo el
-                tratamiento de mis datos personales con los propósitos y
-                condiciones descritos, conforme al Decreto 1377 de 2013 y la
-                Ley 1581 de 2012.
-              </span>
-            </div>
-            <AnimatePresence>
-              {showError && !accepted && (
-                <motion.p
-                  className="cp-check-error"
-                  initial={{ opacity: 0, y: -4 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -4 }}
-                  transition={{ duration: 0.2 }}
+              {/* Acciones */}
+              <div className="cp-actions">
+                <motion.button
+                  className="cp-btn-reject"
+                  onClick={handleReject}
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.97 }}
                 >
-                  <AlertCircle size={12} />
-                  Debes aceptar los términos para continuar.
-                </motion.p>
-              )}
-            </AnimatePresence>
+                  Rechazar y salir
+                </motion.button>
+                <motion.button
+                  className={`cp-btn-accept${!accepted ? ' disabled' : ''}`}
+                  onClick={handleAccept}
+                  whileHover={accepted ? { scale: 1.02 } : {}}
+                  whileTap={accepted ? { scale: 0.97 } : {}}
+                >
+                  Aceptar y continuar
+                  <ArrowRight size={15} />
+                </motion.button>
+              </div>
+            </motion.div>
           </div>
-
-          {/* Acciones */}
-          <div className="cp-actions">
-            <motion.button
-              className="cp-btn-reject"
-              onClick={handleReject}
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.97 }}
-            >
-              Rechazar y salir
-            </motion.button>
-            <motion.button
-              className={`cp-btn-accept${!accepted ? ' disabled' : ''}`}
-              onClick={handleAccept}
-              whileHover={accepted ? { scale: 1.02 } : {}}
-              whileTap={accepted ? { scale: 0.97 } : {}}
-            >
-              Aceptar y continuar
-              <ArrowRight size={15} />
-            </motion.button>
-          </div>
-        </motion.div>
-      </div>
+        </>
+      )}
 
       {/* ── Capa Superior: Loading Screen (Superpuesta a opacity: 1 → 0) ──────────── */}
       {transitionPhase !== 'idle' && transitionPhase !== 'done' && (
