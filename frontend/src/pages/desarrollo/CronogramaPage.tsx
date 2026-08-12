@@ -3,7 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Calendar, Cpu, CheckCircle2, Circle, Save,
-  Check, UserCheck, Code2, Database, ShieldCheck, Sparkles, Layers
+  Check, UserCheck, Code2, Database, ShieldCheck, Sparkles, Layers,
+  Edit3, PenTool
 } from 'lucide-react';
 import InteractiveBackgroundCanvas from '../../components/shared/InteractiveBackgroundCanvas';
 import logoUrl from '../../assets/Logo Clerkship.svg';
@@ -12,47 +13,134 @@ import {
   TECH_CATALOG,
   TEAM_MEMBERS
 } from '../../data/cronogramaData';
-import type { CronogramaItem } from '../../data/cronogramaData';
+import type { CronogramaItem, MemberRegistry } from '../../data/cronogramaData';
 import '../../styles/cronograma.css';
 
-const TECH_STORAGE_KEY = 'clerkship_tech_selections_v1';
+const REGISTRY_STORAGE_KEY = 'clerkship_tech_registry_v2';
 const CRON_STORAGE_KEY = 'clerkship_cron_states_v1';
 
 export default function CronogramaPage() {
   const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState<'cronograma' | 'tech'>('cronograma');
+  const [activeTab, setActiveTab] = useState<'registro' | 'cronograma'>('registro');
 
-  /* ── 1. ESTADO DE TECNOLOGÍAS ────────────────────────────── */
+  /* ── 1. ESTADO DE REGISTRO TÉCNICO (4 MENTES / INTEGRANTES) ── */
   const [selectedMemberId, setSelectedMemberId] = useState<string>('santiago');
-  const [techSelections, setTechSelections] = useState<Record<string, string[]>>(() => {
+  const [registries, setRegistries] = useState<Record<string, MemberRegistry>>(() => {
     try {
-      const saved = localStorage.getItem(TECH_STORAGE_KEY);
+      const saved = localStorage.getItem(REGISTRY_STORAGE_KEY);
       if (saved) return JSON.parse(saved);
     } catch (e) {
       console.error(e);
     }
+    // Default initial registration data for the 4 members
     return {
-      santiago: ['unsloth', 'huggingface_trl', 'pytorch', 'qlora', 'spacy', 'bioc', 'lm_harness', 'jsonl', 'embeddings'],
-      steven: ['python', 'flask', 'langgraph', 'pydantic', 'openapi', 'postgresql', 'sse', 'jwt_cors', 'locust', 'iso27001'],
-      equipo_unab: ['react', 'typescript', 'vite', 'framer_motion', 'lucide', 'jwt_cors'],
+      santiago: {
+        memberId: 'santiago',
+        selectedTechIds: ['unsloth', 'huggingface_trl', 'pytorch', 'qlora', 'spacy', 'bioc', 'lm_harness', 'jsonl', 'embeddings'],
+        customTechnologies: 'Weights & Biases, Google Colab Pro GPU A100, spaCy es_core_news_lg',
+        usageNotes: 'Semana 1 a 7: Curación del corpus de casos clínicos, normalización ortográfica, deduplicación coseno y fine-tuning SFT-CoT de adaptadores PEFT.',
+        frenteTrabajo: 'P1',
+      },
+      steven: {
+        memberId: 'steven',
+        selectedTechIds: ['python', 'flask', 'langgraph', 'pydantic', 'openapi', 'postgresql', 'sse', 'jwt_cors', 'locust', 'iso27001'],
+        customTechnologies: 'Flask Blueprints, Pytest, Docker, Gunicorn, PostgreSQL 15, Locust latencia p90',
+        usageNotes: 'Semana 1 a 8: Scaffolding de Flask, orquestación del grafo LangGraph (Agentes 1, 2, 3), bias_service para 5 sesgos cognitivos, streaming SSE y persistencia CaseSession.',
+        frenteTrabajo: 'P2',
+      },
+      director: {
+        memberId: 'director',
+        selectedTechIds: ['openapi', 'iso27001', 'pydantic', 'jwt_cors'],
+        customTechnologies: 'Checklist ISO/IEC 27001, Métricas de Calidad de Software, Auditoría de Seguridad',
+        usageNotes: 'Supervisión de arquitectura, revisión de contratos de API, auditoría de seguridad y dirección metodológica del proyecto de grado.',
+        frenteTrabajo: 'Ambos',
+      },
+      panel_medico: {
+        memberId: 'panel_medico',
+        selectedTechIds: ['jsonl'],
+        customTechnologies: 'Rúbricas de Pertinencia Clínica, Rúbricas de Retroalimentación Formativa',
+        usageNotes: 'Semana 4, 11 y 12: Validación experta de casos clínicos generados por Agente 1 y evaluación de la retroalimentación diagnóstica del Agente 3.',
+        frenteTrabajo: 'Ambos',
+      },
     };
   });
 
   const [saveSuccess, setSaveSuccess] = useState(false);
 
-  function toggleTech(techId: string) {
-    setTechSelections(prev => {
-      const currentList = prev[selectedMemberId] || [];
+  // Active member's current form state
+  const currentRegistry = registries[selectedMemberId] || {
+    memberId: selectedMemberId,
+    selectedTechIds: [],
+    customTechnologies: '',
+    usageNotes: '',
+    frenteTrabajo: 'P1',
+  };
+
+  function toggleTechForActive(techId: string) {
+    setRegistries(prev => {
+      const activeReg = prev[selectedMemberId] || {
+        memberId: selectedMemberId,
+        selectedTechIds: [],
+        customTechnologies: '',
+        usageNotes: '',
+        frenteTrabajo: 'P1',
+      };
+      const currentList = activeReg.selectedTechIds;
       const updatedList = currentList.includes(techId)
         ? currentList.filter(id => id !== techId)
         : [...currentList, techId];
-      return { ...prev, [selectedMemberId]: updatedList };
+
+      return {
+        ...prev,
+        [selectedMemberId]: { ...activeReg, selectedTechIds: updatedList }
+      };
     });
     setSaveSuccess(false);
   }
 
-  function handleSaveTech() {
-    localStorage.setItem(TECH_STORAGE_KEY, JSON.stringify(techSelections));
+  function handleCustomTechChange(text: string) {
+    setRegistries(prev => ({
+      ...prev,
+      [selectedMemberId]: {
+        ...(prev[selectedMemberId] || { memberId: selectedMemberId, selectedTechIds: [], usageNotes: '', frenteTrabajo: 'P1' }),
+        customTechnologies: text
+      }
+    }));
+    setSaveSuccess(false);
+  }
+
+  function handleUsageNotesChange(text: string) {
+    setRegistries(prev => ({
+      ...prev,
+      [selectedMemberId]: {
+        ...(prev[selectedMemberId] || { memberId: selectedMemberId, selectedTechIds: [], customTechnologies: '', frenteTrabajo: 'P1' }),
+        usageNotes: text
+      }
+    }));
+    setSaveSuccess(false);
+  }
+
+  function handleFrenteChange(frente: 'P1' | 'P2' | 'Ambos') {
+    setRegistries(prev => ({
+      ...prev,
+      [selectedMemberId]: {
+        ...(prev[selectedMemberId] || { memberId: selectedMemberId, selectedTechIds: [], customTechnologies: '', usageNotes: '' }),
+        frenteTrabajo: frente
+      }
+    }));
+    setSaveSuccess(false);
+  }
+
+  function handleSaveRegistry() {
+    const updated = {
+      ...registries,
+      [selectedMemberId]: {
+        ...currentRegistry,
+        updatedAt: new Date().toISOString()
+      }
+    };
+    setRegistries(updated);
+    localStorage.setItem(REGISTRY_STORAGE_KEY, JSON.stringify(updated));
     setSaveSuccess(true);
     setTimeout(() => setSaveSuccess(false), 3000);
   }
@@ -100,7 +188,6 @@ export default function CronogramaPage() {
     return { total, doneCount, pendingCount, percentage };
   }, [filteredActivities, cronStates]);
 
-  // Group activities by week for timeline layout
   const groupedWeeks = useMemo(() => {
     const map = new Map<number, { semanaNombre: string; items: CronogramaItem[] }>();
     filteredActivities.forEach(act => {
@@ -156,32 +243,250 @@ export default function CronogramaPage() {
         {/* Header Hero */}
         <div className="crono-hero-box">
           <span className="crono-badge">
-            <Sparkles size={14} /> PROYECTO DE GRADO · ENTORNO DE DESARROLLO
+            <Sparkles size={14} /> PROYECTO DE GRADO · REGISTRO & CRONOGRAMA
           </span>
-          <h1 className="crono-title">Cronograma del Proyecto & Definición Técnica</h1>
+          <h1 className="crono-title">Registro de Integrantes & Cronograma de Entregas</h1>
           <p className="crono-subtitle">
-            Hoja de ruta interactiva de 16 semanas y cuestionario de definición técnica del equipo.
+            Registro de definición técnica para cada una de las 4 mentes del equipo y alineación con la hoja de ruta de 16 semanas.
           </p>
         </div>
 
-        {/* Pestañas Principales (Roadmap vs Stack Tecnológico) */}
+        {/* Pestañas Principales (Registro vs Cronograma) */}
         <div className="crono-tabs-wrap">
+          <button
+            className={`crono-tab-btn${activeTab === 'registro' ? ' active' : ''}`}
+            onClick={() => setActiveTab('registro')}
+          >
+            <PenTool size={18} /> 1. Registro de Integrante & Stack
+          </button>
           <button
             className={`crono-tab-btn${activeTab === 'cronograma' ? ' active' : ''}`}
             onClick={() => setActiveTab('cronograma')}
           >
-            <Calendar size={18} /> Cronograma (16 Semanas)
-          </button>
-          <button
-            className={`crono-tab-btn${activeTab === 'tech' ? ' active' : ''}`}
-            onClick={() => setActiveTab('tech')}
-          >
-            <Cpu size={18} /> Tecnologías / Responsabilidades
+            <Calendar size={18} /> 2. Cronograma de Entregas (16 Semanas)
           </button>
         </div>
 
         {/* ══════════════════════════════════════════════════════════
-           PESTAÑA 1: CRONOGRAMA ROADMAP TIMELINE
+           PESTAÑA 1: REGISTRO TÉCNICO DE LOS 4 INTEGRANTES (MENTES)
+        ══════════════════════════════════════════════════════════ */}
+        {activeTab === 'registro' && (
+          <motion.div
+            initial={{ opacity: 0, y: 15 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.35 }}
+          >
+            <div className="tech-container">
+
+              {/* Paso 1: Seleccionar Integrante entre las 4 Mentes */}
+              <div style={{ marginBottom: 20 }}>
+                <span style={{ fontSize: '0.95rem', fontWeight: 800, color: '#0F172A', display: 'flex', alignItems: 'center', gap: 8 }}>
+                  <UserCheck size={18} style={{ color: '#1976D2' }} />
+                  Selecciona la persona a registrar (4 Mentes del Equipo):
+                </span>
+              </div>
+
+              <div className="reg-members-grid">
+                {TEAM_MEMBERS.map(m => {
+                  const regData = registries[m.id];
+                  const hasRegistered = regData && (regData.selectedTechIds.length > 0 || !!regData.customTechnologies);
+
+                  return (
+                    <div
+                      key={m.id}
+                      className={`reg-member-card${selectedMemberId === m.id ? ' active' : ''}`}
+                      onClick={() => setSelectedMemberId(m.id)}
+                    >
+                      <span className="reg-member-badge" style={{ background: '#E3F2FD', color: m.avatarColor }}>
+                        {m.areaPrincipal === 'P1' ? 'P1 Datos / IA' : m.areaPrincipal === 'P2' ? 'P2 Agentes' : 'Fullstack / Validación'}
+                      </span>
+                      <span className="reg-member-name">{m.nombre}</span>
+                      <span className="reg-member-rol">{m.rol}</span>
+
+                      <span className={`reg-status-indicator ${hasRegistered ? 'registered' : 'pending'}`}>
+                        {hasRegistered ? <CheckCircle2 size={13} /> : <Circle size={13} />}
+                        {hasRegistered ? 'Registrado' : 'Pendiente'}
+                      </span>
+                    </div>
+                  );
+                })}
+              </div>
+
+              {/* Paso 2: Formulario de Registro Habilitado para el Integrante Seleccionado */}
+              <div style={{ padding: '24px', background: '#F8FAFC', borderRadius: 20, border: '1.5px solid #E2E8F0', marginBottom: 32 }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20, flexWrap: 'wrap', gap: 12 }}>
+                  <div>
+                    <h2 style={{ fontSize: '1.2rem', fontWeight: 800, color: '#0F172A', margin: 0 }}>
+                      Registro de Tecnologías: {activeMemberObj.nombre}
+                    </h2>
+                    <p style={{ margin: '4px 0 0', fontSize: '0.85rem', color: '#64748B' }}>
+                      {activeMemberObj.rol}
+                    </p>
+                  </div>
+
+                  {/* Selección de Frente de Trabajo */}
+                  <div style={{ display: 'flex', gap: 6, background: '#E2E8F0', padding: 4, borderRadius: 12 }}>
+                    {(['P1', 'P2', 'Ambos'] as const).map(frente => (
+                      <button
+                        key={frente}
+                        className={`crono-sub-filter-btn${currentRegistry.frenteTrabajo === frente ? ' active' : ''}`}
+                        onClick={() => handleFrenteChange(frente)}
+                        type="button"
+                      >
+                        {frente === 'P1' ? 'P1 (Datos/IA)' : frente === 'P2' ? 'P2 (Agentes/Backend)' : 'Ambos'}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Grid de Tecnologías Predefinidas por Categoría */}
+                {(['Backend', 'IA', 'Frontend', 'BaseDatos', 'Seguridad'] as const).map(cat => {
+                  const catItems = TECH_CATALOG.filter(t => t.categoria === cat);
+                  if (catItems.length === 0) return null;
+
+                  const catTitles: Record<string, { label: string; icon: any }> = {
+                    Backend: { label: 'Backend & API (P2 Agentes)', icon: Code2 },
+                    IA: { label: 'IA, Fine-Tuning & NLP (P1 Datos)', icon: Cpu },
+                    Frontend: { label: 'Frontend & UI', icon: Layers },
+                    BaseDatos: { label: 'Persistencia & Datasets', icon: Database },
+                    Seguridad: { label: 'Seguridad & Cumplimiento', icon: ShieldCheck },
+                  };
+
+                  const IconComponent = catTitles[cat].icon;
+
+                  return (
+                    <div key={cat} className="tech-cat-section">
+                      <h3 className="tech-cat-header">
+                        <IconComponent size={18} style={{ color: '#1976D2' }} />
+                        {catTitles[cat].label}
+                      </h3>
+                      <div className="tech-card-grid">
+                        {catItems.map(tech => {
+                          const isSelected = currentRegistry.selectedTechIds.includes(tech.id);
+                          return (
+                            <div
+                              key={tech.id}
+                              className={`tech-select-card${isSelected ? ' selected' : ''}`}
+                              onClick={() => toggleTechForActive(tech.id)}
+                            >
+                              <div className="tech-select-title">
+                                <span>{tech.nombre}</span>
+                                {isSelected ? (
+                                  <CheckCircle2 size={18} style={{ color: '#1976D2' }} />
+                                ) : (
+                                  <Circle size={18} style={{ color: '#94A3B8' }} />
+                                )}
+                              </div>
+                              <p className="tech-select-desc">{tech.descripcionDefault}</p>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  );
+                })}
+
+                {/* Entradas de Texto Personalizadas escritas por el usuario */}
+                <div className="reg-input-group">
+                  <label className="reg-label">
+                    <Edit3 size={16} style={{ display: 'inline', verticalAlign: 'middle', marginRight: 6, color: '#1976D2' }} />
+                    Otras Tecnologías / Herramientas Personalizadas que utilizará {activeMemberObj.nombre}:
+                  </label>
+                  <input
+                    type="text"
+                    className="reg-text-input"
+                    placeholder="Ej. Docker, FastAPI, Redis, Weights & Biases, Google Colab Pro, Gunicorn..."
+                    value={currentRegistry.customTechnologies || ''}
+                    onChange={e => handleCustomTechChange(e.target.value)}
+                  />
+                </div>
+
+                <div className="reg-input-group">
+                  <label className="reg-label">
+                    Módulos y Entregables del Cronograma asignados a estas tecnologías:
+                  </label>
+                  <textarea
+                    className="reg-text-input reg-textarea"
+                    placeholder="Describe brevemente en qué entregables o semanas aplicará estas tecnologías..."
+                    value={currentRegistry.usageNotes || ''}
+                    onChange={e => handleUsageNotesChange(e.target.value)}
+                  />
+                </div>
+
+                {/* Botón de Guardado */}
+                <div className="tech-action-bar">
+                  <AnimatePresence>
+                    {saveSuccess && (
+                      <motion.span
+                        initial={{ opacity: 0, x: -10 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        exit={{ opacity: 0, x: -10 }}
+                        style={{ fontSize: '0.9rem', fontWeight: 700, color: '#059669', display: 'flex', alignItems: 'center', gap: 6 }}
+                      >
+                        <Check size={18} /> ¡Registro de {activeMemberObj.nombre} guardado exitosamente!
+                      </motion.span>
+                    )}
+                  </AnimatePresence>
+
+                  <button className="tech-submit-btn" onClick={handleSaveRegistry}>
+                    <Save size={18} /> Registrar Perfil de {activeMemberObj.nombre}
+                  </button>
+                </div>
+              </div>
+
+              {/* Paso 3: Resumen Consolidado de los 4 Registros */}
+              <h3 style={{ fontSize: '1.15rem', fontWeight: 800, color: '#0F172A', marginBottom: 16 }}>
+                Resumen del Registro del Equipo (4 Mentes)
+              </h3>
+              <div className="tech-summary-grid">
+                {TEAM_MEMBERS.map(m => {
+                  const regData = registries[m.id];
+                  const memberTechObjs = regData ? TECH_CATALOG.filter(t => regData.selectedTechIds.includes(t.id)) : [];
+
+                  return (
+                    <div key={m.id} className="tech-summary-box">
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 4 }}>
+                        <h4 style={{ fontSize: '1.05rem', fontWeight: 800, color: '#0F172A', margin: 0 }}>
+                          {m.nombre}
+                        </h4>
+                        <span style={{ fontSize: '0.72rem', fontWeight: 800, background: '#E0F2FE', color: '#0284C7', padding: '2px 8px', borderRadius: 6 }}>
+                          {regData?.frenteTrabajo || m.areaPrincipal}
+                        </span>
+                      </div>
+                      <p style={{ fontSize: '0.82rem', color: '#64748B', margin: '0 0 12px' }}>
+                        {m.rol}
+                      </p>
+
+                      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginBottom: 10 }}>
+                        {memberTechObjs.map(t => (
+                          <span key={t.id} style={{ fontSize: '0.78rem', fontWeight: 700, padding: '4px 10px', borderRadius: 6, background: '#E3F2FD', color: '#0D47A1' }}>
+                            {t.nombre}
+                          </span>
+                        ))}
+                      </div>
+
+                      {regData?.customTechnologies && (
+                        <p style={{ fontSize: '0.8rem', color: '#334155', margin: '6px 0 0', fontWeight: 600 }}>
+                          🛠️ <strong>Adicionales:</strong> {regData.customTechnologies}
+                        </p>
+                      )}
+
+                      {regData?.usageNotes && (
+                        <p style={{ fontSize: '0.78rem', color: '#64748B', margin: '6px 0 0', fontStyle: 'italic', lineHeight: 1.4 }}>
+                          📝 {regData.usageNotes}
+                        </p>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+
+            </div>
+          </motion.div>
+        )}
+
+        {/* ══════════════════════════════════════════════════════════
+           PESTAÑA 2: CRONOGRAMA DE ENTREGAS (16 SEMANAS)
         ══════════════════════════════════════════════════════════ */}
         {activeTab === 'cronograma' && (
           <motion.div
@@ -313,153 +618,6 @@ export default function CronogramaPage() {
                   </div>
                 );
               })}
-            </div>
-          </motion.div>
-        )}
-
-        {/* ══════════════════════════════════════════════════════════
-           PESTAÑA 2: TECNOLOGÍAS / RESPONSABILIDADES
-        ══════════════════════════════════════════════════════════ */}
-        {activeTab === 'tech' && (
-          <motion.div
-            initial={{ opacity: 0, y: 15 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.35 }}
-          >
-            <div className="tech-container">
-              {/* Selector de Integrante */}
-              <div className="tech-member-bar">
-                <span style={{ fontSize: '0.9rem', fontWeight: 800, color: '#334155' }}>
-                  <UserCheck size={18} style={{ display: 'inline', verticalAlign: 'middle', marginRight: 6 }} />
-                  Seleccionar Integrante:
-                </span>
-                <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-                  {TEAM_MEMBERS.map(m => (
-                    <button
-                      key={m.id}
-                      className={`tech-member-pill${selectedMemberId === m.id ? ' active' : ''}`}
-                      onClick={() => setSelectedMemberId(m.id)}
-                    >
-                      <span
-                        style={{
-                          width: 10,
-                          height: 10,
-                          borderRadius: '50%',
-                          background: selectedMemberId === m.id ? '#FFFFFF' : m.avatarColor
-                        }}
-                      />
-                      {m.nombre}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* Mensaje Informativo */}
-              <div style={{ marginBottom: 28, padding: '16px 20px', background: '#F0F7FF', borderRadius: 14, border: '1px solid #BFDBFE' }}>
-                <p style={{ margin: 0, fontSize: '0.9rem', color: '#1E40AF', fontWeight: 600 }}>
-                  Definiendo stack para: <strong>{activeMemberObj.nombre}</strong> ({activeMemberObj.rol})
-                </p>
-              </div>
-
-              {/* Grid por Categorías */}
-              {(['Backend', 'IA', 'Frontend', 'BaseDatos', 'Seguridad'] as const).map(cat => {
-                const catItems = TECH_CATALOG.filter(t => t.categoria === cat);
-                if (catItems.length === 0) return null;
-
-                const catTitles: Record<string, { label: string; icon: any }> = {
-                  Backend: { label: 'Backend & API (P2 Agentes)', icon: Code2 },
-                  IA: { label: 'IA, Fine-Tuning & NLP (P1 Datos)', icon: Cpu },
-                  Frontend: { label: 'Frontend & Experiencia de Usuario', icon: Layers },
-                  BaseDatos: { label: 'Persistencia & Almacenamiento', icon: Database },
-                  Seguridad: { label: 'Seguridad & Cumplimiento', icon: ShieldCheck },
-                };
-
-                const IconComponent = catTitles[cat].icon;
-
-                return (
-                  <div key={cat} className="tech-cat-section">
-                    <h3 className="tech-cat-header">
-                      <IconComponent size={20} style={{ color: '#1976D2' }} />
-                      {catTitles[cat].label}
-                    </h3>
-                    <div className="tech-card-grid">
-                      {catItems.map(tech => {
-                        const isSelected = (techSelections[selectedMemberId] || []).includes(tech.id);
-                        return (
-                          <div
-                            key={tech.id}
-                            className={`tech-select-card${isSelected ? ' selected' : ''}`}
-                            onClick={() => toggleTech(tech.id)}
-                          >
-                            <div className="tech-select-title">
-                              <span>{tech.nombre}</span>
-                              {isSelected ? (
-                                <CheckCircle2 size={18} style={{ color: '#1976D2' }} />
-                              ) : (
-                                <Circle size={18} style={{ color: '#94A3B8' }} />
-                              )}
-                            </div>
-                            <p className="tech-select-desc">{tech.descripcionDefault}</p>
-                          </div>
-                        );
-                      })}
-                    </div>
-                  </div>
-                );
-              })}
-
-              {/* Botón de Acción */}
-              <div className="tech-action-bar">
-                <AnimatePresence>
-                  {saveSuccess && (
-                    <motion.span
-                      initial={{ opacity: 0, x: -10 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      exit={{ opacity: 0, x: -10 }}
-                      style={{ fontSize: '0.9rem', fontWeight: 700, color: '#059669', display: 'flex', alignItems: 'center', gap: 6 }}
-                    >
-                      <Check size={18} /> ¡Configuración guardada exitosamente!
-                    </motion.span>
-                  )}
-                </AnimatePresence>
-
-                <button className="tech-submit-btn" onClick={handleSaveTech}>
-                  <Save size={18} /> Guardar Configuración de Tecnologías
-                </button>
-              </div>
-
-              {/* Resumen de Tecnologías Asignadas */}
-              <div className="tech-summary-grid">
-                {TEAM_MEMBERS.map(m => {
-                  const memberTechIds = techSelections[m.id] || [];
-                  const memberTechObjs = TECH_CATALOG.filter(t => memberTechIds.includes(t.id));
-
-                  return (
-                    <div key={m.id} className="tech-summary-box">
-                      <h4 style={{ fontSize: '1.05rem', fontWeight: 800, color: '#0F172A', margin: '0 0 4px' }}>
-                        {m.nombre}
-                      </h4>
-                      <p style={{ fontSize: '0.82rem', color: '#64748B', margin: '0 0 14px' }}>
-                        {m.rol}
-                      </p>
-
-                      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
-                        {memberTechObjs.length > 0 ? (
-                          memberTechObjs.map(t => (
-                            <span key={t.id} style={{ fontSize: '0.78rem', fontWeight: 700, padding: '4px 10px', borderRadius: 6, background: '#E3F2FD', color: '#0D47A1' }}>
-                              {t.nombre}
-                            </span>
-                          ))
-                        ) : (
-                          <span style={{ fontSize: '0.82rem', color: '#94A3B8', fontStyle: 'italic' }}>
-                            Sin tecnologías seleccionadas.
-                          </span>
-                        )}
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
             </div>
           </motion.div>
         )}

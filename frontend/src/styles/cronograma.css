@@ -373,7 +373,7 @@
 }
 
 /* ══════════════════════════════════════════════════════════
-   PESTAÑA 1: CUESTIONARIO DE TECNOLOGÍAS MINIMALISTA
+   PESTAÑA 1: REGISTRO TÉCNICO DE INTEGRANTES (4 MENTES)
    ══════════════════════════════════════════════════════════ */
 .tech-container {
   background: rgba(255, 255, 255, 0.95);
@@ -382,6 +382,109 @@
   border: 1.5px solid #E2E8F0;
   padding: 36px;
   box-shadow: 0 10px 30px rgba(15, 23, 42, 0.04);
+}
+
+/* Tarjetas de Selección de los 4 Integrantes */
+.reg-members-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 16px;
+  margin-bottom: 32px;
+}
+
+.reg-member-card {
+  padding: 20px;
+  border-radius: 18px;
+  background: #FFFFFF;
+  border: 2px solid #E2E8F0;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  position: relative;
+}
+
+.reg-member-card:hover {
+  border-color: #93C5FD;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(25, 118, 210, 0.08);
+}
+
+.reg-member-card.active {
+  border-color: #1976D2;
+  background: #F0F7FF;
+  box-shadow: 0 8px 24px rgba(25, 118, 210, 0.15);
+}
+
+.reg-member-badge {
+  font-size: 0.72rem;
+  font-weight: 800;
+  padding: 4px 10px;
+  border-radius: 9999px;
+  align-self: flex-start;
+  text-transform: uppercase;
+}
+
+.reg-member-name {
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: #0F172A;
+}
+
+.reg-member-rol {
+  font-size: 0.82rem;
+  color: #64748B;
+  line-height: 1.4;
+}
+
+.reg-status-indicator {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  margin-top: 4px;
+}
+
+.reg-status-indicator.registered { color: #059669; }
+.reg-status-indicator.pending { color: #94A3B8; }
+
+/* Campos de entrada personalizada */
+.reg-input-group {
+  margin-bottom: 24px;
+}
+
+.reg-label {
+  display: block;
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: #0F172A;
+  margin-bottom: 8px;
+}
+
+.reg-text-input {
+  width: 100%;
+  padding: 14px 18px;
+  border-radius: 14px;
+  border: 1.5px solid #CBD5E1;
+  background: #FFFFFF;
+  font-size: 0.92rem;
+  color: #0F172A;
+  font-family: inherit;
+  transition: all 0.2s ease;
+  box-sizing: border-box;
+}
+
+.reg-text-input:focus {
+  outline: none;
+  border-color: #1976D2;
+  box-shadow: 0 0 0 3px rgba(25, 118, 210, 0.15);
+}
+
+.reg-textarea {
+  min-height: 90px;
+  resize: vertical;
 }
 
 .tech-member-bar {

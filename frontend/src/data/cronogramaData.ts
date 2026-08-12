@@ -27,6 +27,15 @@ export interface TeamMember {
   avatarColor: string;
 }
 
+export interface MemberRegistry {
+  memberId: string;
+  selectedTechIds: string[];
+  customTechnologies: string;
+  usageNotes: string;
+  frenteTrabajo: 'P1' | 'P2' | 'Ambos';
+  updatedAt?: string;
+}
+
 export const TEAM_MEMBERS: TeamMember[] = [
   {
     id: 'santiago',
@@ -43,7 +52,14 @@ export const TEAM_MEMBERS: TeamMember[] = [
     avatarColor: '#0097A7',
   },
   {
-    id: 'equipo_unab',
+    id: 'director',
+    nombre: 'Director / Asesor Técnico',
+    rol: 'Supervisión de Arquitectura & Dirección de Tesis',
+    areaPrincipal: 'Fullstack',
+    avatarColor: '#EA580C',
+  },
+  {
+    id: 'panel_medico',
     nombre: 'Panel Médico UNAB',
     rol: 'Validación Clínica & Evaluación de Expertos',
     areaPrincipal: 'Fullstack',
