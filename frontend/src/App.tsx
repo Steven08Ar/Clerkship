@@ -25,6 +25,8 @@ import SimulacionPage from './pages/simulacion/SimulacionPage';
 import CasosPage from './pages/simulacion/CasosPage';
 import HistorialPage from './pages/simulacion/HistorialPage';
 
+import CronogramaPage from './pages/desarrollo/CronogramaPage';
+
 export default function App() {
   return (
     <BrowserRouter>
@@ -40,6 +42,7 @@ export default function App() {
         <Route path="/dashboard"              element={<DashboardPage />} />
 
         {/* Inner pages */}
+        <Route path="/cronograma"             element={<CronogramaPage />} />
         <Route path="/explorar"               element={<ExplorarPage />} />
         <Route path="/equipo/desarrolladores" element={<DesarrolladoresPage />} />
         <Route path="/equipo/direccion"       element={<DireccionPage />} />
