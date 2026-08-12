@@ -141,8 +141,9 @@ img { display: block; }
 .lp-root {
   min-height: 100vh;
   position: relative;
+  z-index: 1;
   overflow-x: hidden;
-  background: #FAFAFA;
+  background: transparent;
   font-family: var(--font);
   user-select: none;
   -webkit-user-select: none;
