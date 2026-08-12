@@ -30,16 +30,16 @@
   --fresca-gris-oscuro:      #263238; /* Gris Oscuro */
 
   /* ═══════════════════════════════════════════════════════════
-     SISTEMA COMBINADO MINIMALISTA Y PROFESIONAL
+     SISTEMA COMBINADO MINIMALISTA Y PROFESIONAL (AZULES)
      ═══════════════════════════════════════════════════════════ */
   --bg-color: #FAFAFA;
-  --bg-alt: #F5F7FA;
+  --bg-alt: #F1F5F9;
   --bg-dark: #263238;
   --text-main: #263238;
   --text-muted: #455A64;
-  --primary: #0097A7;
-  --primary-hover: #006064;
-  --primary-light: #E0F7FA;
+  --primary: #1976D2;
+  --primary-hover: #0D47A1;
+  --primary-light: #E3F2FD;
   --border-color: #CFD8DC;
   
   --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.04);

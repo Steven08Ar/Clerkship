@@ -57,20 +57,20 @@
   --fresca-noche-gris-oscuro:#0B1118; /* Gris Oscuro (Noche) */
 
   /* ═══════════════════════════════════════════════════════════
-     SISTEMA COMBINADO MINIMALISTA Y PROFESIONAL PARA CLERKSHIP
+     SISTEMA DE AZULES APLICADO AL HOME (PALETA 1: CLÁSICA CONFIABLE)
      ═══════════════════════════════════════════════════════════ */
-  --p:          #0097A7; /* Teal Principal (Fresca y Limpia) */
-  --p-lt:       #4DD0E1; /* Aqua Claro (Fresca y Limpia) */
-  --p-dk:       #006064; /* Teal Oscuro (Fresca y Limpia) */
-  --p-subtle:   #E0F7FA; /* Aqua Muy Claro (Fresca y Limpia) */
-  --p-border:   #B2EBF2;
+  --p:          #1976D2; /* Azul Principal (Clásica Confiable) */
+  --p-lt:       #03A9F4; /* Azul Claro (Clásica Confiable) */
+  --p-dk:       #0D47A1; /* Azul Profundo (Clásica Confiable) */
+  --p-subtle:   #E3F2FD; /* Azul Muy Claro (Clásica Confiable) */
+  --p-border:   #BBDEFB;
 
-  --p-alt:      #1976D2; /* Azul Principal (Clásica Confiable) */
-  --p-alt-subtle:#E3F2FD;/* Azul Muy Claro (Clásica Confiable) */
+  --p-alt:      #0097A7; /* Teal Principal (Fresca y Limpia) */
+  --p-alt-subtle:#E0F7FA;/* Aqua Muy Claro (Fresca y Limpia) */
 
-  --bg:         #F5F7FA; /* Gris Muy Claro (Fresca y Limpia) */
+  --bg:         #F1F5F9; /* Gris Claro (Clásica Confiable) */
   --surface:    #FFFFFF; /* Blanco Suave (Minimalista y Elegante) */
-  --surface2:   #FAFAFA; /* Blanco Suave secundario */
+  --surface2:   #E3F2FD; /* Azul Muy Claro secundario */
 
   --ink:        #263238; /* Gris Oscuro (Clásica / Fresca) */
   --ink2:       #455A64; /* Azul Grisáceo (Minimalista y Elegante) */
@@ -79,9 +79,9 @@
   --border:     #CFD8DC; /* Gris Muy Claro (Minimalista y Elegante) */
   --border2:    #E2E8F0;
 
-  --sh-sm:      0 2px 8px rgba(0,0,0,0.04), 0 1px 2px rgba(0,0,0,0.02);
-  --sh-md:      0 6px 24px rgba(0,0,0,0.06), 0 2px 6px rgba(0,0,0,0.03);
-  --sh-lg:      0 16px 40px rgba(0,0,0,0.08), 0 4px 12px rgba(0,0,0,0.04);
+  --sh-sm:      0 2px 8px rgba(13,71,161,0.04), 0 1px 2px rgba(13,71,161,0.02);
+  --sh-md:      0 6px 24px rgba(13,71,161,0.06), 0 2px 6px rgba(13,71,161,0.03);
+  --sh-lg:      0 16px 40px rgba(13,71,161,0.08), 0 4px 12px rgba(13,71,161,0.04);
 
   --r-sm:       6px;
   --r-md:       10px;
