@@ -1,12 +1,10 @@
 import { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { motion, AnimatePresence } from 'framer-motion';
 import {
   Calendar, Cpu, CheckCircle2, Circle, Save,
-  Check, UserCheck, Code2, Database, ShieldCheck, Sparkles, Layers,
-  Edit3, PenTool
+  Check, UserCheck, Code2, Database, ShieldCheck, Layers,
+  Edit3, ArrowLeft
 } from 'lucide-react';
-import InteractiveBackgroundCanvas from '../../components/shared/InteractiveBackgroundCanvas';
 import logoUrl from '../../assets/Logo Clerkship.svg';
 import {
   CRONOGRAMA_ACTIVIDADES,
@@ -32,7 +30,6 @@ export default function CronogramaPage() {
     } catch (e) {
       console.error(e);
     }
-    // Default initial registration data for the 4 members
     return {
       santiago: {
         memberId: 'santiago',
@@ -67,7 +64,6 @@ export default function CronogramaPage() {
 
   const [saveSuccess, setSaveSuccess] = useState(false);
 
-  // Active member's current form state
   const currentRegistry = registries[selectedMemberId] || {
     memberId: selectedMemberId,
     selectedTechIds: [],
@@ -142,7 +138,7 @@ export default function CronogramaPage() {
     setRegistries(updated);
     localStorage.setItem(REGISTRY_STORAGE_KEY, JSON.stringify(updated));
     setSaveSuccess(true);
-    setTimeout(() => setSaveSuccess(false), 3000);
+    setTimeout(() => setSaveSuccess(false), 2500);
   }
 
   /* ── 2. ESTADO DE CRONOGRAMA ──────────────────────────────── */
@@ -169,7 +165,6 @@ export default function CronogramaPage() {
     });
   }
 
-  /* ── Filtrado y Cálculo de Métricas ────────────────────────── */
   const filteredActivities = useMemo(() => {
     if (activeCronFilter === 'p2') {
       return CRONOGRAMA_ACTIVIDADES.filter(a => a.area === 'P2' || a.area === 'Ambos');
@@ -202,472 +197,310 @@ export default function CronogramaPage() {
   const activeMemberObj = TEAM_MEMBERS.find(m => m.id === selectedMemberId) || TEAM_MEMBERS[0];
 
   return (
-    <div
-      className="crono-standalone-root"
-      onContextMenu={e => e.preventDefault()}
-      onDragStart={e => e.preventDefault()}
-    >
-      {/* Fondo Interactivo */}
-      <InteractiveBackgroundCanvas />
+    <div className="crono-compact-root">
+      {/* Top Bar Minimalista */}
+      <div className="crono-top-bar">
+        <button className="crono-brand-btn" onClick={() => navigate('/')}>
+          <img src={logoUrl} alt="Clerkship" style={{ width: 22, height: 22 }} />
+          Clerkship
+        </button>
 
-      {/* ── Navbar idéntico a Landing / Home / Proyecto ── */}
-      <nav className="lp-nav">
-        <div className="lp-nav-left">
-          <button className="lp-logo" onClick={() => navigate('/')}>
-            <img src={logoUrl} alt="Clerkship" className="lp-logo-img" />
-            Clerkship
-          </button>
-        </div>
+        <button className="crono-back-btn" onClick={() => navigate('/')}>
+          <ArrowLeft size={14} /> Volver a la plataforma
+        </button>
+      </div>
 
-        <div className="lp-navlinks-wrap">
-          <div className="lp-navlinks">
-            <button className="lp-navlink" onClick={() => navigate('/')}>Inicio</button>
-            <button className="lp-navlink" onClick={() => navigate('/casos')}>Casos clínicos</button>
-            <button className="lp-navlink" onClick={() => navigate('/proyecto')}>Cómo funciona</button>
-            <button className="lp-navlink lp-navlink-on" onClick={() => navigate('/cronograma')}>Cronograma</button>
-          </div>
-        </div>
-
-        <div className="lp-nav-actions">
-          <div className="lp-lang-toggle">
-            <span className="lp-lang-on">ES</span>
-            <div className="lp-lang-switch"></div>
-          </div>
-          <button className="lp-btn-outline" onClick={() => navigate('/login')}>Ingresar</button>
-          <button className="lp-btn-solid" onClick={() => navigate('/register')}>Registrarse</button>
-        </div>
-      </nav>
-
-      {/* ── Cuerpo Principal ── */}
-      <main className="crono-standalone-body">
-        {/* Header Hero */}
-        <div className="crono-hero-box">
-          <span className="crono-badge">
-            <Sparkles size={14} /> PROYECTO DE GRADO · REGISTRO & CRONOGRAMA
+      {/* Card Formulario Principal Compacto */}
+      <div className="crono-register-card">
+        {/* Form Header */}
+        <div className="crono-form-header">
+          <span className="crono-mini-tag">
+            PROYECTO DE GRADO · FORMULARIO DE REGISTRO
           </span>
-          <h1 className="crono-title">Registro de Integrantes & Cronograma de Entregas</h1>
-          <p className="crono-subtitle">
-            Registro de definición técnica para cada una de las 4 mentes del equipo y alineación con la hoja de ruta de 16 semanas.
+          <h1 className="crono-form-title">Registro Técnico & Cronograma</h1>
+          <p className="crono-form-desc">
+            Define la persona responsable, stack asignado y estado del cronograma.
           </p>
         </div>
 
-        {/* Pestañas Principales (Registro vs Cronograma) */}
-        <div className="crono-tabs-wrap">
+        {/* Pestañas de Navegación Compactas */}
+        <div className="crono-nav-tabs">
           <button
-            className={`crono-tab-btn${activeTab === 'registro' ? ' active' : ''}`}
+            className={`crono-nav-tab${activeTab === 'registro' ? ' active' : ''}`}
             onClick={() => setActiveTab('registro')}
           >
-            <PenTool size={18} /> 1. Registro de Integrante & Stack
+            <UserCheck size={16} /> 1. Registro de Integrante
           </button>
           <button
-            className={`crono-tab-btn${activeTab === 'cronograma' ? ' active' : ''}`}
+            className={`crono-nav-tab${activeTab === 'cronograma' ? ' active' : ''}`}
             onClick={() => setActiveTab('cronograma')}
           >
-            <Calendar size={18} /> 2. Cronograma de Entregas (16 Semanas)
+            <Calendar size={16} /> 2. Cronograma de Entregas
           </button>
         </div>
 
         {/* ══════════════════════════════════════════════════════════
-           PESTAÑA 1: REGISTRO TÉCNICO DE LOS 4 INTEGRANTES (MENTES)
+           PESTAÑA 1: REGISTRO TÉCNICO COMPACTO (4 MENTES)
         ══════════════════════════════════════════════════════════ */}
         {activeTab === 'registro' && (
-          <motion.div
-            initial={{ opacity: 0, y: 15 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.35 }}
-          >
-            <div className="tech-container">
-
-              {/* Paso 1: Seleccionar Integrante entre las 4 Mentes */}
-              <div style={{ marginBottom: 20 }}>
-                <span style={{ fontSize: '0.95rem', fontWeight: 800, color: '#0F172A', display: 'flex', alignItems: 'center', gap: 8 }}>
-                  <UserCheck size={18} style={{ color: '#1976D2' }} />
-                  Selecciona la persona a registrar (4 Mentes del Equipo):
-                </span>
-              </div>
-
-              <div className="reg-members-grid">
-                {TEAM_MEMBERS.map(m => {
-                  const regData = registries[m.id];
-                  const hasRegistered = regData && (regData.selectedTechIds.length > 0 || !!regData.customTechnologies);
-
-                  return (
-                    <div
-                      key={m.id}
-                      className={`reg-member-card${selectedMemberId === m.id ? ' active' : ''}`}
-                      onClick={() => setSelectedMemberId(m.id)}
-                    >
-                      <span className="reg-member-badge" style={{ background: '#E3F2FD', color: m.avatarColor }}>
-                        {m.areaPrincipal === 'P1' ? 'P1 Datos / IA' : m.areaPrincipal === 'P2' ? 'P2 Agentes' : 'Fullstack / Validación'}
-                      </span>
-                      <span className="reg-member-name">{m.nombre}</span>
-                      <span className="reg-member-rol">{m.rol}</span>
-
-                      <span className={`reg-status-indicator ${hasRegistered ? 'registered' : 'pending'}`}>
-                        {hasRegistered ? <CheckCircle2 size={13} /> : <Circle size={13} />}
-                        {hasRegistered ? 'Registrado' : 'Pendiente'}
-                      </span>
-                    </div>
-                  );
-                })}
-              </div>
-
-              {/* Paso 2: Formulario de Registro Habilitado para el Integrante Seleccionado */}
-              <div style={{ padding: '24px', background: '#F8FAFC', borderRadius: 20, border: '1.5px solid #E2E8F0', marginBottom: 32 }}>
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20, flexWrap: 'wrap', gap: 12 }}>
-                  <div>
-                    <h2 style={{ fontSize: '1.2rem', fontWeight: 800, color: '#0F172A', margin: 0 }}>
-                      Registro de Tecnologías: {activeMemberObj.nombre}
-                    </h2>
-                    <p style={{ margin: '4px 0 0', fontSize: '0.85rem', color: '#64748B' }}>
-                      {activeMemberObj.rol}
-                    </p>
-                  </div>
-
-                  {/* Selección de Frente de Trabajo */}
-                  <div style={{ display: 'flex', gap: 6, background: '#E2E8F0', padding: 4, borderRadius: 12 }}>
-                    {(['P1', 'P2', 'Ambos'] as const).map(frente => (
-                      <button
-                        key={frente}
-                        className={`crono-sub-filter-btn${currentRegistry.frenteTrabajo === frente ? ' active' : ''}`}
-                        onClick={() => handleFrenteChange(frente)}
-                        type="button"
-                      >
-                        {frente === 'P1' ? 'P1 (Datos/IA)' : frente === 'P2' ? 'P2 (Agentes/Backend)' : 'Ambos'}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Grid de Tecnologías Predefinidas por Categoría */}
-                {(['Backend', 'IA', 'Frontend', 'BaseDatos', 'Seguridad'] as const).map(cat => {
-                  const catItems = TECH_CATALOG.filter(t => t.categoria === cat);
-                  if (catItems.length === 0) return null;
-
-                  const catTitles: Record<string, { label: string; icon: any }> = {
-                    Backend: { label: 'Backend & API (P2 Agentes)', icon: Code2 },
-                    IA: { label: 'IA, Fine-Tuning & NLP (P1 Datos)', icon: Cpu },
-                    Frontend: { label: 'Frontend & UI', icon: Layers },
-                    BaseDatos: { label: 'Persistencia & Datasets', icon: Database },
-                    Seguridad: { label: 'Seguridad & Cumplimiento', icon: ShieldCheck },
-                  };
-
-                  const IconComponent = catTitles[cat].icon;
-
-                  return (
-                    <div key={cat} className="tech-cat-section">
-                      <h3 className="tech-cat-header">
-                        <IconComponent size={18} style={{ color: '#1976D2' }} />
-                        {catTitles[cat].label}
-                      </h3>
-                      <div className="tech-card-grid">
-                        {catItems.map(tech => {
-                          const isSelected = currentRegistry.selectedTechIds.includes(tech.id);
-                          return (
-                            <div
-                              key={tech.id}
-                              className={`tech-select-card${isSelected ? ' selected' : ''}`}
-                              onClick={() => toggleTechForActive(tech.id)}
-                            >
-                              <div className="tech-select-title">
-                                <span>{tech.nombre}</span>
-                                {isSelected ? (
-                                  <CheckCircle2 size={18} style={{ color: '#1976D2' }} />
-                                ) : (
-                                  <Circle size={18} style={{ color: '#94A3B8' }} />
-                                )}
-                              </div>
-                              <p className="tech-select-desc">{tech.descripcionDefault}</p>
-                            </div>
-                          );
-                        })}
-                      </div>
-                    </div>
-                  );
-                })}
-
-                {/* Entradas de Texto Personalizadas escritas por el usuario */}
-                <div className="reg-input-group">
-                  <label className="reg-label">
-                    <Edit3 size={16} style={{ display: 'inline', verticalAlign: 'middle', marginRight: 6, color: '#1976D2' }} />
-                    Otras Tecnologías / Herramientas Personalizadas que utilizará {activeMemberObj.nombre}:
-                  </label>
-                  <input
-                    type="text"
-                    className="reg-text-input"
-                    placeholder="Ej. Docker, FastAPI, Redis, Weights & Biases, Google Colab Pro, Gunicorn..."
-                    value={currentRegistry.customTechnologies || ''}
-                    onChange={e => handleCustomTechChange(e.target.value)}
-                  />
-                </div>
-
-                <div className="reg-input-group">
-                  <label className="reg-label">
-                    Módulos y Entregables del Cronograma asignados a estas tecnologías:
-                  </label>
-                  <textarea
-                    className="reg-text-input reg-textarea"
-                    placeholder="Describe brevemente en qué entregables o semanas aplicará estas tecnologías..."
-                    value={currentRegistry.usageNotes || ''}
-                    onChange={e => handleUsageNotesChange(e.target.value)}
-                  />
-                </div>
-
-                {/* Botón de Guardado */}
-                <div className="tech-action-bar">
-                  <AnimatePresence>
-                    {saveSuccess && (
-                      <motion.span
-                        initial={{ opacity: 0, x: -10 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        exit={{ opacity: 0, x: -10 }}
-                        style={{ fontSize: '0.9rem', fontWeight: 700, color: '#059669', display: 'flex', alignItems: 'center', gap: 6 }}
-                      >
-                        <Check size={18} /> ¡Registro de {activeMemberObj.nombre} guardado exitosamente!
-                      </motion.span>
-                    )}
-                  </AnimatePresence>
-
-                  <button className="tech-submit-btn" onClick={handleSaveRegistry}>
-                    <Save size={18} /> Registrar Perfil de {activeMemberObj.nombre}
-                  </button>
-                </div>
-              </div>
-
-              {/* Paso 3: Resumen Consolidado de los 4 Registros */}
-              <h3 style={{ fontSize: '1.15rem', fontWeight: 800, color: '#0F172A', marginBottom: 16 }}>
-                Resumen del Registro del Equipo (4 Mentes)
-              </h3>
-              <div className="tech-summary-grid">
-                {TEAM_MEMBERS.map(m => {
-                  const regData = registries[m.id];
-                  const memberTechObjs = regData ? TECH_CATALOG.filter(t => regData.selectedTechIds.includes(t.id)) : [];
-
-                  return (
-                    <div key={m.id} className="tech-summary-box">
-                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 4 }}>
-                        <h4 style={{ fontSize: '1.05rem', fontWeight: 800, color: '#0F172A', margin: 0 }}>
-                          {m.nombre}
-                        </h4>
-                        <span style={{ fontSize: '0.72rem', fontWeight: 800, background: '#E0F2FE', color: '#0284C7', padding: '2px 8px', borderRadius: 6 }}>
-                          {regData?.frenteTrabajo || m.areaPrincipal}
-                        </span>
-                      </div>
-                      <p style={{ fontSize: '0.82rem', color: '#64748B', margin: '0 0 12px' }}>
-                        {m.rol}
-                      </p>
-
-                      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginBottom: 10 }}>
-                        {memberTechObjs.map(t => (
-                          <span key={t.id} style={{ fontSize: '0.78rem', fontWeight: 700, padding: '4px 10px', borderRadius: 6, background: '#E3F2FD', color: '#0D47A1' }}>
-                            {t.nombre}
-                          </span>
-                        ))}
-                      </div>
-
-                      {regData?.customTechnologies && (
-                        <p style={{ fontSize: '0.8rem', color: '#334155', margin: '6px 0 0', fontWeight: 600 }}>
-                          🛠️ <strong>Adicionales:</strong> {regData.customTechnologies}
-                        </p>
-                      )}
-
-                      {regData?.usageNotes && (
-                        <p style={{ fontSize: '0.78rem', color: '#64748B', margin: '6px 0 0', fontStyle: 'italic', lineHeight: 1.4 }}>
-                          📝 {regData.usageNotes}
-                        </p>
-                      )}
-                    </div>
-                  );
-                })}
-              </div>
-
-            </div>
-          </motion.div>
-        )}
-
-        {/* ══════════════════════════════════════════════════════════
-           PESTAÑA 2: CRONOGRAMA DE ENTREGAS (16 SEMANAS)
-        ══════════════════════════════════════════════════════════ */}
-        {activeTab === 'cronograma' && (
-          <motion.div
-            initial={{ opacity: 0, y: 15 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.35 }}
-          >
-            {/* Resumen de Progreso Top Banner */}
-            <div className="crono-progress-card">
-              <div className="crono-prog-head">
-                <div>
-                  <h2 className="crono-prog-title">Progreso General del Proyecto</h2>
-                  <p style={{ margin: '4px 0 0', fontSize: '0.85rem', color: '#64748B' }}>
-                    Porcentaje calculado en vivo según tareas realizadas ({stats.doneCount} de {stats.total} actividades)
-                  </p>
-                </div>
-                <div className="crono-prog-stats">
-                  <div className="crono-stat-pill total">Total: {stats.total}</div>
-                  <div className="crono-stat-pill done">✓ Realizadas: {stats.doneCount}</div>
-                  <div className="crono-stat-pill pending">○ Pendientes: {stats.pendingCount}</div>
-                  <div className="crono-stat-pill done" style={{ background: '#E0F2FE', color: '#0369A1' }}>
-                    {stats.percentage}% Completado
-                  </div>
-                </div>
-              </div>
-
-              <div className="crono-prog-bar-track">
-                <div className="crono-prog-bar-fill" style={{ width: `${stats.percentage}%` }} />
-              </div>
-            </div>
-
-            {/* Filtros de Vista (General, Backend P2, Frontend P1) */}
-            <div className="crono-filter-wrap">
-              <div className="crono-sub-filter-group">
-                <button
-                  className={`crono-sub-filter-btn${activeCronFilter === 'general' ? ' active' : ''}`}
-                  onClick={() => setActiveCronFilter('general')}
-                >
-                  Vista General (Todas)
-                </button>
-                <button
-                  className={`crono-sub-filter-btn${activeCronFilter === 'p2' ? ' active' : ''}`}
-                  onClick={() => setActiveCronFilter('p2')}
-                >
-                  Backend / Agentes (P2)
-                </button>
-                <button
-                  className={`crono-sub-filter-btn${activeCronFilter === 'p1' ? ' active' : ''}`}
-                  onClick={() => setActiveCronFilter('p1')}
-                >
-                  Frontend / Datos (P1)
-                </button>
-              </div>
-
-              <span style={{ fontSize: '0.85rem', color: '#64748B', fontWeight: 600 }}>
-                Mostrando {filteredActivities.length} actividades
+          <div>
+            {/* Selector de los 4 Integrantes */}
+            <div style={{ marginBottom: 12 }}>
+              <span style={{ fontSize: '0.82rem', fontWeight: 800, color: '#334155' }}>
+                Selecciona persona a registrar (4 Integrantes):
               </span>
             </div>
 
-            {/* Timeline Roadmap Vertical */}
-            <div className="crono-timeline-roadmap">
-              {groupedWeeks.map(([semanaNum, group]) => {
-                const weekDoneCount = group.items.filter(i => !!cronStates[i.id]).length;
-                const isAllDone = weekDoneCount === group.items.length;
+            <div className="reg-member-selector-row">
+              {TEAM_MEMBERS.map(m => {
+                const regData = registries[m.id];
+                const hasReg = regData && (regData.selectedTechIds.length > 0 || !!regData.customTechnologies);
 
                 return (
-                  <div key={semanaNum} className="crono-timeline-block">
-                    {/* Node Marker */}
-                    <div className={`crono-timeline-marker${isAllDone ? ' all-done' : ''}`}>
-                      {isAllDone && <Check size={14} />}
+                  <button
+                    key={m.id}
+                    className={`reg-member-chip${selectedMemberId === m.id ? ' active' : ''}`}
+                    onClick={() => setSelectedMemberId(m.id)}
+                    type="button"
+                  >
+                    <span className="reg-chip-name">{m.nombre}</span>
+                    <span className="reg-chip-rol">{m.rol}</span>
+                    <span style={{ fontSize: '0.7rem', color: hasReg ? '#059669' : '#94A3B8', marginTop: 2, fontWeight: 700 }}>
+                      {hasReg ? '✓ Registrado' : '○ Pendiente'}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+
+            {/* Formulario Compacto */}
+            <div style={{ background: '#F8FAFC', borderRadius: 14, border: '1px solid #E2E8F0', padding: 18, marginBottom: 20 }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14, flexWrap: 'wrap', gap: 8 }}>
+                <span style={{ fontSize: '0.9rem', fontWeight: 800, color: '#0F172A' }}>
+                  Formulario: {activeMemberObj.nombre}
+                </span>
+
+                {/* Frente de trabajo */}
+                <div style={{ display: 'flex', gap: 4, background: '#E2E8F0', padding: 3, borderRadius: 8 }}>
+                  {(['P1', 'P2', 'Ambos'] as const).map(frente => (
+                    <button
+                      key={frente}
+                      style={{
+                        padding: '3px 10px',
+                        fontSize: '0.75rem',
+                        fontWeight: 700,
+                        borderRadius: 6,
+                        border: 'none',
+                        background: currentRegistry.frenteTrabajo === frente ? '#FFFFFF' : 'transparent',
+                        color: currentRegistry.frenteTrabajo === frente ? '#1976D2' : '#64748B',
+                        cursor: 'pointer'
+                      }}
+                      onClick={() => handleFrenteChange(frente)}
+                      type="button"
+                    >
+                      {frente === 'P1' ? 'P1 Datos' : frente === 'P2' ? 'P2 Agentes' : 'Ambos'}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Categorías de Tecnologías (Chips Compactos) */}
+              {(['Backend', 'IA', 'Frontend', 'BaseDatos', 'Seguridad'] as const).map(cat => {
+                const catItems = TECH_CATALOG.filter(t => t.categoria === cat);
+                if (catItems.length === 0) return null;
+
+                const catTitles: Record<string, { label: string; icon: any }> = {
+                  Backend: { label: 'Backend & API (P2)', icon: Code2 },
+                  IA: { label: 'IA & Fine-Tuning (P1)', icon: Cpu },
+                  Frontend: { label: 'Frontend & UI', icon: Layers },
+                  BaseDatos: { label: 'Persistencia & Datasets', icon: Database },
+                  Seguridad: { label: 'Seguridad', icon: ShieldCheck },
+                };
+
+                const IconComponent = catTitles[cat].icon;
+
+                return (
+                  <div key={cat} className="tech-compact-group">
+                    <div className="tech-compact-title">
+                      <IconComponent size={14} style={{ color: '#1976D2' }} />
+                      {catTitles[cat].label}
                     </div>
-
-                    {/* Timeline Card */}
-                    <div className="crono-timeline-card">
-                      <div className="crono-timeline-header">
-                        <h3 className="crono-week-name">{group.semanaNombre}</h3>
-                        <span className="crono-week-counter">
-                          {weekDoneCount} / {group.items.length} tareas realizadas
-                        </span>
-                      </div>
-
-                      <div className="crono-act-list">
-                        {group.items.map(act => {
-                          const isDone = !!cronStates[act.id];
-
-                          return (
-                            <div key={act.id} className="crono-act-item">
-                              <div className="crono-act-left-block">
-                                <span className={`crono-area-tag ${act.area.toLowerCase()}`}>
-                                  {act.area === 'P1' ? 'P1 Datos/IA' : act.area === 'P2' ? 'P2 Agentes' : 'Ambos'}
-                                </span>
-                                <div className="crono-act-info">
-                                  <span className="crono-act-title">
-                                    {act.actividad}
-                                    {act.esEntregable && (
-                                      <span style={{ marginLeft: 8, fontSize: '0.72rem', background: '#FEF3C7', color: '#B45309', padding: '2px 8px', borderRadius: 4, fontWeight: 800 }}>
-                                        📦 Entregable clave
-                                      </span>
-                                    )}
-                                  </span>
-                                  <div className="crono-act-meta-row">
-                                    <span>Responsable: <strong>{act.responsableDefault}</strong></span>
-                                    <span>•</span>
-                                    <span>Entrega: {act.fechaEstimada}</span>
-                                  </div>
-                                </div>
-                              </div>
-
-                              <button
-                                className={`crono-status-btn ${isDone ? 'done' : 'pending'}`}
-                                onClick={() => toggleActivityStatus(act.id)}
-                                title="Haz clic para cambiar estado real de cumplimiento"
-                              >
-                                {isDone ? (
-                                  <>
-                                    <CheckCircle2 size={16} /> ✓ Realizado
-                                  </>
-                                ) : (
-                                  <>
-                                    <Circle size={16} /> ○ Pendiente
-                                  </>
-                                )}
-                              </button>
-                            </div>
-                          );
-                        })}
-                      </div>
+                    <div className="tech-compact-chips-grid">
+                      {catItems.map(tech => {
+                        const isSelected = currentRegistry.selectedTechIds.includes(tech.id);
+                        return (
+                          <div
+                            key={tech.id}
+                            className={`tech-chip-item${isSelected ? ' selected' : ''}`}
+                            onClick={() => toggleTechForActive(tech.id)}
+                          >
+                            {isSelected ? <CheckCircle2 size={13} /> : <Circle size={13} />}
+                            {tech.nombre}
+                          </div>
+                        );
+                      })}
                     </div>
                   </div>
                 );
               })}
+
+              {/* Entradas de Texto Personalizadas */}
+              <div className="reg-field-group" style={{ marginTop: 16 }}>
+                <label className="reg-field-label">
+                  <Edit3 size={14} style={{ display: 'inline', verticalAlign: 'middle', marginRight: 4, color: '#1976D2' }} />
+                  Otras tecnologías o herramientas escritas para {activeMemberObj.nombre}:
+                </label>
+                <input
+                  type="text"
+                  className="reg-field-input"
+                  placeholder="Ej. Docker, FastAPI, Redis, Weights & Biases..."
+                  value={currentRegistry.customTechnologies || ''}
+                  onChange={e => handleCustomTechChange(e.target.value)}
+                />
+              </div>
+
+              <div className="reg-field-group">
+                <label className="reg-field-label">
+                  Módulos y Entregables del Cronograma asignados:
+                </label>
+                <textarea
+                  className="reg-field-input reg-field-textarea"
+                  placeholder="Escribe en qué entregables trabajará..."
+                  value={currentRegistry.usageNotes || ''}
+                  onChange={e => handleUsageNotesChange(e.target.value)}
+                />
+              </div>
+
+              {/* Botón de Guardado */}
+              <div className="reg-submit-bar">
+                {saveSuccess ? (
+                  <span style={{ fontSize: '0.82rem', fontWeight: 700, color: '#059669', display: 'flex', alignItems: 'center', gap: 4 }}>
+                    <Check size={15} /> ¡Guardado exitosamente!
+                  </span>
+                ) : <span />}
+
+                <button className="reg-save-btn" onClick={handleSaveRegistry}>
+                  <Save size={15} /> Guardar Registro de {activeMemberObj.nombre}
+                </button>
+              </div>
             </div>
-          </motion.div>
+
+            {/* Resumen Compacto de los 4 Integrantes */}
+            <div className="reg-summary-compact">
+              {TEAM_MEMBERS.map(m => {
+                const regData = registries[m.id];
+                const memberTechObjs = regData ? TECH_CATALOG.filter(t => regData.selectedTechIds.includes(t.id)) : [];
+
+                return (
+                  <div key={m.id} className="reg-summary-item">
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 2 }}>
+                      <span style={{ fontSize: '0.85rem', fontWeight: 800, color: '#0F172A' }}>{m.nombre}</span>
+                      <span style={{ fontSize: '0.68rem', fontWeight: 800, color: '#0284C7', background: '#E0F2FE', padding: '1px 6px', borderRadius: 4 }}>
+                        {regData?.frenteTrabajo || m.areaPrincipal}
+                      </span>
+                    </div>
+
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4, marginTop: 6 }}>
+                      {memberTechObjs.map(t => (
+                        <span key={t.id} style={{ fontSize: '0.72rem', fontWeight: 700, padding: '2px 6px', borderRadius: 4, background: '#E3F2FD', color: '#0D47A1' }}>
+                          {t.nombre}
+                        </span>
+                      ))}
+                    </div>
+
+                    {regData?.customTechnologies && (
+                      <p style={{ fontSize: '0.74rem', color: '#334155', margin: '4px 0 0', fontWeight: 600 }}>
+                        ✍️ {regData.customTechnologies}
+                      </p>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          </div>
         )}
-      </main>
 
-      {/* ── Footer Idéntico a Landing ── */}
-      <footer className="lp-footer">
-        <div className="lp-footer-top">
-          <div className="lp-footer-brand">
-            <div className="lp-footer-logo-row">
-              <img src={logoUrl} alt="Clerkship" className="lp-footer-logo-img" />
-              <span className="lp-footer-brand-title">Clerkship</span>
+        {/* ══════════════════════════════════════════════════════════
+           PESTAÑA 2: CRONOGRAMA COMPACTO DE ENTREGAS (16 SEMANAS)
+        ══════════════════════════════════════════════════════════ */}
+        {activeTab === 'cronograma' && (
+          <div>
+            {/* Barra de Estadísticas Compacta */}
+            <div className="crono-compact-bar">
+              <span style={{ fontSize: '0.85rem', fontWeight: 800, color: '#0F172A' }}>
+                Progreso: {stats.percentage}%
+              </span>
+              <div style={{ display: 'flex', gap: 8, fontSize: '0.78rem', fontWeight: 700 }}>
+                <span style={{ color: '#334155' }}>Total: {stats.total}</span>
+                <span style={{ color: '#047857' }}>✓ {stats.doneCount}</span>
+                <span style={{ color: '#1D4ED8' }}>○ {stats.pendingCount}</span>
+              </div>
             </div>
-            <p className="lp-footer-brand-desc">
-              Plataforma de Simulación Clínica basada en IA Agéntica para el
-              desarrollo de razonamiento diagnóstico y mitigación de sesgos.
-            </p>
+
+            {/* Filtros de Área Compactos */}
+            <div style={{ display: 'flex', gap: 6, marginBottom: 14 }}>
+              {(['general', 'p2', 'p1'] as const).map(filterKey => (
+                <button
+                  key={filterKey}
+                  style={{
+                    padding: '5px 14px',
+                    fontSize: '0.78rem',
+                    fontWeight: 700,
+                    borderRadius: 8,
+                    border: 'none',
+                    background: activeCronFilter === filterKey ? '#1976D2' : '#E2E8F0',
+                    color: activeCronFilter === filterKey ? '#FFFFFF' : '#475569',
+                    cursor: 'pointer'
+                  }}
+                  onClick={() => setActiveCronFilter(filterKey)}
+                  type="button"
+                >
+                  {filterKey === 'general' ? 'General' : filterKey === 'p2' ? 'P2 Backend' : 'P1 Datos'}
+                </button>
+              ))}
+            </div>
+
+            {/* Lista por Semanas Compacta */}
+            <div>
+              {groupedWeeks.map(([semanaNum, group]) => (
+                <div key={semanaNum} className="crono-week-compact-item">
+                  <div className="crono-week-compact-title">
+                    <span>{group.semanaNombre}</span>
+                    <span style={{ fontSize: '0.75rem', color: '#64748B' }}>
+                      {group.items.filter(i => !!cronStates[i.id]).length} / {group.items.length} tareas
+                    </span>
+                  </div>
+
+                  <div>
+                    {group.items.map(act => {
+                      const isDone = !!cronStates[act.id];
+
+                      return (
+                        <div key={act.id} className="crono-compact-act-row">
+                          <div style={{ flex: 1, display: 'flex', alignItems: 'center', gap: 8 }}>
+                            <span style={{ fontSize: '0.68rem', fontWeight: 800, padding: '2px 6px', borderRadius: 4, background: act.area === 'P1' ? '#E0F2FE' : act.area === 'P2' ? '#E0F2FE' : '#F3E8FF', color: act.area === 'P1' ? '#0284C7' : act.area === 'P2' ? '#0097A7' : '#7E22CE' }}>
+                              {act.area}
+                            </span>
+                            <span style={{ fontWeight: 600, color: '#1E293B' }}>{act.actividad}</span>
+                          </div>
+
+                          <button
+                            className={`crono-compact-btn ${isDone ? 'done' : 'pending'}`}
+                            onClick={() => toggleActivityStatus(act.id)}
+                            type="button"
+                          >
+                            {isDone ? '✓ Realizado' : '○ Pendiente'}
+                          </button>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
-
-          <div className="lp-footer-nav">
-            <div className="lp-footer-col">
-              <h4 className="lp-footer-col-title">Plataforma</h4>
-              <a href="/" className="lp-footer-link">Inicio</a>
-              <a href="/casos" className="lp-footer-link">Casos clínicos</a>
-              <a href="/proyecto" className="lp-footer-link">Cómo funciona</a>
-              <a href="/cronograma" className="lp-footer-link">Cronograma</a>
-            </div>
-
-            <div className="lp-footer-col">
-              <h4 className="lp-footer-col-title">Equipo</h4>
-              <a href="/equipo/desarrolladores" className="lp-footer-link">Desarrolladores</a>
-              <a href="/equipo/direccion" className="lp-footer-link">Dirección de proyecto</a>
-              <a href="/equipo/institucion" className="lp-footer-link">Institución</a>
-            </div>
-
-            <div className="lp-footer-col">
-              <h4 className="lp-footer-col-title">Legal</h4>
-              <a href="/legal/terminos" className="lp-footer-link">Términos de uso</a>
-              <a href="/legal/privacidad" className="lp-footer-link">Tratamiento de datos</a>
-              <a href="/legal/licencia" className="lp-footer-link">Licencia de software</a>
-            </div>
-          </div>
-        </div>
-
-        <div className="lp-footer-bottom">
-          <p className="lp-footer-copy">
-            © {new Date().getFullYear()} Clerkship · Prototipo de Investigación Clínica. Universidad Autónoma de Bucaramanga (UNAB).
-          </p>
-        </div>
-      </footer>
+        )}
+      </div>
     </div>
   );
 }
