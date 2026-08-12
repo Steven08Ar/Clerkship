@@ -842,10 +842,10 @@
 }
 
 /* ══════════════════════════════════════════════════════════
-   Transición Cinematográfica Crossfade (Consent -> Dashboard)
+   Transición Cinematográfica Crossfade Ultra-Suave (Consent -> Dashboard)
    ══════════════════════════════════════════════════════════ */
 
-/* Capa Inferior: Dashboard (opacity: 0 -> 1) */
+/* Capa Inferior: Dashboard (pre-cargado 100% en el DOM) */
 .crossfade-dashboard-layer {
   position: fixed;
   top: 0; left: 0; right: 0; bottom: 0;
@@ -854,7 +854,7 @@
   overflow: auto;
   pointer-events: none;
   background: #F8FAFC;
-  transition: opacity 800ms cubic-bezier(0.22, 1, 0.36, 1);
+  transition: opacity 1200ms cubic-bezier(0.16, 1, 0.3, 1);
   will-change: opacity;
 }
 
@@ -863,7 +863,7 @@
   pointer-events: auto;
 }
 
-/* Capa Superior: Loading Screen Overlay (opacity: 1 -> 0) */
+/* Capa Superior: Loading Screen Overlay */
 .crossfade-loading-layer {
   position: fixed;
   top: 0; left: 0; right: 0; bottom: 0;
@@ -875,7 +875,7 @@
   padding: 24px;
   opacity: 1;
   pointer-events: auto;
-  transition: opacity 800ms cubic-bezier(0.22, 1, 0.36, 1);
+  transition: opacity 1200ms cubic-bezier(0.16, 1, 0.3, 1);
   will-change: opacity;
 }
 

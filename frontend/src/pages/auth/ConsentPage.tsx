@@ -85,7 +85,7 @@ export default function ConsentPage() {
   // Tiempos configurables de la animación
   const PHRASE_INTERVAL = 1500;  // Cambiar frases cada 1.5s
   const SUCCESS_HOLD    = 1000;  // Permanencia de 1.0s para "¡Creado exitosamente!"
-  const CROSSFADE_TIME  = 800;   // Duración del desvanecimiento cinematográfico (800ms)
+  const CROSSFADE_TIME  = 1200;  // Duración del desvanecimiento cinematográfico ultra-suave (1.2s)
 
   function toggleSection(i: number) {
     setOpenIdx(prev => (prev === i ? null : i));
@@ -95,7 +95,7 @@ export default function ConsentPage() {
     if (!accepted) { setShowError(true); return; }
     localStorage.setItem('clerkship_consent', 'accepted');
 
-    // 1. Fase de Carga (Dashboard montado detrás a opacity 0)
+    // 1. Fase de Carga (Dashboard pre-cargado 100% en el DOM)
     setTransitionPhase('loading');
 
     let step = 0;
@@ -113,14 +113,14 @@ export default function ConsentPage() {
 
       // 3. Estar ahí durante EXACTAMENTE 1.0 SEGUNDO (1000ms)
       setTimeout(() => {
-        // 4. Iniciar Crossfade Cinematográfico (opacity: 1 -> 0 en Loading, opacity: 0 -> 1 en Dashboard)
+        // 4. Iniciar Crossfade Cinematográfico ultra-suave (1.2s)
         setTransitionPhase('crossfade');
 
-        // 5. Tras concluir los 800ms de desvanecimiento, navegar formalmente a /dashboard
+        // 5. Tras concluir los 1200ms de desvanecimiento, navegar a /dashboard
         setTimeout(() => {
           setTransitionPhase('done');
           navigate('/dashboard', { replace: true });
-        }, CROSSFADE_TIME + 20);
+        }, CROSSFADE_TIME + 50);
       }, SUCCESS_HOLD);
     }, 3000);
   }
@@ -133,12 +133,10 @@ export default function ConsentPage() {
   return (
     <div className="cp-shell">
 
-      {/* ── Capa Inferior: Dashboard (Montado detrás a opacity: 0 → 1) ────────────── */}
-      {transitionPhase !== 'idle' && (
-        <div className={`crossfade-dashboard-layer${transitionPhase === 'crossfade' || transitionPhase === 'done' ? ' is-visible' : ''}`}>
-          <DashboardPage />
-        </div>
-      )}
+      {/* ── Capa Inferior: Dashboard (Pre-cargado 100% en el DOM a opacity: 0 → 1) ── */}
+      <div className={`crossfade-dashboard-layer${transitionPhase === 'crossfade' || transitionPhase === 'done' ? ' is-visible' : ''}`}>
+        <DashboardPage />
+      </div>
 
       {/* ── Navbar ─────────────────────────────────────── */}
       <nav className="cp-nav">
