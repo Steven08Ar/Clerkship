@@ -842,165 +842,110 @@
 }
 
 /* ══════════════════════════════════════════════════════════
-   Pantalla de Carga Médica e Inicialización (Consent -> Dashboard)
+   Pantalla de Carga Médica Sencilla y Minimalista (Consent -> Dashboard)
    ══════════════════════════════════════════════════════════ */
-.cp-loading-overlay {
+.cp-minimal-overlay {
   position: fixed;
   top: 0; left: 0; right: 0; bottom: 0;
   z-index: 10000;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: rgba(240, 247, 255, 0.85);
-  backdrop-filter: blur(16px);
+  background: #FAFAFA;
   padding: 24px;
 }
 
-.cp-loading-card {
+.cp-minimal-content {
   position: relative;
   z-index: 2;
-  background: #FFFFFF;
-  border-radius: 32px;
-  border: 1.5px solid #BFDBFE;
-  box-shadow: 0 24px 60px rgba(13, 71, 161, 0.12);
-  width: 100%;
-  max-width: 500px;
-  padding: 48px 40px;
-  text-align: center;
   display: flex;
   flex-direction: column;
   align-items: center;
+  text-align: center;
+  max-width: 600px;
+  width: 100%;
 }
 
-/* Pulsing Medical Icon */
-.cp-loading-icon-wrap {
+/* Circulo puro de carga sin icono interior */
+.cp-minimal-circle-wrap {
   position: relative;
-  width: 90px;
-  height: 90px;
+  width: 80px;
+  height: 80px;
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-bottom: 28px;
+  margin-bottom: 32px;
 }
 
-.cp-loading-ripple {
-  position: absolute;
-  top: 0; left: 0; right: 0; bottom: 0;
+.cp-pure-spinner {
+  width: 56px;
+  height: 56px;
   border-radius: 50%;
-  background: rgba(25, 118, 210, 0.12);
-  animation: cpPulse 2s cubic-bezier(0.215, 0.61, 0.355, 1) infinite;
+  border: 4px solid #E2E8F0;
+  border-top-color: #1976D2;
+  border-right-color: #1976D2;
+  animation: cpSpin 0.9s linear infinite;
 }
 
-.cp-loading-ripple.r2 {
-  animation-delay: 0.6s;
+@keyframes cpSpin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
 }
 
-@keyframes cpPulse {
-  0% { transform: scale(0.7); opacity: 0.9; }
-  100% { transform: scale(1.6); opacity: 0; }
-}
-
-.cp-loading-icon {
-  position: relative;
-  z-index: 2;
-  width: 68px;
-  height: 68px;
+.cp-finished-circle {
+  width: 60px;
+  height: 60px;
   border-radius: 50%;
-  background: #1976D2;
+  background: #10B981;
   color: #FFFFFF;
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 10px 24px rgba(25, 118, 210, 0.3);
+  box-shadow: 0 10px 24px rgba(16, 185, 129, 0.3);
 }
 
-.cp-loading-title {
-  font-size: 1.25rem;
-  font-weight: 800;
-  color: #0F172A;
-  line-height: 1.35;
-  margin-bottom: 10px;
-  max-width: 400px;
+.cp-finished-check-svg {
+  color: #FFFFFF;
 }
 
-.cp-loading-subtitle {
-  font-size: 0.85rem;
-  color: #64748B;
-  line-height: 1.5;
-  margin-bottom: 28px;
-}
-
-/* Progress Bar */
-.cp-progress-bar-bg {
-  width: 100%;
-  height: 8px;
-  background: #E2E8F0;
-  border-radius: 20px;
-  overflow: hidden;
-  margin-bottom: 20px;
-}
-
-.cp-progress-bar-fill {
-  height: 100%;
-  background: linear-gradient(90deg, #1976D2 0%, #0097A7 100%);
-  border-radius: 20px;
-  transition: width 0.1s linear;
-}
-
-/* Dynamic Messages Box */
-.cp-loading-msg-box {
-  height: 44px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 0 12px;
-  background: #F8FAFC;
-  border-radius: 14px;
-  border: 1px solid #E2E8F0;
-  width: 100%;
-}
-
-.cp-loading-msg {
-  font-size: 0.82rem;
-  font-weight: 600;
-  color: #1E293B;
-  margin: 0;
-  line-height: 1.3;
-}
-
-/* Finished Checkmark Animation */
-.cp-finished-wrap {
+/* Minimal Title & Dynamic Phrase */
+.cp-minimal-text-wrap {
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 10px 0;
 }
 
-.cp-finished-icon-box {
-  width: 90px;
-  height: 90px;
-  border-radius: 50%;
-  background: rgba(16, 185, 129, 0.1);
+.cp-minimal-title {
+  font-size: clamp(1.3rem, 2.2vw, 1.7rem);
+  font-weight: 800;
+  color: #0F172A;
+  line-height: 1.3;
+  margin-bottom: 16px;
+  max-width: 520px;
+  letter-spacing: -0.02em;
+}
+
+.cp-minimal-title.success {
+  color: #0F172A;
+  font-size: 1.8rem;
+}
+
+.cp-phrase-box {
+  height: 36px;
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-bottom: 24px;
 }
 
-.cp-finished-check {
-  color: #10B981;
-}
-
-.cp-finished-title {
-  font-size: 1.4rem;
-  font-weight: 900;
-  color: #0F172A;
-  margin-bottom: 8px;
-}
-
-.cp-finished-sub {
-  font-size: 0.88rem;
-  color: #475569;
-  line-height: 1.5;
+.cp-phrase-text {
+  font-size: 0.98rem;
+  font-weight: 600;
+  color: #1976D2;
   margin: 0;
+  line-height: 1.4;
+}
+
+.cp-phrase-text.success {
+  color: #059669;
+  font-size: 1rem;
 }

@@ -4,10 +4,9 @@ import { motion, AnimatePresence } from 'framer-motion';
 import {
   FileText, Database, Shield, Scale,
   ChevronDown, CheckSquare, Square, AlertCircle, ArrowRight,
-  Stethoscope, CheckCircle2
+  CheckCircle2
 } from 'lucide-react';
 import logoUrl from '../../assets/Logo Clerkship.svg';
-import InteractiveBackgroundCanvas from '../../components/shared/InteractiveBackgroundCanvas';
 
 /* ── Datos ─────────────────────────────────────────────── */
 interface ConsentSection {
@@ -77,9 +76,8 @@ export default function ConsentPage() {
   const [accepted, setAccepted] = useState(false);
   const [showError, setShowError] = useState(false);
 
-  // States for medical loading screen
+  // Minimal loading states
   const [isPreparing, setIsPreparing] = useState(false);
-  const [progress, setProgress] = useState(0);
   const [msgIdx, setMsgIdx] = useState(0);
   const [isFinished, setIsFinished] = useState(false);
 
@@ -92,31 +90,25 @@ export default function ConsentPage() {
     localStorage.setItem('clerkship_consent', 'accepted');
     setIsPreparing(true);
 
-    const startTime = Date.now();
-    const minDuration = 2200; // 2.2 seconds minimum to complete progress
-
-    const interval = setInterval(() => {
-      const elapsed = Date.now() - startTime;
-      const pct = Math.min(Math.floor((elapsed / minDuration) * 100), 100);
-      setProgress(pct);
-
-      const msgStep = Math.min(
-        Math.floor((elapsed / minDuration) * LOADING_MESSAGES.length),
-        LOADING_MESSAGES.length - 1
-      );
-      setMsgIdx(msgStep);
-
-      if (elapsed >= minDuration) {
-        clearInterval(interval);
-        setProgress(100);
-        setIsFinished(true); // Trigger "Chulo de terminado / Creado exitosamente" animation
-
-        // After showing success checkmark animation, navigate smoothly to dashboard
-        setTimeout(() => {
-          navigate('/dashboard', { replace: true });
-        }, 1200);
+    // Change phrase every 1.5 seconds (1500ms)
+    let step = 0;
+    const msgInterval = setInterval(() => {
+      step++;
+      if (step < LOADING_MESSAGES.length) {
+        setMsgIdx(step);
       }
-    }, 80);
+    }, 1500);
+
+    // Guaranteed minimum duration (3 seconds = 2 full phrase steps at 1.5s each)
+    setTimeout(() => {
+      clearInterval(msgInterval);
+      setIsFinished(true); // Morph single medical circle into green checkmark
+
+      // After 1.2s of displaying checkmark animation, navigate smoothly to dashboard
+      setTimeout(() => {
+        navigate('/dashboard', { replace: true });
+      }, 1200);
+    }, 3200);
   }
 
   function handleReject() {
@@ -272,91 +264,77 @@ export default function ConsentPage() {
         </motion.div>
       </div>
 
-      {/* ── Overlay de Pantalla de Carga Médica Interactiva ────────────────────── */}
+      {/* ── Overlay de Carga Médica Sencilla y Minimalista ────────────────────── */}
       <AnimatePresence>
         {isPreparing && (
           <motion.div 
-            className="cp-loading-overlay"
+            className="cp-minimal-overlay"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.4 }}
           >
-            <InteractiveBackgroundCanvas />
+            <div className="cp-minimal-content">
+              {/* Círculo puro de carga que se transforma en chulo */}
+              <div className="cp-minimal-circle-wrap">
+                {!isFinished ? (
+                  <motion.div
+                    key="spinner"
+                    className="cp-pure-spinner"
+                    initial={{ scale: 0.8, opacity: 0 }}
+                    animate={{ scale: 1, opacity: 1 }}
+                    exit={{ scale: 0.8, opacity: 0 }}
+                    transition={{ duration: 0.3 }}
+                  />
+                ) : (
+                  <motion.div
+                    key="check"
+                    className="cp-finished-circle"
+                    initial={{ scale: 0.4, opacity: 0 }}
+                    animate={{ scale: 1, opacity: 1 }}
+                    transition={{ type: 'spring', stiffness: 350, damping: 16 }}
+                  >
+                    <CheckCircle2 size={36} className="cp-finished-check-svg" />
+                  </motion.div>
+                )}
+              </div>
 
-            <motion.div 
-              className="cp-loading-card"
-              initial={{ scale: 0.9, opacity: 0, y: 20 }}
-              animate={{ scale: 1, opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
-            >
+              {/* Título y Frases Dinámicas (Cada 1.5s) */}
               {!isFinished ? (
-                <>
-                  {/* Pulse Medical Icon */}
-                  <div className="cp-loading-icon-wrap">
-                    <div className="cp-loading-ripple"></div>
-                    <div className="cp-loading-ripple r2"></div>
-                    <div className="cp-loading-icon">
-                      <Stethoscope size={36} />
-                    </div>
-                  </div>
-
-                  <h2 className="cp-loading-title">
+                <div className="cp-minimal-text-wrap">
+                  <h2 className="cp-minimal-title">
                     Dejando todo listo para que tengas la mejor experiencia...
                   </h2>
-                  <p className="cp-loading-subtitle">
-                    Configurando tu entorno clínico agéntico de simulación en la UNAB.
-                  </p>
 
-                  {/* Progress Bar */}
-                  <div className="cp-progress-bar-bg">
-                    <motion.div 
-                      className="cp-progress-bar-fill"
-                      style={{ width: `${progress}%` }}
-                    />
-                  </div>
-
-                  {/* Changing Message */}
-                  <div className="cp-loading-msg-box">
+                  <div className="cp-phrase-box">
                     <AnimatePresence mode="wait">
                       <motion.p
                         key={msgIdx}
-                        initial={{ opacity: 0, y: 6 }}
+                        initial={{ opacity: 0, y: 8 }}
                         animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: -6 }}
-                        transition={{ duration: 0.2 }}
-                        className="cp-loading-msg"
+                        exit={{ opacity: 0, y: -8 }}
+                        transition={{ duration: 0.35, ease: 'easeOut' }}
+                        className="cp-phrase-text"
                       >
                         {LOADING_MESSAGES[msgIdx]}
                       </motion.p>
                     </AnimatePresence>
                   </div>
-                </>
+                </div>
               ) : (
                 <motion.div
-                  key="finished"
-                  initial={{ scale: 0.85, opacity: 0 }}
-                  animate={{ scale: 1, opacity: 1 }}
-                  transition={{ type: 'spring', stiffness: 300, damping: 20 }}
-                  className="cp-finished-wrap"
+                  initial={{ opacity: 0, y: 8 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.4 }}
+                  className="cp-minimal-text-wrap"
                 >
-                  <div className="cp-finished-icon-box">
-                    <motion.div
-                      initial={{ scale: 0, rotate: -30 }}
-                      animate={{ scale: 1, rotate: 0 }}
-                      transition={{ type: 'spring', stiffness: 350, damping: 15 }}
-                    >
-                      <CheckCircle2 size={68} className="cp-finished-check" />
-                    </motion.div>
-                  </div>
-
-                  <h2 className="cp-finished-title">¡Creado exitosamente!</h2>
-                  <p className="cp-finished-sub">
-                    Tu espacio de simulación y agentes de IA están listos. Abriendo tu panel de control...
+                  <h2 className="cp-minimal-title success">¡Creado exitosamente!</h2>
+                  <p className="cp-phrase-text success">
+                    Tu entorno agéntico de simulación está listo. Entrando al panel de control...
                   </p>
                 </motion.div>
               )}
-            </motion.div>
+            </div>
           </motion.div>
         )}
       </AnimatePresence>
