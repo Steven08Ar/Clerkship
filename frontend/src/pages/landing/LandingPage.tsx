@@ -5,6 +5,7 @@ import {
   BrainCircuit, Database, FileText, Network, Sparkles, Layout, Cloud
 } from 'lucide-react';
 import logoUrl from '../../assets/Logo Clerkship.svg';
+import InteractiveBackgroundCanvas from '../../components/shared/InteractiveBackgroundCanvas';
 
 /* ══════════════════════════════════════════════════════
    Data
@@ -103,6 +104,7 @@ export default function LandingPage() {
       onContextMenu={e => e.preventDefault()}
       onDragStart={e => e.preventDefault()}
     >
+      <InteractiveBackgroundCanvas />
       {/* ── Navbar ── */}
       <nav className="lp-nav">
         <div className="lp-nav-left">
