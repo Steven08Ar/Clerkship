@@ -275,8 +275,6 @@ export default function LandingPage() {
             </div>
           </div>
 
-          <div className="lp-ab-divider"></div>
-
           {/* Middle Row: 3 Stats */}
           <div className="lp-ab-stats">
             {/* Stat 1 */}
@@ -306,7 +304,6 @@ export default function LandingPage() {
                 <button className="lp-ab-link" onClick={() => scrollTo('tecnologia')}>Ver ejemplo</button>
               </div>
             </div>
-
             {/* Stat 3 */}
             <div className="lp-ab-stat-item">
               <div className="lp-ab-stat-icon">
@@ -338,112 +335,137 @@ export default function LandingPage() {
       {/* ══════════════════════════════════════════════
           Metodología
       ══════════════════════════════════════════════ */}
-      <section className="lp-sec-wrap lp-met-section" id="metodologia">
-        <div className="lp-sec-header lp-met-header">
-          <p className="lp-sec-pretitle">Proceso de desarrollo</p>
-          <h2 className="lp-sec-title">Metodología</h2>
-          <p className="lp-sec-desc">
-            Desarrollo ágil con sprints iterativos, revisión académica continua
-            y validación con el aliado clínico en cada incremento.
-          </p>
-          <a href="/proyecto" className="lp-proyecto-link">
-            Ver contexto del proyecto
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="7" y1="17" x2="17" y2="7"/><polyline points="7 7 17 7 17 17"/></svg>
-          </a>
+      <section className="lp-met-wave-section" id="metodologia">
+        {/* Top Wave Transition */}
+        <div className="lp-met-wave-top">
+          <svg viewBox="0 0 1440 120" preserveAspectRatio="none">
+            <path fill="rgba(255, 255, 255, 0.75)" d="M0,40L60,48C120,56,240,72,360,74.7C480,77,600,67,720,53.3C840,40,960,21,1080,16C1200,11,1320,21,1380,26.7L1440,32L1440,120L1380,120C1320,120,1200,120,1080,120C960,120,840,120,720,120C600,120,480,120,360,120C240,120,120,120,60,120L0,120Z"></path>
+          </svg>
         </div>
 
-        {/* Animated Timeline */}
-        <div className="lp-met-timeline">
-          
-          {/* Background Line Wrapper */}
-          <div style={{ position: 'absolute', top: '63px', left: '24px', right: '24px', height: '2px', background: '#E2E8F0', zIndex: 0 }}>
-            {/* Animated Progress Line */}
-            <motion.div 
-              style={{ position: 'absolute', top: '0', left: '0', bottom: '0', zIndex: 1, background: '#1976D2' }}
-              animate={{ width: `${(activeMetStep / (MET_STEPS.length - 1)) * 100}%` }}
-              transition={{ duration: 0.6, ease: 'easeInOut' }}
-            />
+        <div className="lp-met-inner-wrap">
+          <div className="lp-sec-header lp-met-header">
+            <p className="lp-sec-pretitle">Proceso de desarrollo</p>
+            <h2 className="lp-sec-title">Metodología</h2>
+            <p className="lp-sec-desc">
+              Desarrollo ágil con sprints iterativos, revisión académica continua
+              y validación con el aliado clínico en cada incremento.
+            </p>
+            <a href="/proyecto" className="lp-proyecto-link">
+              Ver contexto del proyecto
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="7" y1="17" x2="17" y2="7"/><polyline points="7 7 17 7 17 17"/></svg>
+            </a>
           </div>
 
-          {MET_STEPS.map((step, index) => {
-            const isActive = activeMetStep === index;
-            const isPast = activeMetStep >= index;
+          {/* Animated Timeline */}
+          <div className="lp-met-timeline">
+            
+            {/* Background Line Wrapper */}
+            <div style={{ position: 'absolute', top: '63px', left: '24px', right: '24px', height: '2px', background: '#E2E8F0', zIndex: 0 }}>
+              {/* Animated Progress Line */}
+              <motion.div 
+                style={{ position: 'absolute', top: '0', left: '0', bottom: '0', zIndex: 1, background: '#1976D2' }}
+                animate={{ width: `${(activeMetStep / (MET_STEPS.length - 1)) * 100}%` }}
+                transition={{ duration: 0.6, ease: 'easeInOut' }}
+              />
+            </div>
 
-            return (
-              <div key={step.id} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', position: 'relative', zIndex: 2 }}>
-                
-                {/* Timeline Node */}
-                <motion.div
-                  style={{
-                    width: '48px',
-                    height: '48px',
-                    borderRadius: '50%',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    background: isActive ? '#1976D2' : (isPast ? '#0D47A1' : '#FFFFFF'),
-                    color: isActive || isPast ? '#FFFFFF' : '#94A3B8',
-                    cursor: 'pointer',
-                    border: isPast ? `2px solid #0D47A1` : `2px solid #E2E8F0`,
-                    boxShadow: isActive ? '0 0 0 8px rgba(25, 118, 210, 0.08)' : 'none'
+            {MET_STEPS.map((step, index) => {
+              const isActive = activeMetStep === index;
+              const isPast = activeMetStep >= index;
+
+              return (
+                <div 
+                  key={step.id} 
+                  style={{ 
+                    display: 'flex', 
+                    flexDirection: 'column', 
+                    alignItems: 'center', 
+                    position: 'relative',
+                    zIndex: 2,
+                    width: '120px'
                   }}
-                  animate={{
-                    scale: isActive ? 1.15 : 1,
-                  }}
-                  transition={{ type: 'spring', stiffness: 300, damping: 20 }}
-                  onClick={() => handleMetStepClick(index)}
                 >
-                  <step.Icon size={20} strokeWidth={isActive ? 2.5 : 2} />
-                </motion.div>
+                  {/* Node Circle */}
+                  <motion.div
+                    style={{
+                      width: '48px',
+                      height: '48px',
+                      borderRadius: '50%',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      background: isActive ? '#1976D2' : (isPast ? '#0D47A1' : '#FFFFFF'),
+                      color: isActive || isPast ? '#FFFFFF' : '#94A3B8',
+                      cursor: 'pointer',
+                      border: isPast ? `2px solid #0D47A1` : `2px solid #CFD8DC`,
+                      boxShadow: isActive ? '0 0 0 8px rgba(25, 118, 210, 0.15)' : 'none'
+                    }}
+                    animate={{
+                      scale: isActive ? 1.15 : 1,
+                    }}
+                    transition={{ type: 'spring', stiffness: 300, damping: 20 }}
+                    onClick={() => handleMetStepClick(index)}
+                  >
+                    <step.Icon size={20} strokeWidth={isActive ? 2.5 : 2} />
+                  </motion.div>
 
-                {/* Node Label */}
-                <div style={{ marginTop: '16px', fontWeight: isActive ? 700 : 600, color: isActive ? '#0D47A1' : '#94A3B8', fontSize: '0.85rem', transition: 'all 0.3s' }}>
-                  {step.title}
-                </div>
+                  {/* Node Label */}
+                  <div style={{ marginTop: '16px', fontWeight: isActive ? 700 : 600, color: isActive ? '#0D47A1' : '#78909C', fontSize: '0.85rem', transition: 'all 0.3s' }}>
+                    {step.title}
+                  </div>
 
-                {/* Popover Card */}
-                <div style={{ 
-                  position: 'absolute', 
-                  top: '100px', 
-                  left: '50%', 
-                  transform: index === 0 ? 'translateX(0)' : index === MET_STEPS.length - 1 ? 'translateX(-100%)' : 'translateX(-50%)', 
-                  width: '280px',
-                  display: 'flex', 
-                  justifyContent: index === 0 ? 'flex-start' : index === MET_STEPS.length - 1 ? 'flex-end' : 'center',
-                  pointerEvents: isActive ? 'auto' : 'none',
-                  marginLeft: index === 0 ? '-24px' : index === MET_STEPS.length - 1 ? '24px' : '0',
-                }}>
-                  <AnimatePresence>
-                    {isActive && (
-                      <motion.div
-                        initial={{ opacity: 0, y: 10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: -10 }}
-                        transition={{ duration: 0.3 }}
-                        style={{
-                          background: '#FFFFFF',
-                          padding: '24px',
-                          borderRadius: '16px',
-                          boxShadow: '0 20px 40px -10px rgba(13,71,161,0.12)',
-                          width: '100%',
-                          textAlign: 'left',
-                          border: '1px solid #E3F2FD',
-                          position: 'relative'
-                        }}
-                      >
-                        <h3 style={{ fontSize: '1.05rem', fontWeight: 800, color: '#0E1117', marginBottom: '8px' }}>
-                          {step.title}
-                        </h3>
-                        <p style={{ fontSize: '0.85rem', color: '#64748B', lineHeight: 1.6, margin: 0 }}>
-                          {step.desc}
-                        </p>
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
+                  {/* Popover Card */}
+                  <div style={{ 
+                    position: 'absolute', 
+                    top: '100px', 
+                    left: '50%', 
+                    transform: index === 0 ? 'translateX(0)' : index === MET_STEPS.length - 1 ? 'translateX(-100%)' : 'translateX(-50%)', 
+                    width: '280px',
+                    display: 'flex', 
+                    justifyContent: index === 0 ? 'flex-start' : index === MET_STEPS.length - 1 ? 'flex-end' : 'center',
+                    pointerEvents: isActive ? 'auto' : 'none',
+                    marginLeft: index === 0 ? '-24px' : index === MET_STEPS.length - 1 ? '24px' : '0',
+                  }}>
+                    <AnimatePresence>
+                      {isActive && (
+                        <motion.div
+                          initial={{ opacity: 0, y: 10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          exit={{ opacity: 0, y: -10 }}
+                          transition={{ duration: 0.3 }}
+                          style={{
+                            background: '#FFFFFF',
+                            padding: '24px',
+                            borderRadius: '16px',
+                            boxShadow: '0 20px 40px -10px rgba(13,71,161,0.12)',
+                            width: '100%',
+                            textAlign: 'left',
+                            border: '1px solid #E3F2FD',
+                            position: 'relative'
+                          }}
+                        >
+                          <h3 style={{ fontSize: '1.05rem', fontWeight: 800, color: '#0D47A1', marginBottom: '8px' }}>
+                            {step.title}
+                          </h3>
+                          <p style={{ fontSize: '0.85rem', color: '#455A64', lineHeight: 1.6, margin: 0 }}>
+                            {step.desc}
+                          </p>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+                  </div>
                 </div>
-              </div>
-            );
-          })}
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Bottom Wave Transition */}
+        <div className="lp-met-wave-bottom">
+          <svg viewBox="0 0 1440 120" preserveAspectRatio="none">
+            <path fill="rgba(255, 255, 255, 0.75)" d="M0,64L60,69.3C120,75,240,85,360,80C480,75,600,53,720,48C840,43,960,53,1080,64C1200,75,1320,85,1380,90.7L1440,96L1440,0L1380,0C1320,0,1200,0,1080,0C960,0,840,0,720,0C600,0,480,0,360,0C240,0,120,0,60,0L0,0Z"></path>
+          </svg>
         </div>
       </section>
 
