@@ -1,7 +1,7 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Menu, X, ArrowRight, LayoutDashboard, Calendar, FileText, Sparkles } from 'lucide-react';
+import { Menu, X, ArrowRight, LayoutDashboard, Calendar, FileText, Sparkles, Sun, Moon } from 'lucide-react';
 import logoUrl from '../../assets/Logo Clerkship.svg';
 
 interface HeaderNavProps {
@@ -11,6 +11,20 @@ interface HeaderNavProps {
 export default function HeaderNav({ activeTab }: HeaderNavProps) {
   const { pathname } = useLocation();
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [theme, setTheme] = useState<'dark' | 'light'>(() => {
+    const saved = localStorage.getItem('clerkship_theme');
+    return (saved as 'dark' | 'light') || 'dark';
+  });
+
+  useEffect(() => {
+    document.documentElement.setAttribute('data-theme', theme);
+    document.body.setAttribute('data-theme', theme);
+    localStorage.setItem('clerkship_theme', theme);
+  }, [theme]);
+
+  const toggleTheme = () => {
+    setTheme((prev) => (prev === 'dark' ? 'light' : 'dark'));
+  };
 
   const isCurrent = (tab: string, route: string) => {
     if (activeTab) return activeTab === tab;
@@ -58,6 +72,16 @@ export default function HeaderNav({ activeTab }: HeaderNavProps) {
 
         {/* ── Actions Right (Desktop) ────────────────────────────── */}
         <div className="lp-nav-actions">
+          <button
+            type="button"
+            className="lp-header-theme-toggle-btn"
+            onClick={toggleTheme}
+            title={theme === 'dark' ? 'Cambiar a Modo Claro' : 'Cambiar a Modo Oscuro'}
+            aria-label="Cambiar tema"
+          >
+            {theme === 'dark' ? <Sun size={18} style={{ color: '#FBBF24' }} /> : <Moon size={18} style={{ color: '#4F46E5' }} />}
+          </button>
+
           <div className="lp-lang-toggle">
             <span className="lp-lang-on">ES</span>
             <div className="lp-lang-switch"></div>
@@ -73,15 +97,26 @@ export default function HeaderNav({ activeTab }: HeaderNavProps) {
           )}
         </div>
 
-        {/* ── Botón Hamburguesa para Móvil ─────────────────────── */}
-        <button
-          className="lp-hamburger-btn"
-          onClick={() => setMobileOpen(!mobileOpen)}
-          aria-label="Abrir menú"
-          type="button"
-        >
-          {mobileOpen ? <X size={22} /> : <Menu size={22} />}
-        </button>
+        {/* ── Botones Móvil: Tema + Hamburguesa ─────────────────── */}
+        <div className="lp-mobile-nav-controls">
+          <button
+            type="button"
+            className="lp-header-theme-toggle-btn-mobile"
+            onClick={toggleTheme}
+            aria-label="Cambiar tema modo claro/oscuro"
+          >
+            {theme === 'dark' ? <Sun size={20} style={{ color: '#FBBF24' }} /> : <Moon size={20} style={{ color: '#4F46E5' }} />}
+          </button>
+
+          <button
+            className="lp-hamburger-btn"
+            onClick={() => setMobileOpen(!mobileOpen)}
+            aria-label="Abrir menú"
+            type="button"
+          >
+            {mobileOpen ? <X size={22} /> : <Menu size={22} />}
+          </button>
+        </div>
       </nav>
 
       {/* ── Menú Desplegable Móvil (Drawer Overlay) ───────────── */}
@@ -107,13 +142,25 @@ export default function HeaderNav({ activeTab }: HeaderNavProps) {
                   <img src={logoUrl} alt="Clerkship" className="lp-logo-img" />
                   <span>Clerkship</span>
                 </div>
-                <button
-                  className="lp-mobile-close-btn"
-                  onClick={() => setMobileOpen(false)}
-                  type="button"
-                >
-                  <X size={20} />
-                </button>
+
+                <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                  <button
+                    type="button"
+                    className="lp-header-theme-toggle-btn-mobile"
+                    onClick={toggleTheme}
+                    aria-label="Cambiar tema"
+                  >
+                    {theme === 'dark' ? <Sun size={20} style={{ color: '#FBBF24' }} /> : <Moon size={20} style={{ color: '#4F46E5' }} />}
+                  </button>
+
+                  <button
+                    className="lp-mobile-close-btn"
+                    onClick={() => setMobileOpen(false)}
+                    type="button"
+                  >
+                    <X size={20} />
+                  </button>
+                </div>
               </div>
 
               <div className="lp-mobile-menu-links">

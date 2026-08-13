@@ -64,6 +64,12 @@ body *,
   transform: translateY(-50%) scale(0.95);
 }
 
+@media (max-width: 768px) {
+  .theme-toggle-floating-btn {
+    display: none !important;
+  }
+}
+
 /* ══════════════════════════════════════════════════════════════
    1. MODO OSCURO (Deep Dark con Tonos Opacos Confortables)
    ══════════════════════════════════════════════════════════════ */
