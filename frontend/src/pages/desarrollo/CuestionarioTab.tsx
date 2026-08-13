@@ -1,11 +1,38 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ArrowRight, ArrowLeft, CheckCircle2, FilePlus, Sparkles, PlusCircle, Bot, BrainCircuit, Server, Layout, Save, ChevronDown, Check, ShieldCheck, X } from 'lucide-react';
+import {
+  ArrowLeft,
+  Sparkles,
+  PlusCircle,
+  Bot,
+  BrainCircuit,
+  Server,
+  Layout,
+  Save,
+  ChevronDown,
+  Check,
+  ShieldCheck,
+  X,
+  KeyRound,
+  Pencil,
+  UserCheck,
+} from 'lucide-react';
 import { TEAM_MEMBERS } from '../../data/teamData';
 import type { TeamMember } from '../../data/teamData';
 import { getPlaceholderCategoriesForMember } from '../../data/techPlaceholders';
-import { readCuestionarioAnswers, saveCuestionarioAnswers } from '../../data/cuestionarioStore';
-import { authenticateMember, authErrorMessage, isFirstLogin, setNewPassword, validateNewPassword } from '../../data/devAuth';
+import {
+  readCuestionarioAnswers,
+  saveCuestionarioAnswers,
+  isMemberRegistered,
+  markMemberRegistered,
+} from '../../data/cuestionarioStore';
+import {
+  authenticateMember,
+  authErrorMessage,
+  isFirstLogin,
+  setNewPassword,
+  validateNewPassword,
+} from '../../data/devAuth';
 import PasswordInput from '../../components/shared/PasswordInput';
 import NewPasswordFields from '../../components/shared/NewPasswordFields';
 
@@ -32,7 +59,10 @@ export default function CuestionarioTab() {
   const [saving, setSaving] = useState(false);
   const [saveError, setSaveError] = useState('');
 
-  // ── Login por perfil (contraseña) + cambio obligatorio en el primer ingreso ──
+  // Identifica si el perfil está registrando el cuestionario por PRIMERA VEZ
+  const [isFirstTime, setIsFirstTime] = useState(false);
+
+  // Modal de inicio de sesión de perfil
   const [pendingMember, setPendingMember] = useState<TeamMember | null>(null);
   const [authPhase, setAuthPhase] = useState<'password' | 'newPassword' | null>(null);
   const [loginPassword, setLoginPassword] = useState('');
@@ -41,10 +71,19 @@ export default function CuestionarioTab() {
   const [authError, setAuthError] = useState('');
   const [authSubmitting, setAuthSubmitting] = useState(false);
 
-  const proceedToStep2 = async (member: TeamMember) => {
+  // Modal / Formulario para cambio de contraseña desde el Resumen (cuando YA están registrados)
+  const [showChangePwdModal, setShowChangePwdModal] = useState(false);
+  const [pwdCurrent, setPwdCurrent] = useState('');
+  const [pwdNew1, setPwdNew1] = useState('');
+  const [pwdNew2, setPwdNew2] = useState('');
+  const [pwdSubmitting, setPwdSubmitting] = useState(false);
+  const [pwdError, setPwdError] = useState('');
+  const [pwdSuccess, setPwdSuccess] = useState('');
+
+  const proceedAfterLogin = async (member: TeamMember) => {
     setSelectedMember(member);
 
-    // Precarga los selects con lo que ya esté guardado en Firebase (o el valor sugerido por defecto)
+    const registered = await isMemberRegistered(member.id);
     const saved = await readCuestionarioAnswers();
     const placeholderCategories = getPlaceholderCategoriesForMember(member.id);
     const initialAnswers: Record<string, string> = {};
@@ -54,11 +93,22 @@ export default function CuestionarioTab() {
       });
     });
 
-    setFormData((prev) => ({ ...prev, placeholderAnswers: initialAnswers, customOtro: '' }));
+    setFormData({
+      descripcion: saved[`${member.id}_descripcion`] || '',
+      placeholderAnswers: initialAnswers,
+      customOtro: saved[`${member.id}_customOtro`] || '',
+    });
     setOpenDropdownKey(null);
     setCustomEntryKey(null);
     closeLoginModal();
-    setCurrentStep(2);
+
+    if (registered) {
+      setIsFirstTime(false);
+      setCurrentStep(4); // Ya registrado -> Muestra resumen con opciones de Editar y Cambiar Contraseña
+    } else {
+      setIsFirstTime(true);
+      setCurrentStep(2); // Primera vez -> Formulario de tecnologías
+    }
   };
 
   const handleCardClick = (member: TeamMember) => {
@@ -92,10 +142,9 @@ export default function CuestionarioTab() {
     try {
       const user = await authenticateMember(pendingMember.id, loginPassword);
       if (isFirstLogin(user)) {
-        // Primera vez que esta cuenta inicia sesión: la contraseña era temporal, exige una propia.
         setAuthPhase('newPassword');
       } else {
-        await proceedToStep2(pendingMember);
+        await proceedAfterLogin(pendingMember);
       }
     } catch (err) {
       setAuthError(authErrorMessage(err));
@@ -117,7 +166,7 @@ export default function CuestionarioTab() {
     setAuthSubmitting(true);
     try {
       await setNewPassword(newPassword1);
-      await proceedToStep2(pendingMember);
+      await proceedAfterLogin(pendingMember);
     } catch (err) {
       setAuthError(authErrorMessage(err));
     } finally {
@@ -150,22 +199,102 @@ export default function CuestionarioTab() {
     setCustomEntryKey(null);
   };
 
-  const handleNextStep = async (e: React.FormEvent) => {
+  // Guardar Selección de Tecnologías (Paso 2)
+  const handleTechSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (currentStep !== 2 || !selectedMember) return;
 
     setSaveError('');
     setSaving(true);
     try {
-      // Ya quedó autenticado como selectedMember al elegir el perfil.
-      // update() hace merge parcial en Firebase — no borra lo que guardaron los demás.
-      await saveCuestionarioAnswers(formData.placeholderAnswers);
+      const patch: Record<string, string> = {
+        ...formData.placeholderAnswers,
+      };
+      if (formData.customOtro) {
+        patch[`${selectedMember.id}_customOtro`] = formData.customOtro;
+      }
+      if (formData.descripcion) {
+        patch[`${selectedMember.id}_descripcion`] = formData.descripcion;
+      }
+
+      await saveCuestionarioAnswers(patch);
       setJustSaved(true);
-      setCurrentStep(3);
+
+      if (isFirstTime) {
+        // Primera vez: Ir a Paso 3 (Cambiar Contraseña antes de la confirmación)
+        setCurrentStep(3);
+      } else {
+        // Ya registrado: Ir a Paso 4 (Resumen)
+        await markMemberRegistered(selectedMember.id);
+        setCurrentStep(4);
+      }
     } catch {
       setSaveError('No se pudo guardar. Revisa tu conexión e intenta de nuevo.');
     } finally {
       setSaving(false);
+    }
+  };
+
+  // Guardar Contraseña en PRIMERA VEZ (Paso 3) -> Pide SOLO contraseña nueva
+  const handleFirstTimePasswordSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!selectedMember) return;
+
+    const validationError = validateNewPassword(newPassword1, newPassword2);
+    if (validationError) {
+      setSaveError(validationError);
+      return;
+    }
+
+    setSaveError('');
+    setSaving(true);
+    try {
+      await setNewPassword(newPassword1);
+      await markMemberRegistered(selectedMember.id);
+      setIsFirstTime(false);
+      setCurrentStep(4); // Pasar al Resumen Exitoso (Paso 4)
+    } catch (err) {
+      setSaveError(authErrorMessage(err));
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  // Guardar Cambio de Contraseña cuando YA REGISTRARON (Modal) -> PIDE CONTRASEÑA ACTUAL Y LUEGO NUEVA
+  const handleSubsequentPasswordSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!selectedMember) return;
+
+    if (!pwdCurrent) {
+      setPwdError('Ingresa tu contraseña actual.');
+      return;
+    }
+    const validationError = validateNewPassword(pwdNew1, pwdNew2);
+    if (validationError) {
+      setPwdError(validationError);
+      return;
+    }
+
+    setPwdError('');
+    setPwdSuccess('');
+    setPwdSubmitting(true);
+    try {
+      // 1. Verificar contraseña actual autenticando al usuario
+      await authenticateMember(selectedMember.id, pwdCurrent);
+      // 2. Establecer la nueva contraseña
+      await setNewPassword(pwdNew1);
+      setPwdSuccess('¡Contraseña actualizada exitosamente!');
+      setTimeout(() => {
+        setShowChangePwdModal(false);
+        setPwdCurrent('');
+        setPwdNew1('');
+        setPwdNew2('');
+        setPwdSuccess('');
+      }, 1600);
+    } catch (err) {
+      setPwdError(authErrorMessage(err));
+    } finally {
+      setPwdSubmitting(false);
     }
   };
 
@@ -182,36 +311,10 @@ export default function CuestionarioTab() {
 
   return (
     <div className="cuestionario-wizard-wrapper">
-      {/* ── Wizard Step Indicator ─────────────────────────────────── */}
-      <div className="wizard-progress-bar">
-        <div className={`wizard-step-item ${currentStep === 1 ? 'active' : currentStep > 1 ? 'completed' : ''}`}>
-          <div className="wizard-step-circle">
-            {currentStep > 1 ? <CheckCircle2 size={16} /> : '1'}
-          </div>
-          <span className="wizard-step-label">Perfil Integrante</span>
-        </div>
-
-        <div className="wizard-step-line" />
-
-        <div className={`wizard-step-item ${currentStep === 2 ? 'active' : currentStep > 2 ? 'completed' : ''}`}>
-          <div className="wizard-step-circle">
-            {currentStep > 2 ? <CheckCircle2 size={16} /> : '2'}
-          </div>
-          <span className="wizard-step-label">Tecnologías</span>
-        </div>
-
-        <div className="wizard-step-line" />
-
-        <div className={`wizard-step-item ${currentStep === 3 ? 'active' : ''}`}>
-          <div className="wizard-step-circle">3</div>
-          <span className="wizard-step-label">Confirmación</span>
-        </div>
-      </div>
-
       {/* ── Step Content Animation ────────────────────────────────── */}
       <AnimatePresence mode="wait">
         {/* ════════════════════════════════════════════════════════════
-            PASO 1: SELECCIÓN DE PERFIL ESTILO NETFLIX
+            PASO 1: SELECCIÓN DE PERFIL
             ════════════════════════════════════════════════════════════ */}
         {currentStep === 1 && (
           <motion.div
@@ -224,7 +327,7 @@ export default function CuestionarioTab() {
           >
             <h2 className="netflix-title">¿Quién está registrando?</h2>
             <p className="netflix-subtitle">
-              Selecciona la mente detrás del proyecto para cargar tus categorías técnicas.
+              Selecciona la mente detrás del proyecto para gestionar tus opciones técnicas.
             </p>
 
             <div className="netflix-profiles-grid">
@@ -286,7 +389,7 @@ export default function CuestionarioTab() {
             <div className="form-step-header">
               <div>
                 <h3 style={{ fontSize: '20px', fontWeight: 700, margin: 0, color: '#FFF' }}>
-                  Paso 2: Tecnologías y Herramientas
+                  Tecnologías y Herramientas
                 </h3>
                 <p style={{ fontSize: '13px', color: '#9CA3AF', margin: '4px 0 0 0' }}>
                   Selecciona qué estás usando o vas a usar en cada frente de tu área.
@@ -317,8 +420,8 @@ export default function CuestionarioTab() {
               </div>
             </div>
 
-            <form onSubmit={handleNextStep}>
-              {/* ── Tecnologías atadas al Cronograma (rellenan los "____") ─── */}
+            <form onSubmit={handleTechSubmit}>
+              {/* ── Tecnologías atadas al Cronograma ─── */}
               <div style={{ marginBottom: '24px' }}>
                 <p style={{ fontSize: '12px', color: '#9CA3AF', margin: '0 0 14px 0' }}>
                   Cada selección llena el espacio en blanco correspondiente en el Cronograma de tu categoría.
@@ -499,7 +602,7 @@ export default function CuestionarioTab() {
                 </button>
 
                 <button type="submit" className="btn-primary" disabled={saving}>
-                  <Save size={16} /> {saving ? 'Guardando...' : 'Guardar y Continuar'} <ArrowRight size={16} />
+                  <Save size={16} /> {saving ? 'Guardando...' : isFirstTime ? 'Siguiente: Cambiar Contraseña →' : 'Guardar Cambios'}
                 </button>
               </div>
             </form>
@@ -507,22 +610,92 @@ export default function CuestionarioTab() {
         )}
 
         {/* ════════════════════════════════════════════════════════════
-            PASO 3: CONFIRMACIÓN Y RESUMEN
+            PASO 3: CAMBIAR CONTRASEÑA EN PRIMERA VEZ (SOLO PIDE NUEVA CONTRASEÑA)
             ════════════════════════════════════════════════════════════ */}
         {currentStep === 3 && selectedMember && (
           <motion.div
             key="step3"
+            initial={{ opacity: 0, x: 40 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: -40 }}
+            transition={{ duration: 0.35, ease: 'easeInOut' }}
+            className="form-step-container"
+            style={{ maxWidth: '580px', margin: '0 auto' }}
+          >
+            <div style={{ textAlign: 'center', marginBottom: 24 }}>
+              <div
+                style={{
+                  width: 56,
+                  height: 56,
+                  borderRadius: '50%',
+                  background: `${selectedMember.color}18`,
+                  border: `2px solid ${selectedMember.color}`,
+                  color: selectedMember.color,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  margin: '0 auto 14px auto',
+                }}
+              >
+                <KeyRound size={28} />
+              </div>
+              <h3 style={{ fontSize: '22px', fontWeight: 800, color: '#FFF', margin: '0 0 6px 0' }}>
+                Configura tu Contraseña
+              </h3>
+              <p style={{ fontSize: '13.5px', color: '#9CA3AF', margin: 0 }}>
+                Es tu primer registro. Crea tu contraseña personal para acceder de aquí en adelante.
+              </p>
+            </div>
+
+            <form onSubmit={handleFirstTimePasswordSubmit}>
+              <NewPasswordFields
+                password1={newPassword1}
+                onPassword1Change={setNewPassword1}
+                password2={newPassword2}
+                onPassword2Change={setNewPassword2}
+              />
+
+              {saveError && (
+                <p style={{ color: '#F87171', fontSize: '12.5px', fontWeight: 600, margin: '14px 0 0 0' }}>
+                  {saveError}
+                </p>
+              )}
+
+              <div className="form-actions" style={{ marginTop: 24 }}>
+                <button
+                  type="button"
+                  className="btn-secondary"
+                  onClick={() => setCurrentStep(2)}
+                  disabled={saving}
+                >
+                  <ArrowLeft size={16} /> Volver a Tecnologías
+                </button>
+
+                <button type="submit" className="btn-primary" disabled={saving}>
+                  <ShieldCheck size={16} /> {saving ? 'Guardando...' : 'Guardar y Finalizar Registro'}
+                </button>
+              </div>
+            </form>
+          </motion.div>
+        )}
+
+        {/* ════════════════════════════════════════════════════════════
+            PASO 4: CONFIRMACIÓN Y RESUMEN (OPCIONES ESCOGIDAS + EDITAR + CAMBIAR CONTRASEÑA)
+            ════════════════════════════════════════════════════════════ */}
+        {currentStep === 4 && selectedMember && (
+          <motion.div
+            key="step4"
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.9 }}
             transition={{ duration: 0.35, ease: 'easeInOut' }}
             className="form-step-container"
-            style={{ textAlign: 'center', padding: '48px 32px' }}
+            style={{ textAlign: 'center', padding: '40px 28px' }}
           >
             <div
               style={{
-                width: 72,
-                height: 72,
+                width: 68,
+                height: 68,
                 borderRadius: '50%',
                 background: 'rgba(16, 185, 129, 0.15)',
                 border: '2px solid #10B981',
@@ -530,42 +703,42 @@ export default function CuestionarioTab() {
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                margin: '0 auto 20px auto',
+                margin: '0 auto 18px auto',
               }}
             >
-              <CheckCircle2 size={38} />
+              <UserCheck size={36} />
             </div>
 
-            <h3 style={{ fontSize: '26px', fontWeight: 800, color: '#FFF', margin: '0 0 8px 0' }}>
-              ¡Registro Exitoso!
+            <h3 style={{ fontSize: '24px', fontWeight: 800, color: '#FFF', margin: '0 0 6px 0' }}>
+              Cuestionario Registrado
             </h3>
-            <p style={{ fontSize: '14.5px', color: '#9CA3AF', maxWidth: '520px', margin: '0 auto 12px auto' }}>
-              Las tecnologías han sido registradas correctamente por{' '}
+            <p style={{ fontSize: '14px', color: '#9CA3AF', maxWidth: '520px', margin: '0 auto 20px auto' }}>
+              Opciones técnicas guardadas para el perfil de{' '}
               <strong style={{ color: selectedMember.color }}>{selectedMember.name}</strong>.
             </p>
 
             {justSaved && (
-              <p style={{ fontSize: '12.5px', color: '#34D399', maxWidth: '520px', margin: '0 auto 28px auto', display: 'flex', alignItems: 'center', gap: 6, justifyContent: 'center' }}>
-                <Save size={13} /> Guardadas y sincronizadas — ya están disponibles en el Cronograma para todo el equipo.
+              <p style={{ fontSize: '12.5px', color: '#34D399', maxWidth: '520px', margin: '0 auto 24px auto', display: 'flex', alignItems: 'center', gap: 6, justifyContent: 'center' }}>
+                <Save size={13} /> Sincronizado en tiempo real con el Cronograma.
               </p>
             )}
 
             {/* Summary Box */}
             <div
               style={{
-                background: 'rgba(11, 15, 25, 0.8)',
-                border: '1px solid rgba(255, 255, 255, 0.1)',
+                background: 'rgba(11, 15, 25, 0.85)',
+                border: '1px solid rgba(255, 255, 255, 0.12)',
                 borderRadius: '16px',
-                padding: '22px 26px',
+                padding: '22px 24px',
                 maxWidth: '680px',
-                margin: '0 auto 32px auto',
+                margin: '0 auto 28px auto',
                 textAlign: 'left',
               }}
             >
-              <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 12 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 14 }}>
                 <Sparkles size={18} style={{ color: selectedMember.color }} />
                 <span style={{ fontSize: '15px', fontWeight: 700, color: '#FFF' }}>
-                  Tecnologías Registradas
+                  Tus Opciones Seleccionadas:
                 </span>
               </div>
 
@@ -576,65 +749,82 @@ export default function CuestionarioTab() {
               )}
 
               {/* Selected Techs Tags */}
-              <div>
-                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
-                  {Object.values(formData.placeholderAnswers).filter(Boolean).map((t, idx) => (
-                    <span
-                      key={`${t}-${idx}`}
-                      style={{
-                        background: 'rgba(59, 130, 246, 0.15)',
-                        border: '1px solid rgba(59, 130, 246, 0.3)',
-                        color: '#60A5FA',
-                        padding: '3px 10px',
-                        borderRadius: '8px',
-                        fontSize: '12px',
-                        fontWeight: 500,
-                      }}
-                    >
-                      {t}
-                    </span>
-                  ))}
-                  {formData.customOtro && (
-                    <span
-                      style={{
-                        background: `${selectedMember.color}20`,
-                        border: `1px solid ${selectedMember.color}40`,
-                        color: selectedMember.color,
-                        padding: '3px 10px',
-                        borderRadius: '8px',
-                        fontSize: '12px',
-                        fontWeight: 600,
-                      }}
-                    >
-                      + {formData.customOtro}
-                    </span>
-                  )}
-                </div>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+                {Object.entries(formData.placeholderAnswers).map(([key, val]) => (
+                  <span
+                    key={key}
+                    style={{
+                      background: val ? 'rgba(59, 130, 246, 0.15)' : 'rgba(239, 68, 68, 0.1)',
+                      border: val ? '1px solid rgba(59, 130, 246, 0.35)' : '1px solid rgba(239, 68, 68, 0.25)',
+                      color: val ? '#60A5FA' : '#FCA5A5',
+                      padding: '4px 12px',
+                      borderRadius: '8px',
+                      fontSize: '12.5px',
+                      fontWeight: 600,
+                    }}
+                  >
+                    {val || 'Sin definir'}
+                  </span>
+                ))}
+                {formData.customOtro && (
+                  <span
+                    style={{
+                      background: `${selectedMember.color}20`,
+                      border: `1px solid ${selectedMember.color}40`,
+                      color: selectedMember.color,
+                      padding: '4px 12px',
+                      borderRadius: '8px',
+                      fontSize: '12.5px',
+                      fontWeight: 700,
+                    }}
+                  >
+                    + {formData.customOtro}
+                  </span>
+                )}
               </div>
             </div>
 
-            <div style={{ display: 'flex', gap: 16, justifyContent: 'center' }}>
+            {/* Acciones principales cuando ya está registrado */}
+            <div style={{ display: 'flex', gap: 12, justifyContent: 'center', flexWrap: 'wrap' }}>
               <button
                 type="button"
                 className="btn-secondary"
                 onClick={() => setCurrentStep(2)}
+                style={{ gap: 6 }}
               >
-                <ArrowLeft size={16} /> Editar Selección
+                <Pencil size={15} /> Editar Selección
+              </button>
+
+              <button
+                type="button"
+                className="btn-secondary"
+                onClick={() => {
+                  setShowChangePwdModal(true);
+                  setPwdCurrent('');
+                  setPwdNew1('');
+                  setPwdNew2('');
+                  setPwdError('');
+                  setPwdSuccess('');
+                }}
+                style={{ gap: 6, borderColor: selectedMember.color, color: selectedMember.color }}
+              >
+                <KeyRound size={15} /> Cambiar Contraseña
               </button>
 
               <button
                 type="button"
                 className="btn-primary"
                 onClick={handleReset}
+                style={{ gap: 6 }}
               >
-                <FilePlus size={16} /> Nuevo Registro
+                <ArrowLeft size={15} /> Cambiar de Perfil
               </button>
             </div>
           </motion.div>
         )}
       </AnimatePresence>
 
-      {/* ── Login por perfil: contraseña, con cambio obligatorio la primera vez ── */}
+      {/* ── Modal 1: Login inicial por perfil (contraseña) ── */}
       <AnimatePresence>
         {pendingMember && authPhase && (
           <div className="crono-verify-overlay" onClick={closeLoginModal}>
@@ -662,7 +852,7 @@ export default function CuestionarioTab() {
 
               {authPhase === 'password' && (
                 <form onSubmit={handleLoginSubmit}>
-                  <p className="crono-verify-subtitle">Ingresa tu contraseña para continuar.</p>
+                  <p className="crono-verify-subtitle">Ingresa tu contraseña para ingresar a tu cuestionario.</p>
                   <div className="crono-verify-field">
                     <label className="crono-verify-label">Contraseña</label>
                     <PasswordInput
@@ -712,6 +902,69 @@ export default function CuestionarioTab() {
                   </div>
                 </form>
               )}
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* ── Modal 2: Cambiar Contraseña cuando YA están registrados (Pide Contraseña Actual + Nueva Contraseña) ── */}
+      <AnimatePresence>
+        {showChangePwdModal && selectedMember && (
+          <div className="crono-verify-overlay" onClick={() => setShowChangePwdModal(false)}>
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 12 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 12 }}
+              transition={{ duration: 0.2 }}
+              className="crono-verify-modal"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="crono-verify-header">
+                <div className="crono-verify-header-title">
+                  <KeyRound size={18} style={{ color: selectedMember.color }} />
+                  <span>Cambiar Contraseña — {selectedMember.name.split(' ')[0]}</span>
+                </div>
+                <button type="button" className="crono-gcal-close" onClick={() => setShowChangePwdModal(false)}>
+                  <X size={16} />
+                </button>
+              </div>
+
+              <form onSubmit={handleSubsequentPasswordSubmit}>
+                <p className="crono-verify-subtitle">
+                  Para actualizar tu contraseña, ingresa tu contraseña actual seguida de la nueva contraseña.
+                </p>
+
+                {/* 1. Contraseña Actual */}
+                <div className="crono-verify-field" style={{ marginBottom: 14 }}>
+                  <label className="crono-verify-label">Contraseña Actual</label>
+                  <PasswordInput
+                    autoFocus
+                    placeholder="Ingresa tu contraseña actual"
+                    value={pwdCurrent}
+                    onChange={setPwdCurrent}
+                  />
+                </div>
+
+                {/* 2 y 3. Nueva Contraseña y Confirmación */}
+                <NewPasswordFields
+                  password1={pwdNew1}
+                  onPassword1Change={setPwdNew1}
+                  password2={pwdNew2}
+                  onPassword2Change={setPwdNew2}
+                />
+
+                {pwdError && <p className="crono-verify-form-error">{pwdError}</p>}
+                {pwdSuccess && <p style={{ color: '#34D399', fontSize: '13px', fontWeight: 600, marginTop: 10, textAlign: 'center' }}>{pwdSuccess}</p>}
+
+                <div className="crono-verify-actions">
+                  <button type="button" className="crono-cal-nav-btn" onClick={() => setShowChangePwdModal(false)} disabled={pwdSubmitting}>
+                    Cancelar
+                  </button>
+                  <button type="submit" className="crono-verify-confirm-btn" disabled={pwdSubmitting}>
+                    <ShieldCheck size={15} /> {pwdSubmitting ? 'Actualizando...' : 'Actualizar Contraseña'}
+                  </button>
+                </div>
+              </form>
             </motion.div>
           </div>
         )}
