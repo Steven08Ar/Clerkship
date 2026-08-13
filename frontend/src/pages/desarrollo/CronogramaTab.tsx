@@ -3,10 +3,10 @@ import { motion, AnimatePresence } from 'framer-motion';
 import {
   Calendar, Flag, Clock, Filter, Layers, Eye, EyeOff, ChevronDown, Check,
   CheckCircle2, AlertTriangle, Lock,
-  ChevronLeft, ChevronRight, X, GitCommit, GitBranch, ShieldCheck
+  ChevronLeft, ChevronRight, X, GitCommit, GitBranch, ShieldCheck, Pencil, Trash2
 } from 'lucide-react';
 import {
-  subscribeEvidenceMap, saveEvidence, subscribeCompletedMap, setCompleted,
+  subscribeEvidenceMap, saveEvidence, removeEvidence, subscribeCompletedMap, setCompleted,
 } from '../../data/repoEvidence';
 import type { RepoEvidence } from '../../data/repoEvidence';
 import { fetchBranches, fetchCommits, githubFetchErrorMessage } from '../../data/githubApi';
@@ -377,6 +377,81 @@ export default function CronogramaTab() {
     setCursorTooltip({ show: false, x: 0, y: 0, text: '' });
   };
 
+  // ── Modal de Edición / Eliminación de Entrega Confirmada ──
+  const [editItemKey, setEditItemKey] = useState<string | null>(null);
+  const [editStep, setEditStep] = useState<'auth' | 'edit' | 'deleteConfirm'>('auth');
+  const [editPassword, setEditPassword] = useState('');
+  const [editShowPassword, setEditShowPassword] = useState(false);
+  const [editFormError, setEditFormError] = useState('');
+  const [editSubmitting, setEditSubmitting] = useState(false);
+
+  // Campos de edición
+  const [editRepoId, setEditRepoId] = useState('');
+  const [editRepoOpen, setEditRepoOpen] = useState(false);
+  const [editBranches, setEditBranches] = useState<GitHubBranch[]>([]);
+  const [editBranchesStatus, setEditBranchesStatus] = useState<'loading' | 'ok' | 'error'>('loading');
+  const [editBranch, setEditBranch] = useState('');
+  const [editBranchOpen, setEditBranchOpen] = useState(false);
+  const [editCommits, setEditCommits] = useState<GitHubCommit[]>([]);
+  const [editCommitsStatus, setEditCommitsStatus] = useState<'idle' | 'loading' | 'ok' | 'error'>('idle');
+  const [editCommitSha, setEditCommitSha] = useState('');
+  const [editCommitOpen, setEditCommitOpen] = useState(false);
+  const [editDescription, setEditDescription] = useState('');
+  const [editErrorMsg, setEditErrorMsg] = useState('');
+
+  // Campo para la confirmación de fecha de eliminación
+  const [deleteDateInput, setDeleteDateInput] = useState('');
+
+  const openEditModal = (itemKey: string) => {
+    const evidence = evidenceMap[itemKey];
+    setEditItemKey(itemKey);
+    setEditStep('auth');
+    setEditPassword('');
+    setEditShowPassword(false);
+    setEditFormError('');
+    setEditSubmitting(false);
+
+    setEditRepoId(evidence?.repoId || 'clerkship');
+    setEditBranch(evidence?.branch || '');
+    setEditCommitSha(evidence?.sha || '');
+    setEditDescription(evidence?.description || '');
+    setDeleteDateInput('');
+  };
+
+  const handleEditAuth = async () => {
+    if (!editItemKey) return;
+    const evidence = evidenceMap[editItemKey];
+
+    const publisherMember = TEAM_MEMBERS.find((m) =>
+      evidence?.registeredBy && (
+        evidence.registeredBy.toLowerCase().includes(m.id) ||
+        evidence.registeredBy.toLowerCase().includes(m.name.split(' ')[0].toLowerCase())
+      )
+    );
+
+    if (!publisherMember) {
+      setEditFormError(`No se pudo identificar la cuenta del autor "${evidence?.registeredBy || ''}".`);
+      return;
+    }
+
+    if (!editPassword) {
+      setEditFormError(`Ingresa la contraseña del perfil de ${publisherMember.name}.`);
+      return;
+    }
+
+    setEditSubmitting(true);
+    setEditFormError('');
+
+    try {
+      await authenticateMember(publisherMember.id, editPassword);
+      setEditStep('edit');
+    } catch (err) {
+      setEditFormError(authErrorMessage(err));
+    } finally {
+      setEditSubmitting(false);
+    }
+  };
+
   const handleStep1Auth = async () => {
     if (!verifyMemberId) {
       setVerifyFormError('Selecciona tu perfil de Mente Maestra para continuar.');
@@ -492,6 +567,119 @@ export default function CronogramaTab() {
       });
     return () => { cancelled = true; };
   }, [verifyItemKey, verifyMode, verifyRepoId, verifyBranch]);
+
+  // Carga las ramas al cambiar repo en la edición
+  useEffect(() => {
+    if (!editItemKey || editStep !== 'edit' || !editRepoId) return;
+    const repo = REPOS.find((r) => r.id === editRepoId);
+    if (!repo) return;
+
+    let cancelled = false;
+    setEditBranchesStatus('loading');
+    fetchBranches(repo)
+      .then((data) => {
+        if (cancelled) return;
+        setEditBranches(data);
+        setEditBranchesStatus('ok');
+      })
+      .catch((err) => {
+        if (cancelled) return;
+        setEditBranchesStatus('error');
+        setEditErrorMsg(githubFetchErrorMessage(err));
+      });
+    return () => { cancelled = true; };
+  }, [editItemKey, editStep, editRepoId]);
+
+  // Carga los commits al cambiar la rama en la edición
+  useEffect(() => {
+    if (!editItemKey || editStep !== 'edit' || !editRepoId || !editBranch) return;
+    const repo = REPOS.find((r) => r.id === editRepoId);
+    if (!repo) return;
+
+    let cancelled = false;
+    setEditCommitsStatus('loading');
+    fetchCommits(repo, editBranch, 30)
+      .then((data) => {
+        if (cancelled) return;
+        setEditCommits(data);
+        setEditCommitsStatus('ok');
+      })
+      .catch((err) => {
+        if (cancelled) return;
+        setEditCommitsStatus('error');
+        setEditErrorMsg(githubFetchErrorMessage(err));
+      });
+    return () => { cancelled = true; };
+  }, [editItemKey, editStep, editRepoId, editBranch]);
+
+  const handleSaveEdit = async () => {
+    if (!editItemKey) return;
+    const commit = editCommits.find((c) => c.sha === editCommitSha);
+
+    const dashIdx = editItemKey.indexOf('-');
+    const catId = editItemKey.slice(0, dashIdx) as CategoryId;
+    const actId = editItemKey.slice(dashIdx + 1);
+    const act = (CRONOGRAMA_DATA[catId] || []).find((a) => a.id === actId);
+    const cat = CATEGORIES.find((c) => c.id === catId);
+    const existingEvidence = evidenceMap[editItemKey];
+
+    setEditSubmitting(true);
+    setEditFormError('');
+
+    try {
+      await saveEvidence(editItemKey, {
+        repoId: editRepoId,
+        sha: commit ? commit.sha : (existingEvidence?.sha || editCommitSha),
+        shortSha: commit ? commit.sha.slice(0, 7) : (existingEvidence?.shortSha || editCommitSha.slice(0, 7)),
+        branch: editBranch || existingEvidence?.branch || 'main',
+        message: commit ? commit.commit.message.split('\n')[0] : (existingEvidence?.message || 'Commit editado'),
+        htmlUrl: commit ? commit.html_url : (existingEvidence?.htmlUrl || `https://github.com/Steven08Ar/Clerkship/commit/${editCommitSha}`),
+        author: commit ? commit.commit.author.name : (existingEvidence?.author || existingEvidence?.registeredBy || 'Mente Maestra'),
+        date: commit ? commit.commit.author.date : (existingEvidence?.date || new Date().toISOString()),
+        milestoneLabel: act ? `${cat?.label} — ${act.id}` : (existingEvidence?.milestoneLabel || 'Hito'),
+        description: editDescription.trim(),
+        registeredBy: existingEvidence?.registeredBy || 'Mente Maestra',
+        taggedAt: existingEvidence?.taggedAt || new Date().toISOString(),
+      });
+
+      setEditItemKey(null);
+      setDetailsItemKey(null);
+    } catch (err) {
+      setEditFormError('Error al guardar los cambios de la entrega.');
+    } finally {
+      setEditSubmitting(false);
+    }
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!editItemKey) return;
+
+    const dashIdx = editItemKey.indexOf('-');
+    const catId = editItemKey.slice(0, dashIdx) as CategoryId;
+    const actId = editItemKey.slice(dashIdx + 1);
+    const act = (CRONOGRAMA_DATA[catId] || []).find((a) => a.id === actId);
+
+    if (!act) return;
+
+    if (deleteDateInput.trim().toLowerCase() !== act.dateLabel.trim().toLowerCase()) {
+      setEditFormError(`La fecha ingresada "${deleteDateInput}" no coincide exactamente con "${act.dateLabel}".`);
+      return;
+    }
+
+    setEditSubmitting(true);
+    setEditFormError('');
+
+    try {
+      await removeEvidence(editItemKey);
+      await setCompleted(editItemKey, false);
+      setEditItemKey(null);
+      setDetailsItemKey(null);
+    } catch (err) {
+      setEditFormError('Error al eliminar la entrega de Firebase.');
+    } finally {
+      setEditSubmitting(false);
+    }
+  };
 
   const performVerifyWrite = async () => {
     if (!verifyItemKey) return;
@@ -2014,6 +2202,19 @@ export default function CronogramaTab() {
 
                   <button
                     type="button"
+                    className="crono-details-edit-btn"
+                    onClick={() => {
+                      const keyToEdit = detailsItemKey;
+                      setDetailsItemKey(null);
+                      if (keyToEdit) openEditModal(keyToEdit);
+                    }}
+                  >
+                    <Pencil size={14} />
+                    Editar / Eliminar Entrega
+                  </button>
+
+                  <button
+                    type="button"
                     className="crono-cal-nav-btn"
                     onClick={() => {
                       setDetailsItemKey(null);
@@ -2030,6 +2231,395 @@ export default function CronogramaTab() {
                   >
                     Cerrar
                   </button>
+                </div>
+              </motion.div>
+            </div>
+          );
+        })()}
+      </AnimatePresence>
+
+      {/* ── Modal de Edición / Eliminación de Entrega Confirmada ── */}
+      <AnimatePresence>
+        {editItemKey && (() => {
+          const dashIdx = editItemKey.indexOf('-');
+          const eCatId = editItemKey.slice(0, dashIdx) as CategoryId;
+          const eActId = editItemKey.slice(dashIdx + 1);
+          const eAct = (CRONOGRAMA_DATA[eCatId] || []).find((a) => a.id === eActId);
+          const eCat = CATEGORIES.find((c) => c.id === eCatId);
+          const evidence = evidenceMap[editItemKey];
+
+          const publisherMember = TEAM_MEMBERS.find((m) =>
+            evidence?.registeredBy && (
+              evidence.registeredBy.toLowerCase().includes(m.id) ||
+              evidence.registeredBy.toLowerCase().includes(m.name.split(' ')[0].toLowerCase())
+            )
+          );
+
+          const editSelectedRepo = REPOS.find((r) => r.id === editRepoId);
+          const editSelectedCommit = editCommits.find((c) => c.sha === editCommitSha);
+
+          return (
+            <div className="crono-verify-overlay" onClick={() => setEditItemKey(null)}>
+              <motion.div
+                initial={{ opacity: 0, scale: 0.95, y: 12 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.95, y: 12 }}
+                transition={{ duration: 0.2 }}
+                className="crono-verify-modal crono-details-modal"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <div className="crono-verify-header">
+                  <div className="crono-verify-header-title">
+                    <Pencil size={18} style={{ color: '#3B82F6' }} />
+                    <span>Editar o Eliminar Entrega</span>
+                  </div>
+                  <button type="button" className="crono-gcal-close" onClick={() => setEditItemKey(null)}>
+                    <X size={16} />
+                  </button>
+                </div>
+
+                {eCat && (
+                  <div className="crono-details-tag" style={{ backgroundColor: `${eCat.color}18`, color: eCat.color }}>
+                    <Layers size={13} />
+                    <span>{eCat.label}</span> — Hito #{eActId} ({eAct?.dateLabel})
+                  </div>
+                )}
+
+                <h3 className="crono-details-title">
+                  {eAct ? resolveTitleWithTech(eAct) : editItemKey}
+                </h3>
+
+                {/* PASO 1 DE EDICIÓN: Autenticación con contraseña del AUTOR */}
+                {editStep === 'auth' && (
+                  <>
+                    <div className="crono-verify-subtitle" style={{ marginBottom: 14 }}>
+                      Para editar o eliminar esta entrega, debes ingresar la contraseña de <strong>{publisherMember?.name || evidence?.registeredBy || 'quien la publicó'}</strong>:
+                    </div>
+
+                    {publisherMember && (
+                      <div className="crono-verified-user-badge" style={{ backgroundColor: `${publisherMember.color}15`, border: `1px solid ${publisherMember.color}40`, marginBottom: 16 }}>
+                        <div className="crono-verified-avatar" style={{ backgroundColor: `${publisherMember.color}20`, border: `1.5px solid ${publisherMember.color}` }}>
+                          <img src={publisherMember.avatarUrl} alt="" className="crono-verified-img" />
+                        </div>
+                        <div>
+                          <strong className="crono-verified-name" style={{ color: publisherMember.color }}>
+                            {publisherMember.name}
+                          </strong>
+                          <span className="crono-details-time">
+                            Autor original de la entrega
+                          </span>
+                        </div>
+                      </div>
+                    )}
+
+                    <div className="crono-verify-field">
+                      <label className="crono-verify-label">Contraseña de {publisherMember?.name.split(' ')[0] || 'Autor'}</label>
+                      <div style={{ position: 'relative' }}>
+                        <input
+                          type={editShowPassword ? 'text' : 'password'}
+                          className="crono-verify-input"
+                          placeholder="Ingresa la contraseña del autor..."
+                          value={editPassword}
+                          onChange={(e) => setEditPassword(e.target.value)}
+                          onKeyDown={(e) => { if (e.key === 'Enter') handleEditAuth(); }}
+                        />
+                        <button
+                          type="button"
+                          className="crono-pwd-toggle-btn"
+                          onClick={() => setEditShowPassword((v) => !v)}
+                        >
+                          {editShowPassword ? <EyeOff size={15} /> : <Eye size={15} />}
+                        </button>
+                      </div>
+                    </div>
+                  </>
+                )}
+
+                {/* PASO 2 DE EDICIÓN: Formulario de edición */}
+                {editStep === 'edit' && (
+                  <>
+                    {/* Repositorio */}
+                    <div className="crono-verify-field">
+                      <label className="crono-verify-label">Repositorio del commit</label>
+                      <div className={`crono-dd-wrap ${editRepoOpen ? 'dd-open' : ''}`}>
+                        <button
+                          type="button"
+                          className="crono-dd-trigger"
+                          style={{ width: '100%', justifyContent: 'space-between' }}
+                          onClick={() => {
+                            setEditRepoOpen((o) => {
+                              const next = !o;
+                              if (next) { setEditBranchOpen(false); setEditCommitOpen(false); }
+                              return next;
+                            });
+                          }}
+                        >
+                          <span className="crono-dd-text">
+                            <GitBranch size={13} style={{ marginRight: 6, display: 'inline-block', verticalAlign: 'middle' }} />
+                            {editSelectedRepo ? editSelectedRepo.label : 'Selecciona un repositorio'}
+                          </span>
+                          <ChevronDown size={14} className={`crono-dd-chevron ${editRepoOpen ? 'open' : ''}`} />
+                        </button>
+                        <AnimatePresence>
+                          {editRepoOpen && (
+                            <motion.div
+                              initial={{ opacity: 0, y: 6, scale: 0.98 }}
+                              animate={{ opacity: 1, y: 0, scale: 1 }}
+                              exit={{ opacity: 0, y: 6, scale: 0.98 }}
+                              transition={{ duration: 0.18 }}
+                              className="crono-dd-menu tech-select-menu"
+                              style={{ width: '100%' }}
+                            >
+                              {REPOS.map((r) => (
+                                <button
+                                  key={r.id}
+                                  type="button"
+                                  onClick={() => {
+                                    setEditRepoId(r.id);
+                                    setEditRepoOpen(false);
+                                    setEditBranchOpen(false);
+                                    setEditCommitOpen(false);
+                                  }}
+                                  className={`crono-dd-item ${r.id === editRepoId ? 'active' : ''}`}
+                                >
+                                  <span className="crono-dd-item-label">{r.label}</span>
+                                  {r.id === editRepoId && <Check size={14} className="crono-dd-check" />}
+                                </button>
+                              ))}
+                            </motion.div>
+                          )}
+                        </AnimatePresence>
+                      </div>
+                    </div>
+
+                    {/* Rama */}
+                    <div className="crono-verify-field">
+                      <label className="crono-verify-label">Rama del commit</label>
+                      <div className={`crono-dd-wrap ${editBranchOpen ? 'dd-open' : ''}`}>
+                        <button
+                          type="button"
+                          className="crono-dd-trigger"
+                          style={{ width: '100%', justifyContent: 'space-between' }}
+                          onClick={() => {
+                            setEditBranchOpen((o) => {
+                              const next = !o;
+                              if (next) { setEditRepoOpen(false); setEditCommitOpen(false); }
+                              return next;
+                            });
+                          }}
+                          disabled={!editRepoId || editBranchesStatus !== 'ok'}
+                        >
+                          <span className="crono-dd-text">
+                            <GitBranch size={13} style={{ marginRight: 6, display: 'inline-block', verticalAlign: 'middle' }} />
+                            {!editRepoId
+                              ? 'Selecciona primero un repositorio'
+                              : editBranchesStatus === 'loading' ? 'Cargando ramas...' : (editBranch || 'Selecciona una rama')}
+                          </span>
+                          <ChevronDown size={14} className={`crono-dd-chevron ${editBranchOpen ? 'open' : ''}`} />
+                        </button>
+                        <AnimatePresence>
+                          {editBranchOpen && editBranchesStatus === 'ok' && (
+                            <motion.div
+                              initial={{ opacity: 0, y: 6, scale: 0.98 }}
+                              animate={{ opacity: 1, y: 0, scale: 1 }}
+                              exit={{ opacity: 0, y: 6, scale: 0.98 }}
+                              transition={{ duration: 0.18 }}
+                              className="crono-dd-menu tech-select-menu"
+                              style={{ width: '100%' }}
+                            >
+                              {editBranches.map((b) => (
+                                <button
+                                  key={b.name}
+                                  type="button"
+                                  onClick={() => {
+                                    setEditBranch(b.name);
+                                    setEditBranchOpen(false);
+                                    setEditCommitOpen(false);
+                                  }}
+                                  className={`crono-dd-item ${b.name === editBranch ? 'active' : ''}`}
+                                >
+                                  <span className="crono-dd-item-label">{b.name}</span>
+                                  {b.name === editBranch && <Check size={14} className="crono-dd-check" />}
+                                </button>
+                              ))}
+                            </motion.div>
+                          )}
+                        </AnimatePresence>
+                      </div>
+                    </div>
+
+                    {/* Commit */}
+                    <div className="crono-verify-field">
+                      <label className="crono-verify-label">Commit de evidencia</label>
+                      <div className={`crono-dd-wrap ${editCommitOpen ? 'dd-open' : ''}`}>
+                        <button
+                          type="button"
+                          className="crono-dd-trigger"
+                          style={{ width: '100%', justifyContent: 'space-between' }}
+                          onClick={() => {
+                            setEditCommitOpen((o) => {
+                              const next = !o;
+                              if (next) { setEditRepoOpen(false); setEditBranchOpen(false); }
+                              return next;
+                            });
+                          }}
+                          disabled={editCommitsStatus !== 'ok'}
+                        >
+                          <span className="crono-dd-text">
+                            {editCommitsStatus === 'idle'
+                              ? 'Selecciona primero una rama'
+                              : editCommitsStatus === 'loading'
+                                ? 'Cargando commits...'
+                                : editSelectedCommit
+                                  ? `${editSelectedCommit.sha.slice(0, 7)} — ${editSelectedCommit.commit.message.split('\n')[0].slice(0, 40)}`
+                                  : (editCommitSha ? `${editCommitSha.slice(0, 7)} — Actual` : 'Selecciona un commit')}
+                          </span>
+                          <ChevronDown size={14} className={`crono-dd-chevron ${editCommitOpen ? 'open' : ''}`} />
+                        </button>
+                        <AnimatePresence>
+                          {editCommitOpen && editCommitsStatus === 'ok' && (
+                            <motion.div
+                              initial={{ opacity: 0, y: 6, scale: 0.98 }}
+                              animate={{ opacity: 1, y: 0, scale: 1 }}
+                              exit={{ opacity: 0, y: 6, scale: 0.98 }}
+                              transition={{ duration: 0.18 }}
+                              className="crono-dd-menu tech-select-menu"
+                              style={{ width: '100%' }}
+                            >
+                              {editCommits.map((c) => (
+                                <button
+                                  key={c.sha}
+                                  type="button"
+                                  onClick={() => {
+                                    setEditCommitSha(c.sha);
+                                    setEditCommitOpen(false);
+                                  }}
+                                  className={`crono-dd-item ${c.sha === editCommitSha ? 'active' : ''}`}
+                                >
+                                  <span className="crono-dd-item-label">
+                                    <span className="crono-verify-commit-sha">{c.sha.slice(0, 7)}</span>
+                                    {c.commit.message.split('\n')[0].slice(0, 50)}
+                                  </span>
+                                  {c.sha === editCommitSha && <Check size={14} className="crono-dd-check" />}
+                                </button>
+                              ))}
+                            </motion.div>
+                          )}
+                        </AnimatePresence>
+                      </div>
+                    </div>
+
+                    {(editBranchesStatus === 'error' || editCommitsStatus === 'error') && (
+                      <div className="crono-verify-error-box">
+                        <AlertTriangle size={14} /> <span>{editErrorMsg}</span>
+                      </div>
+                    )}
+
+                    {/* Descripción */}
+                    <div className="crono-verify-field">
+                      <label className="crono-verify-label">Descripción de la entrega</label>
+                      <textarea
+                        className="crono-verify-textarea"
+                        placeholder="Edita la descripción de la entrega..."
+                        value={editDescription}
+                        onChange={(e) => setEditDescription(e.target.value)}
+                      />
+                    </div>
+                  </>
+                )}
+
+                {/* PASO 3 DE EDICIÓN: Confirmación de Eliminación con Fecha */}
+                {editStep === 'deleteConfirm' && (
+                  <div className="crono-delete-confirm-box">
+                    <div className="crono-delete-confirm-title">
+                      <AlertTriangle size={18} />
+                      <span>¿Confirmas que deseas eliminar esta entrega?</span>
+                    </div>
+                    <p className="crono-delete-confirm-text">
+                      Esta acción borrará permanentemente la evidencia registrada y cambiará el estado del hito a <strong>En progreso / Pendiente</strong>.
+                    </p>
+                    <div className="crono-verify-field" style={{ marginTop: 12 }}>
+                      <label className="crono-verify-label">
+                        Escribe exactamente la fecha del hito <span className="crono-delete-date-target">{eAct?.dateLabel}</span> para autorizar:
+                      </label>
+                      <input
+                        type="text"
+                        className="crono-verify-input"
+                        placeholder={`Escribe "${eAct?.dateLabel}" para confirmar...`}
+                        value={deleteDateInput}
+                        onChange={(e) => setDeleteDateInput(e.target.value)}
+                      />
+                    </div>
+                  </div>
+                )}
+
+                {editFormError && <p className="crono-verify-form-error">{editFormError}</p>}
+
+                {/* ACCIONES DEL MODAL DE EDICIÓN */}
+                <div className="crono-details-actions">
+                  <button type="button" className="crono-cal-nav-btn" onClick={() => setEditItemKey(null)} disabled={editSubmitting}>
+                    Cancelar
+                  </button>
+
+                  {editStep === 'auth' && (
+                    <button
+                      type="button"
+                      className="crono-verify-confirm-btn"
+                      onClick={handleEditAuth}
+                      disabled={editSubmitting || !editPassword}
+                    >
+                      <ShieldCheck size={15} />
+                      {editSubmitting ? 'Verificando...' : 'Autenticar Autor →'}
+                    </button>
+                  )}
+
+                  {editStep === 'edit' && (
+                    <>
+                      <button
+                        type="button"
+                        className="crono-edit-delete-btn"
+                        onClick={() => { setEditFormError(''); setEditStep('deleteConfirm'); }}
+                        disabled={editSubmitting}
+                      >
+                        <Trash2 size={14} />
+                        Eliminar Entrega
+                      </button>
+
+                      <button
+                        type="button"
+                        className="crono-verify-confirm-btn"
+                        onClick={handleSaveEdit}
+                        disabled={editSubmitting}
+                      >
+                        <ShieldCheck size={15} />
+                        {editSubmitting ? 'Guardando...' : 'Guardar Cambios'}
+                      </button>
+                    </>
+                  )}
+
+                  {editStep === 'deleteConfirm' && (
+                    <>
+                      <button
+                        type="button"
+                        className="crono-cal-nav-btn"
+                        onClick={() => { setEditFormError(''); setEditStep('edit'); }}
+                        disabled={editSubmitting}
+                      >
+                        ← Volver a Edición
+                      </button>
+
+                      <button
+                        type="button"
+                        className="crono-edit-delete-btn"
+                        style={{ backgroundColor: '#EF4444', color: '#FFFFFF' }}
+                        onClick={handleConfirmDelete}
+                        disabled={editSubmitting || deleteDateInput.trim().toLowerCase() !== (eAct?.dateLabel || '').trim().toLowerCase()}
+                      >
+                        <Trash2 size={14} />
+                        {editSubmitting ? 'Eliminando...' : 'Confirmar y Eliminar'}
+                      </button>
+                    </>
+                  )}
                 </div>
               </motion.div>
             </div>
