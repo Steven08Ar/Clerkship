@@ -1,0 +1,926 @@
+/* ══════════════════════════════════════════════════════════════
+   SISTEMA GLOBAL DE MODO CLARO / OSCURO — CLERKSHIP (MATTE REFINED)
+   ══════════════════════════════════════════════════════════════ */
+
+/* ── Transición Suave Global de Colores ────────────────────── */
+html,
+body,
+body *,
+.lp-root,
+.lp-nav,
+.lp-hero-canvas,
+.lp-stats,
+.lp-about-block,
+.lp-equipo-card,
+.lp-feature-card,
+.lp-met-card,
+.lp-tec-item,
+.lp-tec-img-card,
+.lp-tec-pill-btn,
+.lp-tec-circle-btn,
+.lp-tec-outline-btn,
+.lp-met-node,
+.lp-met-popover,
+.lp-met-wave-path,
+.proy-card-clean,
+.proy-alert-banner,
+.theme-toggle-floating-btn,
+.dash-card,
+.casos-card,
+.bib-card,
+.form-step-container,
+.cronograma-tab-container {
+  transition: background-color 0.45s cubic-bezier(0.4, 0, 0.2, 1),
+              color 0.45s cubic-bezier(0.4, 0, 0.2, 1),
+              border-color 0.45s cubic-bezier(0.4, 0, 0.2, 1),
+              fill 0.45s cubic-bezier(0.4, 0, 0.2, 1),
+              box-shadow 0.45s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+/* ── Botón Flotante Fijo a la Derecha ───────────────────────── */
+.theme-toggle-floating-btn {
+  position: fixed;
+  right: 22px;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 99999;
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  backdrop-filter: blur(16px);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  outline: none;
+}
+
+.theme-toggle-floating-btn:hover {
+  transform: translateY(-50%) scale(1.12);
+}
+
+.theme-toggle-floating-btn:active {
+  transform: translateY(-50%) scale(0.95);
+}
+
+/* ══════════════════════════════════════════════════════════════
+   1. MODO OSCURO (Deep Dark con Tonos Opacos Confortables)
+   ══════════════════════════════════════════════════════════════ */
+
+[data-theme="dark"] {
+  --bg: #0B0F19 !important;
+  --surface: rgba(17, 24, 39, 0.85) !important;
+  --surface2: rgba(31, 41, 55, 0.85) !important;
+  --ink: #E2E8F0 !important;
+  --ink2: #CBD5E1 !important;
+  --ink3: #94A3B8 !important;
+  --border: rgba(255, 255, 255, 0.1) !important;
+  --border2: rgba(255, 255, 255, 0.15) !important;
+}
+
+/* ── Contenedores de Páginas ── */
+[data-theme="dark"] body,
+[data-theme="dark"] .lp-root,
+[data-theme="dark"] .desarrollo-container,
+[data-theme="dark"] .dash-root,
+[data-theme="dark"] .casos-page-container,
+[data-theme="dark"] .hist-page-container,
+[data-theme="dark"] .bib-page-container,
+[data-theme="dark"] .anat-page-container,
+[data-theme="dark"] .proy-web-root {
+  background-color: #0B0F19 !important;
+  color: #E2E8F0 !important;
+}
+
+/* ── Títulos y Encabezados en Modo Oscuro (Mate Suave, Sin Brillo Excesivo) ── */
+[data-theme="dark"] h1,
+[data-theme="dark"] h2,
+[data-theme="dark"] h3,
+[data-theme="dark"] h4,
+[data-theme="dark"] h5,
+[data-theme="dark"] h6,
+[data-theme="dark"] .lp-hero-giant-title,
+[data-theme="dark"] .lp-sec-title,
+[data-theme="dark"] .lp-equipo-title,
+[data-theme="dark"] .proy-hero-title,
+[data-theme="dark"] .proy-sec-title,
+[data-theme="dark"] .dash-header-title,
+[data-theme="dark"] .dash-doc-header h1,
+[data-theme="dark"] .netflix-title,
+[data-theme="dark"] .card-title,
+[data-theme="dark"] .lp-ortho-title,
+[data-theme="dark"] .lp-dr-name,
+[data-theme="dark"] .lp-stat-n,
+[data-theme="dark"] .lp-ab-quote,
+[data-theme="dark"] .lp-ab-stat-val,
+[data-theme="dark"] .lp-equipo-card-name,
+[data-theme="dark"] .lp-feature-title,
+[data-theme="dark"] .lp-insight-title,
+[data-theme="dark"] .lp-about-title,
+[data-theme="dark"] .lp-logo {
+  color: #E2E8F0 !important; /* Blanco mate confortable */
+}
+
+/* ── Textos, Párrafos, Subtítulos y Labels en Modo Oscuro ── */
+[data-theme="dark"] p,
+[data-theme="dark"] label,
+[data-theme="dark"] .lp-sec-subtitle,
+[data-theme="dark"] .lp-equipo-subtitle,
+[data-theme="dark"] .lp-hero-top-text,
+[data-theme="dark"] .lp-plan-text,
+[data-theme="dark"] .lp-ortho-days,
+[data-theme="dark"] .lp-ortho-time,
+[data-theme="dark"] .lp-docs-count,
+[data-theme="dark"] .netflix-subtitle,
+[data-theme="dark"] .lp-stat-l,
+[data-theme="dark"] .lp-ab-stat-label,
+[data-theme="dark"] .lp-ab-logos-header,
+[data-theme="dark"] .lp-equipo-card-desc,
+[data-theme="dark"] .lp-navlink {
+  color: #94A3B8 !important; /* Gris suave antideslumbrante */
+}
+
+/* ── Logo: De Negro a Blanco Suave en Modo Oscuro ── */
+[data-theme="dark"] .lp-logo-img,
+[data-theme="dark"] img[alt="Clerkship"],
+[data-theme="dark"] .sb-logo-img,
+[data-theme="dark"] .logo-img {
+  filter: brightness(0) invert(0.9) opacity(0.9) !important;
+}
+
+[data-theme="dark"] .lp-ab-logo-img {
+  filter: none !important;
+}
+
+/* ── Botones en Modo Oscuro ── */
+[data-theme="dark"] .lp-btn-action {
+  background: rgba(30, 41, 59, 0.8) !important;
+  color: #E2E8F0 !important;
+  border: 1px solid rgba(255, 255, 255, 0.15) !important;
+}
+[data-theme="dark"] .lp-btn-action:hover {
+  background: rgba(51, 65, 85, 0.9) !important;
+  color: #FFFFFF !important;
+}
+
+[data-theme="dark"] .lp-btn-outline {
+  color: #E2E8F0 !important;
+  border-color: rgba(255, 255, 255, 0.3) !important;
+}
+[data-theme="dark"] .lp-btn-outline:hover {
+  background: rgba(255, 255, 255, 0.1) !important;
+}
+
+[data-theme="dark"] .lp-filter-btn {
+  background: rgba(30, 41, 59, 0.8) !important;
+  color: #CBD5E1 !important;
+  border-color: rgba(255, 255, 255, 0.15) !important;
+}
+[data-theme="dark"] .lp-filter-btn:hover {
+  background: rgba(51, 65, 85, 0.9) !important;
+  color: #FFFFFF !important;
+}
+
+[data-theme="dark"] .lp-ab-link {
+  background: rgba(30, 41, 59, 0.8) !important;
+  color: #60A5FA !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+[data-theme="dark"] .lp-ab-link:hover {
+  background: rgba(51, 65, 85, 0.9) !important;
+  color: #FFFFFF !important;
+}
+
+[data-theme="dark"] .lp-ab-badge {
+  background: rgba(59, 130, 246, 0.18) !important;
+  color: #60A5FA !important;
+  border: none !important;
+}
+
+/* ── Hero Canvas, Mockup & Curva inferior en Modo Oscuro ── */
+[data-theme="dark"] .lp-hero-canvas {
+  background: rgba(15, 23, 42, 0.8) !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+}
+
+[data-theme="dark"] .lp-filter-extension {
+  background: rgba(15, 23, 42, 0.95) !important;
+  border-top: none !important;
+  border-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+/* Curva / Onda inferior derecha en Modo Oscuro (Soluciona el parche claro) */
+[data-theme="dark"] .lp-filter-extension::before {
+  background: radial-gradient(circle at 0 100%, transparent 40px, #0F172A 40.5px) !important;
+}
+
+[data-theme="dark"] .lp-float-pill,
+[data-theme="dark"] .lp-ortho-card,
+[data-theme="dark"] .lp-plan-card {
+  background: #0F172A !important;
+  border: 1px solid rgba(59, 130, 246, 0.3) !important;
+  color: #E2E8F0 !important;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.6) !important;
+}
+
+/* Elementos internos del Mockup Hero */
+[data-theme="dark"] .lp-ortho-consult {
+  background: #1E293B !important;
+  color: #94A3B8 !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+}
+
+[data-theme="dark"] .lp-ortho-days {
+  background: #1E293B !important;
+  color: #94A3B8 !important;
+}
+
+[data-theme="dark"] .lp-float-circle-small {
+  background: #334155 !important;
+  box-shadow: 0 0 0 10px #0F172A !important;
+}
+
+[data-theme="dark"] .lp-float-circle,
+[data-theme="dark"] .lp-doc-av,
+[data-theme="dark"] .lp-ortho-icon,
+[data-theme="dark"] .lp-plan-img {
+  background: #1E293B !important;
+  border-color: rgba(255, 255, 255, 0.2) !important;
+}
+
+[data-theme="dark"] .lp-float-line,
+[data-theme="dark"] .lp-plan-divider {
+  background: rgba(255, 255, 255, 0.15) !important;
+}
+
+/* ── Barra de Estadísticas (Stats strip) en Modo Oscuro ── */
+[data-theme="dark"] .lp-stats {
+  background: rgba(11, 15, 25, 0.95) !important;
+  border-top: none !important;
+  border-bottom: none !important;
+}
+
+/* ── Bloque Sobre el Proyecto (About block) en Modo Oscuro ── */
+[data-theme="dark"] .lp-about-block {
+  background: transparent !important;
+  border-bottom: none !important;
+  padding: 40px 48px 80px !important;
+}
+
+[data-theme="dark"] .lp-ab-container {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+}
+
+[data-theme="dark"] .lp-ab-stat-icon {
+  background: #1E293B !important;
+  border: none !important;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4) !important;
+}
+
+[data-theme="dark"] .lp-ab-logo-box {
+  background: rgba(17, 24, 39, 0.8) !important;
+  border: none !important;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4) !important;
+}
+
+/* ── Secciones, Cards y Conservación del Color de Marca ── */
+[data-theme="dark"] .lp-equipo-card,
+[data-theme="dark"] .lp-feature-card,
+[data-theme="dark"] .lp-met-card,
+[data-theme="dark"] .lp-tec-item,
+[data-theme="dark"] .proy-card,
+[data-theme="dark"] .proy-agent-card,
+[data-theme="dark"] .form-step-container,
+[data-theme="dark"] .cronograma-tab-container,
+[data-theme="dark"] .dash-card,
+[data-theme="dark"] .casos-card,
+[data-theme="dark"] .bib-card,
+[data-theme="dark"] .form-category-block,
+[data-theme="dark"] .netflix-profile-card,
+[data-theme="dark"] .lp-insight,
+[data-theme="dark"] .lp-about {
+  background: rgba(17, 24, 39, 0.8) !important;
+  border-color: rgba(255, 255, 255, 0.1) !important;
+  color: #E2E8F0 !important;
+}
+
+/* Mantener el acento de color superior, sombra sutil y resplandor suave tenue con el cursor */
+.lp-equipo-card {
+  position: relative;
+  overflow: hidden;
+  padding: 30px 18px 28px !important;
+  min-height: auto !important;
+  transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.35s cubic-bezier(0.4, 0, 0.2, 1), border-color 0.35s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+.lp-equipo-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: radial-gradient(
+    280px circle at var(--mouse-x, 50%) var(--mouse-y, 50%),
+    color-mix(in srgb, var(--dev-color) 10%, transparent),
+    transparent 80%
+  );
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.lp-equipo-card:hover::before {
+  opacity: 1;
+}
+
+.lp-equipo-card > * {
+  position: relative;
+  z-index: 1;
+}
+
+.lp-equipo-card:hover,
+[data-theme="dark"] .lp-equipo-card:hover,
+[data-theme="light"] .lp-equipo-card:hover {
+  transform: translateY(-6px) !important;
+  border-color: color-mix(in srgb, var(--dev-color) 35%, transparent) !important;
+  box-shadow: 0 12px 28px -8px color-mix(in srgb, var(--dev-color) 12%, transparent),
+              0 2px 8px -2px color-mix(in srgb, var(--dev-color) 8%, transparent) !important;
+}
+
+[data-theme="dark"] .lp-equipo-card {
+  border-top-width: 4px !important;
+  border-top-style: solid !important;
+}
+
+/* ── Navbar Header en Modo Oscuro (Sin Fondo / Transparente) ── */
+[data-theme="dark"] .lp-nav {
+  background: transparent !important;
+  border-bottom: none !important;
+  box-shadow: none !important;
+}
+
+/* ── Botón Flotante en Modo Oscuro ── */
+[data-theme="dark"] .theme-toggle-floating-btn {
+  background: rgba(17, 24, 39, 0.95);
+  color: #FBBF24;
+  border: 1px solid rgba(251, 191, 36, 0.4);
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.6), 0 0 15px rgba(251, 191, 36, 0.2);
+}
+
+/* ══════════════════════════════════════════════════════════════
+   2. MODO CLARO
+   ══════════════════════════════════════════════════════════════ */
+[data-theme="light"] {
+  --bg: #F8FAFC !important;
+  --surface: #FFFFFF !important;
+  --surface2: #F1F5F9 !important;
+  --ink: #0F172A !important;
+  --ink2: #334155 !important;
+  --ink3: #64748B !important;
+  --border: #E2E8F0 !important;
+}
+
+[data-theme="light"] body,
+[data-theme="light"] .lp-root,
+[data-theme="light"] .desarrollo-container,
+[data-theme="light"] .dash-root,
+[data-theme="light"] .casos-page-container,
+[data-theme="light"] .hist-page-container,
+[data-theme="light"] .bib-page-container,
+[data-theme="light"] .anat-page-container,
+[data-theme="light"] .proy-web-root {
+  background-color: #F8FAFC !important;
+  color: #0F172A !important;
+}
+
+/* Títulos y Texto en Modo Claro */
+[data-theme="light"] h1,
+[data-theme="light"] h2,
+[data-theme="light"] h3,
+[data-theme="light"] h4,
+[data-theme="light"] h5,
+[data-theme="light"] h6,
+[data-theme="light"] .lp-hero-giant-title,
+[data-theme="light"] .lp-sec-title,
+[data-theme="light"] .lp-equipo-title,
+[data-theme="light"] .proy-hero-title,
+[data-theme="light"] .proy-sec-title,
+[data-theme="light"] .dash-header-title,
+[data-theme="light"] .dash-doc-header h1,
+[data-theme="light"] .netflix-title,
+[data-theme="light"] .card-title,
+[data-theme="light"] .lp-ortho-title,
+[data-theme="light"] .lp-dr-name,
+[data-theme="light"] .lp-stat-n,
+[data-theme="light"] .lp-ab-quote,
+[data-theme="light"] .lp-ab-stat-val,
+[data-theme="light"] .lp-equipo-card-name,
+[data-theme="light"] .lp-logo {
+  color: #0F172A !important;
+}
+
+[data-theme="light"] p,
+[data-theme="light"] label,
+[data-theme="light"] .lp-sec-subtitle,
+[data-theme="light"] .netflix-subtitle,
+[data-theme="light"] .lp-hero-top-text,
+[data-theme="light"] .lp-stat-l,
+[data-theme="light"] .lp-ab-stat-label,
+[data-theme="light"] .lp-ab-logos-header {
+  color: #475569 !important;
+}
+
+[data-theme="light"] .lp-navlink {
+  color: #1E293B !important;
+}
+
+/* Logo en Modo Claro */
+[data-theme="light"] .lp-logo-img,
+[data-theme="light"] img[alt="Clerkship"],
+[data-theme="light"] .sb-logo-img,
+[data-theme="light"] .logo-img,
+[data-theme="light"] .lp-ab-logo-img {
+  filter: none !important;
+}
+
+[data-theme="light"] .lp-hero-canvas {
+  background: #E3F2FD !important;
+}
+
+[data-theme="light"] .lp-filter-extension {
+  background: #E3F2FD !important;
+  border-color: transparent !important;
+}
+
+[data-theme="light"] .lp-filter-extension::before {
+  background: radial-gradient(circle at 0 100%, transparent 40px, #E3F2FD 40.5px) !important;
+}
+
+[data-theme="light"] .lp-float-pill,
+[data-theme="light"] .lp-ortho-card,
+[data-theme="light"] .lp-plan-card {
+  background: rgba(255, 255, 255, 0.95) !important;
+  border-color: #E2E8F0 !important;
+  color: #0F172A !important;
+}
+
+[data-theme="light"] .lp-stats {
+  background: #FFFFFF !important;
+  border-top: none !important;
+  border-bottom: none !important;
+}
+
+[data-theme="light"] .lp-about-block {
+  background: transparent !important;
+  border-bottom: none !important;
+  padding: 40px 48px 80px !important;
+}
+
+[data-theme="light"] .lp-ab-container {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+}
+
+[data-theme="light"] .lp-ab-stat-icon {
+  background: #FFFFFF !important;
+  border: none !important;
+}
+
+[data-theme="light"] .lp-ab-link {
+  background: #FFFFFF !important;
+  color: #0F172A !important;
+  border: none !important;
+}
+
+[data-theme="light"] .lp-equipo-card {
+  background: #FFFFFF !important;
+  border: 1px solid #E2E8F0 !important;
+  border-top-width: 4px !important;
+  border-top-style: solid !important;
+  box-shadow: 0 12px 32px rgba(15, 23, 42, 0.08), 0 2px 6px rgba(0, 0, 0, 0.03) !important;
+}
+
+[data-theme="light"] .lp-feature-card,
+[data-theme="light"] .lp-met-card,
+[data-theme="light"] .lp-tec-item,
+[data-theme="light"] .lp-ab-logo-box {
+  background: #FFFFFF !important;
+  border: none !important;
+}
+[data-theme="light"] .proy-card,
+[data-theme="light"] .proy-agent-card,
+[data-theme="light"] .form-step-container,
+[data-theme="light"] .cronograma-tab-container,
+[data-theme="light"] .dash-card,
+[data-theme="light"] .casos-card,
+[data-theme="light"] .bib-card,
+[data-theme="light"] .form-category-block,
+[data-theme="light"] .netflix-profile-card {
+  background: #FFFFFF !important;
+  border-color: #E2E8F0 !important;
+  color: #0F172A !important;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06) !important;
+}
+
+[data-theme="light"] .form-input,
+[data-theme="light"] .form-select,
+[data-theme="light"] .form-textarea,
+[data-theme="light"] .checkbox-custom-input {
+  background: #FFFFFF !important;
+  border-color: #CBD5E1 !important;
+  color: #0F172A !important;
+}
+
+[data-theme="light"] .checkbox-pill-label {
+  background: #F1F5F9 !important;
+  border-color: #E2E8F0 !important;
+  color: #334155 !important;
+}
+
+[data-theme="light"] .checkbox-pill-label.checked {
+  background: #E0F2FE !important;
+  border-color: #0284C7 !important;
+  color: #0369A1 !important;
+}
+
+/* Navbar en Modo Claro (Sin Fondo / Transparente) */
+[data-theme="light"] .lp-nav {
+  background: transparent !important;
+  border-bottom: none !important;
+  box-shadow: none !important;
+}
+
+/* Floating button in Light Mode */
+[data-theme="light"] .theme-toggle-floating-btn {
+  background: #FFFFFF;
+  color: #4F46E5;
+  border: 1px solid rgba(79, 70, 229, 0.3);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+}
+
+[data-theme="dark"] .lp-top-right-arrow {
+  background: #1E3A8A !important;
+  color: #93C5FD !important;
+}
+
+/* --- Metodologia & Proyecto Cards --- */
+[data-theme="dark"] .lp-met-inner-wrap { background: #0B0F19 !important; }
+[data-theme="dark"] .lp-met-wave-path { fill: #0B0F19 !important; }
+[data-theme="dark"] .lp-met-line-wrap { background: #334155 !important; }
+[data-theme="dark"] .lp-met-line-progress { background: #60A5FA !important; }
+[data-theme="dark"] .lp-met-node { background: #1E293B !important; border-color: #334155 !important; color: #94A3B8 !important; }
+[data-theme="dark"] .lp-met-node[data-past="true"] { background: #1D4ED8 !important; border-color: #1D4ED8 !important; color: #FFFFFF !important; }
+[data-theme="dark"] .lp-met-node[data-active="true"] { background: #3B82F6 !important; border-color: #2563EB !important; box-shadow: 0 0 0 8px rgba(59, 130, 246, 0.15) !important; color: #FFFFFF !important; }
+[data-theme="dark"] .lp-met-label { color: #94A3B8 !important; }
+[data-theme="dark"] .lp-met-label[data-active="true"] { color: #60A5FA !important; }
+[data-theme="dark"] .lp-met-popover { background: #0F172A !important; border-color: rgba(255, 255, 255, 0.15) !important; box-shadow: 0 20px 40px rgba(0,0,0,0.5) !important; }
+[data-theme="dark"] .lp-met-popover-h3 { color: #E2E8F0 !important; }
+[data-theme="dark"] .lp-met-popover-p { color: #94A3B8 !important; }
+[data-theme="dark"] .proy-card-clean, [data-theme="dark"] .proy-alert-banner { background: #0F172A !important; border-color: rgba(255, 255, 255, 0.15) !important; box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4) !important; }
+[data-theme="dark"] .proy-alert-icon { color: #60A5FA !important; }
+
+[data-theme="dark"] .proy-card-icon-box.blue { background: rgba(59, 130, 246, 0.2) !important; color: #60A5FA !important; }
+[data-theme="dark"] .proy-card-icon-box.darkblue { background: rgba(37, 99, 235, 0.2) !important; color: #3B82F6 !important; }
+[data-theme="dark"] .proy-card-icon-box.cyan { background: rgba(6, 182, 212, 0.2) !important; color: #22D3EE !important; }
+
+[data-theme="dark"] .lp-proyecto-link { background: rgba(30, 41, 59, 0.8) !important; color: #60A5FA !important; border-color: rgba(255, 255, 255, 0.15) !important; }
+[data-theme="dark"] .lp-proyecto-link:hover { background: rgba(51, 65, 85, 0.9) !important; color: #FFFFFF !important; }
+
+/* --- Team Skill Tags & Initials Pills (Nubes en Modo Oscuro) --- */
+[data-theme="dark"] .lp-equipo-skill-tag,
+[data-theme="dark"] .lp-equipo-pill,
+[data-theme="dark"] .proy-team-skill,
+[data-theme="dark"] .proy-team-web-skill {
+  background: rgba(30, 41, 59, 0.9) !important;
+  border: 1px solid rgba(255, 255, 255, 0.15) !important;
+  color: #CBD5E1 !important;
+  box-shadow: none !important;
+}
+
+[data-theme="dark"] .lp-equipo-skill-tag:hover {
+  background: rgba(51, 65, 85, 0.95) !important;
+  color: #E2E8F0 !important;
+  border-color: rgba(255, 255, 255, 0.3) !important;
+}
+
+[data-theme="dark"] .lp-equipo-initials {
+  color: #E2E8F0 !important;
+}
+
+/* --- Tecnologia Section (3-Column Architecture Cards) --- */
+[data-theme="dark"] .lp-tec-main-title-img { color: #E2E8F0 !important; }
+[data-theme="dark"] .lp-tec-main-desc-img { color: #94A3B8 !important; }
+[data-theme="dark"] .lp-tec-blog-label { color: #E2E8F0 !important; }
+
+[data-theme="dark"] .lp-tec-img-card {
+  background: rgba(15, 23, 42, 0.9) !important;
+  border: 1px solid rgba(255, 255, 255, 0.12) !important;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.5) !important;
+}
+
+[data-theme="dark"] .lp-tec-pill-btn,
+[data-theme="dark"] .lp-tec-circle-btn {
+  background: rgba(30, 41, 59, 0.9) !important;
+  border: 1px solid rgba(255, 255, 255, 0.15) !important;
+  color: #CBD5E1 !important;
+  box-shadow: none !important;
+}
+
+[data-theme="dark"] .lp-tec-pill-btn:hover,
+[data-theme="dark"] .lp-tec-circle-btn:hover {
+  background: rgba(51, 65, 85, 0.95) !important;
+  color: #FFFFFF !important;
+  border-color: rgba(255, 255, 255, 0.3) !important;
+}
+
+[data-theme="dark"] .lp-tec-outline-btn {
+  border: 1.5px solid #60A5FA !important;
+  color: #60A5FA !important;
+  background: rgba(30, 41, 59, 0.6) !important;
+}
+[data-theme="dark"] .lp-tec-outline-btn:hover {
+  background: #3B82F6 !important;
+  color: #FFFFFF !important;
+}
+
+/* ══════════════════════════════════════════════════════════════
+   PROYECTO PAGE (/proyecto) — CLERKSHIP THEME OVERRIDES
+   ══════════════════════════════════════════════════════════════ */
+
+/* Modo Oscuro — Pestaña /proyecto */
+[data-theme="dark"] .proy-hero-title { color: #E2E8F0 !important; }
+[data-theme="dark"] .proy-hero-desc { color: #94A3B8 !important; }
+[data-theme="dark"] .proy-hero-badge {
+  background: rgba(30, 41, 59, 0.8) !important;
+  border-color: rgba(59, 130, 246, 0.4) !important;
+  color: #60A5FA !important;
+}
+
+[data-theme="dark"] .proy-metric-card,
+[data-theme="dark"] .proy-card-clean,
+[data-theme="dark"] .proy-alert-banner,
+[data-theme="dark"] .proy-gen-obj-box,
+[data-theme="dark"] .proy-spec-obj-card,
+[data-theme="dark"] .proy-agent-card,
+[data-theme="dark"] .proy-trl-banner,
+[data-theme="dark"] .proy-ref-card {
+  background: rgba(15, 23, 42, 0.9) !important;
+  border: 1px solid rgba(255, 255, 255, 0.12) !important;
+  color: #E2E8F0 !important;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5) !important;
+}
+
+[data-theme="dark"] .proy-ref-badge {
+  background: rgba(30, 41, 59, 0.9) !important;
+  color: #60A5FA !important;
+  border: 1px solid rgba(255, 255, 255, 0.12) !important;
+}
+
+[data-theme="dark"] .proy-ref-authors {
+  color: #E2E8F0 !important;
+}
+
+[data-theme="dark"] .proy-ref-title {
+  color: #CBD5E1 !important;
+}
+
+[data-theme="dark"] .proy-ref-where {
+  color: #94A3B8 !important;
+}
+
+[data-theme="dark"] .proy-metric-label,
+[data-theme="dark"] .proy-card-h3,
+[data-theme="dark"] .proy-alert-h4,
+[data-theme="dark"] .proy-gen-obj-text,
+[data-theme="dark"] .proy-spec-h4,
+[data-theme="dark"] .proy-agent-title,
+[data-theme="dark"] .proy-trl-title {
+  color: #E2E8F0 !important;
+}
+
+[data-theme="dark"] .proy-metric-sub,
+[data-theme="dark"] .proy-card-p,
+[data-theme="dark"] .proy-alert-p,
+[data-theme="dark"] .proy-spec-p,
+[data-theme="dark"] .proy-agent-desc,
+[data-theme="dark"] .proy-budget-ul li,
+[data-theme="dark"] .proy-agent-num {
+  color: #94A3B8 !important;
+}
+
+[data-theme="dark"] .proy-tab-btn {
+  background: rgba(30, 41, 59, 0.8) !important;
+  border-color: rgba(255, 255, 255, 0.15) !important;
+  color: #94A3B8 !important;
+}
+[data-theme="dark"] .proy-tab-btn.active {
+  background: #1D4ED8 !important;
+  border-color: #2563EB !important;
+  color: #FFFFFF !important;
+}
+
+[data-theme="dark"] .proy-chip {
+  background: rgba(30, 41, 59, 0.8) !important;
+  color: #60A5FA !important;
+  border: 1px solid rgba(255, 255, 255, 0.15) !important;
+}
+
+[data-theme="dark"] .proy-spec-num {
+  background: rgba(30, 41, 59, 0.9) !important;
+  color: #60A5FA !important;
+}
+
+/* Modo Claro — Pestaña /proyecto */
+[data-theme="light"] .proy-hero-title { color: #0F172A !important; }
+[data-theme="light"] .proy-hero-desc { color: #475569 !important; }
+[data-theme="light"] .proy-metric-card,
+[data-theme="light"] .proy-card-clean,
+[data-theme="light"] .proy-alert-banner,
+[data-theme="light"] .proy-gen-obj-box,
+[data-theme="light"] .proy-spec-obj-card,
+[data-theme="light"] .proy-agent-card,
+[data-theme="light"] .proy-trl-banner,
+[data-theme="light"] .proy-ref-card {
+  background: #FFFFFF !important;
+  border: 1px solid #E2E8F0 !important;
+  color: #0F172A !important;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04) !important;
+}
+
+/* ══════════════════════════════════════════════════════════════
+   Hipótesis Card — Alto Contraste de Texto Blanco en Modo Claro y Oscuro
+   ══════════════════════════════════════════════════════════════ */
+.proy-hypothesis-card,
+[data-theme="light"] .proy-hypothesis-card,
+[data-theme="dark"] .proy-hypothesis-card {
+  background: linear-gradient(135deg, #0D47A1 0%, #1565C0 100%) !important;
+  color: #FFFFFF !important;
+  box-shadow: 0 20px 50px rgba(13, 71, 161, 0.25) !important;
+}
+
+.proy-hypothesis-card .proy-hyp-badge,
+[data-theme="light"] .proy-hypothesis-card .proy-hyp-badge,
+[data-theme="dark"] .proy-hypothesis-card .proy-hyp-badge {
+  background: rgba(255, 255, 255, 0.18) !important;
+  color: #FFFFFF !important;
+}
+
+.proy-hypothesis-card .proy-hyp-q,
+[data-theme="light"] .proy-hypothesis-card .proy-hyp-q,
+[data-theme="dark"] .proy-hypothesis-card .proy-hyp-q {
+  color: #FFFFFF !important;
+}
+
+.proy-hypothesis-card .proy-hyp-tag,
+[data-theme="light"] .proy-hypothesis-card .proy-hyp-tag,
+[data-theme="dark"] .proy-hypothesis-card .proy-hyp-tag {
+  color: #90CAF9 !important;
+}
+
+.proy-hypothesis-card .proy-hyp-p,
+[data-theme="light"] .proy-hypothesis-card .proy-hyp-p,
+[data-theme="dark"] .proy-hypothesis-card .proy-hyp-p {
+  color: #E3F2FD !important;
+}
+
+/* ══════════════════════════════════════════════════════════════
+   Tarjeta Destacada de Presupuesto (.proy-card-highlight)
+   ══════════════════════════════════════════════════════════════ */
+.proy-card-highlight,
+[data-theme="light"] .proy-card-highlight,
+[data-theme="dark"] .proy-card-highlight {
+  background: linear-gradient(135deg, #1976D2 0%, #0D47A1 100%) !important;
+  color: #FFFFFF !important;
+  border: none !important;
+  box-shadow: 0 12px 30px rgba(25, 118, 210, 0.25) !important;
+}
+
+.proy-card-highlight .proy-card-h3,
+.proy-card-highlight .proy-bicon,
+[data-theme="light"] .proy-card-highlight .proy-card-h3,
+[data-theme="light"] .proy-card-highlight .proy-bicon,
+[data-theme="dark"] .proy-card-highlight .proy-card-h3,
+[data-theme="dark"] .proy-card-highlight .proy-bicon {
+  color: #FFFFFF !important;
+}
+
+.proy-card-highlight .proy-budget-ul li,
+[data-theme="light"] .proy-card-highlight .proy-budget-ul li,
+[data-theme="dark"] .proy-card-highlight .proy-budget-ul li {
+  color: #E2E8F0 !important;
+}
+
+/* ══════════════════════════════════════════════════════════════
+   Sección de Olas de Lateral a Lateral (100% Ancho Completo Sin Bordes)
+   ══════════════════════════════════════════════════════════════ */
+.lp-met-wave-section {
+  width: 100% !important;
+  max-width: 100% !important;
+  margin: 60px 0 !important;
+  padding: 0 !important;
+}
+
+.lp-met-inner-wrap {
+  width: 100% !important;
+  max-width: 100% !important;
+  border-radius: 0 !important;
+  padding: 20px 48px 80px !important;
+  margin: 0 !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+}
+
+.lp-met-wave-top,
+.lp-met-wave-bottom,
+.lp-met-wave-top svg,
+.lp-met-wave-bottom svg {
+  width: 100% !important;
+  max-width: 100% !important;
+}
+
+/* ══════════════════════════════════════════════════════════════
+   Pestaña /proyecto — 100% Ancho Completo Esquina a Esquina
+   ══════════════════════════════════════════════════════════════ */
+.proy-web-root {
+  width: 100% !important;
+  max-width: 100% !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  overflow-x: hidden;
+}
+
+.proy-hero-section,
+.proy-sec-container,
+.proy-metrics-container,
+.lp-sec-wrap,
+.lp-ab-container {
+  width: 100% !important;
+  max-width: 100% !important;
+  margin-left: 0 !important;
+  margin-right: 0 !important;
+  padding-left: 48px !important;
+  padding-right: 48px !important;
+}
+
+.lp-met-wave-section {
+  width: 100% !important;
+  max-width: 100% !important;
+  margin: 60px 0 !important;
+  padding: 0 !important;
+}
+
+.lp-met-inner-wrap {
+  width: 100% !important;
+  max-width: 100% !important;
+  border-radius: 0 !important;
+  padding: 20px 48px 80px !important;
+  margin: 0 !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+}
+
+.lp-met-wave-top,
+.lp-met-wave-bottom,
+.lp-met-wave-top svg,
+.lp-met-wave-bottom svg {
+  width: 100% !important;
+  max-width: 100% !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+.lp-sec-header {
+  width: 100% !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  text-align: center !important;
+}
+
+.lp-sec-desc {
+  margin-left: auto !important;
+  margin-right: auto !important;
+  text-align: center !important;
+  max-width: 680px !important;
+}
+
+.proy-grid-3,
+.proy-grid-2,
+.proy-agent-pipeline-grid,
+.proy-trl-banner,
+.proy-refs-grid,
+.lp-equipo-cards {
+  width: 100% !important;
+  max-width: 100% !important;
+  margin-left: 0 !important;
+  margin-right: 0 !important;
+}
