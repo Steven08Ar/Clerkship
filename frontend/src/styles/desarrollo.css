@@ -820,17 +820,28 @@
 
   .desarrollo-header-title-box {
     flex-direction: column;
-    align-items: flex-start;
+    align-items: center !important;
+    text-align: center !important;
     gap: 12px;
     margin-bottom: 14px;
   }
 
+  .desarrollo-title-wrap {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    text-align: center !important;
+  }
+
   .desarrollo-title-wrap h1 {
     font-size: 20px;
+    text-align: center !important;
+    justify-content: center !important;
   }
 
   .desarrollo-title-wrap p {
     font-size: 12px;
+    text-align: center !important;
   }
 
   /* Pestañas de Navegación con Scroll Horizontal Suave */

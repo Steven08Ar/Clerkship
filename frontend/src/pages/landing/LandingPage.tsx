@@ -2,7 +2,8 @@ import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   ClipboardList, PenTool, Code, CheckCircle, Settings,
-  BrainCircuit, Database, FileText, Network, Sparkles, Layout, Cloud
+  BrainCircuit, Database, FileText, Network, Sparkles, Layout, Cloud,
+  ChevronLeft, ChevronRight
 } from 'lucide-react';
 import InteractiveBackgroundCanvas from '../../components/shared/InteractiveBackgroundCanvas';
 
@@ -329,104 +330,95 @@ export default function LandingPage() {
           </div>
 
           {/* Animated Timeline */}
-          <div className="lp-met-timeline">
-            
-            {/* Background Line Wrapper */}
-            <div className="lp-met-line-wrap" style={{ position: 'absolute', top: '63px', left: '24px', right: '24px', height: '2px', zIndex: 0 }}>
-              {/* Animated Progress Line */}
-              <motion.div 
-                className="lp-met-line-progress"
-                style={{ position: 'absolute', top: '0', left: '0', bottom: '0', zIndex: 1 }}
-                animate={{ width: `${(activeMetStep / (MET_STEPS.length - 1)) * 100}%` }}
-                transition={{ duration: 0.6, ease: 'easeInOut' }}
-              />
-            </div>
+          <div className="lp-met-timeline-container">
+            {/* Timeline Steps Bar */}
+            <div className="lp-met-steps-row">
+              {/* Background Line Wrapper */}
+              <div className="lp-met-line-wrap">
+                {/* Animated Progress Line */}
+                <motion.div
+                  className="lp-met-line-progress"
+                  animate={{ width: `${(activeMetStep / (MET_STEPS.length - 1)) * 100}%` }}
+                  transition={{ duration: 0.6, ease: 'easeInOut' }}
+                />
+              </div>
 
-            {MET_STEPS.map((step, index) => {
-              const isActive = activeMetStep === index;
-              const isPast = activeMetStep >= index;
+              {MET_STEPS.map((step, index) => {
+                const isActive = activeMetStep === index;
+                const isPast = activeMetStep >= index;
 
-              return (
-                <div 
-                  key={step.id} 
-                  style={{ 
-                    display: 'flex', 
-                    flexDirection: 'column', 
-                    alignItems: 'center', 
-                    position: 'relative',
-                    zIndex: 2,
-                    width: '120px'
-                  }}
-                >
-                  {/* Node Circle */}
-                  <motion.div
-                    className="lp-met-node"
-                    data-active={isActive}
-                    data-past={isPast}
-                    style={{
-                      width: '48px',
-                      height: '48px',
-                      borderRadius: '50%',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      cursor: 'pointer'
-                    }}
-                    animate={{
-                      scale: isActive ? 1.15 : 1,
-                    }}
-                    transition={{ type: 'spring', stiffness: 300, damping: 20 }}
+                return (
+                  <div
+                    key={step.id}
+                    className={`lp-met-step-col${isActive ? ' active' : ''}`}
                     onClick={() => handleMetStepClick(index)}
                   >
-                    <step.Icon size={20} strokeWidth={isActive ? 2.5 : 2} />
-                  </motion.div>
+                    {/* Node Circle */}
+                    <motion.div
+                      className="lp-met-node"
+                      data-active={isActive}
+                      data-past={isPast}
+                      animate={{ scale: isActive ? 1.15 : 1 }}
+                      transition={{ type: 'spring', stiffness: 300, damping: 20 }}
+                    >
+                      <step.Icon size={20} strokeWidth={isActive ? 2.5 : 2} />
+                    </motion.div>
 
-                  {/* Node Label */}
-                  <div className="lp-met-label" data-active={isActive} style={{ marginTop: '16px', fontWeight: isActive ? 700 : 600, fontSize: '0.85rem', transition: 'all 0.3s' }}>
-                    {step.title}
+                    {/* Node Label */}
+                    <div className="lp-met-label" data-active={isActive}>
+                      {step.title}
+                    </div>
                   </div>
+                );
+              })}
+            </div>
 
-                  {/* Popover Card */}
-                  <div style={{ 
-                    position: 'absolute', 
-                    top: '100px', 
-                    left: '50%', 
-                    transform: index === 0 ? 'translateX(0)' : index === MET_STEPS.length - 1 ? 'translateX(-100%)' : 'translateX(-50%)', 
-                    width: '280px',
-                    display: 'flex', 
-                    justifyContent: index === 0 ? 'flex-start' : index === MET_STEPS.length - 1 ? 'flex-end' : 'center',
-                    pointerEvents: isActive ? 'auto' : 'none',
-                    marginLeft: index === 0 ? '-24px' : index === MET_STEPS.length - 1 ? '24px' : '0',
-                  }}>
-                    <AnimatePresence>
-                      {isActive && (
-                        <motion.div
-                          className="lp-met-popover"
-                          initial={{ opacity: 0, y: 10 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          exit={{ opacity: 0, y: -10 }}
-                          transition={{ duration: 0.3 }}
-                          style={{
-                            padding: '24px',
-                            borderRadius: '16px',
-                            width: '100%',
-                            textAlign: 'left',
-                            position: 'relative'
-                          }}
-                        >
-                          <h3 className="lp-met-popover-h3" style={{ fontSize: '1.05rem', fontWeight: 800, marginBottom: '8px' }}>
-                            {step.title}
-                          </h3>
-                          <p className="lp-met-popover-p" style={{ fontSize: '0.85rem', lineHeight: 1.6, margin: 0 }}>
-                            {step.desc}
-                          </p>
-                        </motion.div>
-                      )}
-                    </AnimatePresence>
+            {/* Active Card Container (Dedicated block below steps, 0% overlap!) */}
+            <div className="lp-met-active-card-wrap">
+              <AnimatePresence mode="wait">
+                <motion.div
+                  key={activeMetStep}
+                  className="lp-met-popover"
+                  initial={{ opacity: 0, y: 12 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -12 }}
+                  transition={{ duration: 0.25 }}
+                >
+                  <div className="lp-met-card-header-row">
+                    <span className="lp-met-card-header-badge">
+                      Paso {activeMetStep + 1} de {MET_STEPS.length}
+                    </span>
+
+                    <div className="lp-met-nav-controls">
+                      <button
+                        className="lp-met-nav-btn"
+                        onClick={() => handleMetStepClick(Math.max(0, activeMetStep - 1))}
+                        disabled={activeMetStep === 0}
+                        aria-label="Paso anterior"
+                        type="button"
+                      >
+                        <ChevronLeft size={16} />
+                      </button>
+                      <button
+                        className="lp-met-nav-btn"
+                        onClick={() => handleMetStepClick(Math.min(MET_STEPS.length - 1, activeMetStep + 1))}
+                        disabled={activeMetStep === MET_STEPS.length - 1}
+                        aria-label="Paso siguiente"
+                        type="button"
+                      >
+                        <ChevronRight size={16} />
+                      </button>
+                    </div>
                   </div>
-                </div>
-              );
-            })}
+                  <h3 className="lp-met-popover-h3">
+                    {MET_STEPS[activeMetStep].title}
+                  </h3>
+                  <p className="lp-met-popover-p">
+                    {MET_STEPS[activeMetStep].desc}
+                  </p>
+                </motion.div>
+              </AnimatePresence>
+            </div>
           </div>
         </div>
 
