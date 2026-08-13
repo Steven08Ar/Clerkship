@@ -810,6 +810,97 @@
 }
 
 /* ══════════════════════════════════════════════════════════════
+   RESPONSIVIDAD DE PESTAÑAS (DESARROLLO, CRONOGRAMA, REPOSITORIO)
+   ══════════════════════════════════════════════════════════════ */
+@media (max-width: 768px) {
+  /* Header Principal de Desarrollo */
+  .desarrollo-header {
+    padding: 16px 16px 0 16px;
+  }
+
+  .desarrollo-header-title-box {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+    margin-bottom: 14px;
+  }
+
+  .desarrollo-title-wrap h1 {
+    font-size: 20px;
+  }
+
+  .desarrollo-title-wrap p {
+    font-size: 12px;
+  }
+
+  /* Pestañas de Navegación con Scroll Horizontal Suave */
+  .desarrollo-nav-tabs {
+    overflow-x: auto;
+    overflow-y: hidden;
+    white-space: nowrap;
+    -webkit-overflow-scrolling: touch;
+    width: 100%;
+    padding-bottom: 4px;
+  }
+
+  .desarrollo-tab-btn {
+    padding: 10px 14px;
+    font-size: 13px;
+    flex-shrink: 0;
+  }
+
+  .desarrollo-body {
+    padding: 20px 12px;
+  }
+
+  /* Toolbar de Cronograma */
+  .crono-top-toolbar {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+  }
+
+  .crono-dd-wrap {
+    width: 100%;
+  }
+
+  .crono-dd-trigger {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .crono-dd-menu {
+    width: 100% !important;
+    left: 0 !important;
+    right: 0 !important;
+  }
+
+  /* Repositorio Tab */
+  .repo-header-actions {
+    flex-direction: column;
+    gap: 10px;
+    align-items: stretch;
+  }
+
+  .repo-commit-item {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  .repo-commit-actions {
+    width: 100%;
+    justify-content: flex-end;
+  }
+
+  /* Gantt Table Overflow */
+  .crono-table-overflow {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+}
+
+/* ══════════════════════════════════════════════════════════════
    TAB DE CRONOGRAMA (PLACEHOLDER DE CRONOGRAMA)
    ══════════════════════════════════════════════════════════════ */
 .cronograma-tab-container {
