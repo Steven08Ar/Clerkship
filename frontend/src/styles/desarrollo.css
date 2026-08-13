@@ -2853,7 +2853,8 @@
 }
 
 .dev-auth-select,
-.dev-auth-input {
+.dev-auth-input,
+.crono-verify-input {
   width: 100%;
   box-sizing: border-box;
   background: #F8FAFC;
@@ -2869,13 +2870,15 @@
 }
 
 .dev-auth-select:focus,
-.dev-auth-input:focus {
+.dev-auth-input:focus,
+.crono-verify-input:focus {
   border-color: #3B82F6;
   box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
 }
 
 [data-theme="dark"] .dev-auth-select,
-[data-theme="dark"] .dev-auth-input {
+[data-theme="dark"] .dev-auth-input,
+[data-theme="dark"] .crono-verify-input {
   background: rgba(15, 23, 42, 0.9) !important;
   border-color: rgba(255, 255, 255, 0.15) !important;
   color: #F8FAFC !important;
@@ -3599,6 +3602,36 @@
   background: #EF4444;
   color: #FFFFFF !important;
   border-color: #EF4444;
+}
+
+.crono-delete-confirm-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  background: #EF4444 !important;
+  color: #FFFFFF !important;
+  font-family: inherit;
+  font-size: 0.78rem;
+  font-weight: 700;
+  border-radius: 10px;
+  border: none;
+  cursor: pointer;
+  box-shadow: 0 4px 14px rgba(239, 68, 68, 0.35);
+  transition: all 0.2s ease;
+}
+
+.crono-delete-confirm-btn:hover:not(:disabled) {
+  background: #DC2626 !important;
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(220, 38, 38, 0.45);
+}
+
+.crono-delete-confirm-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  transform: none !important;
+  box-shadow: none !important;
 }
 
 .crono-delete-confirm-box {

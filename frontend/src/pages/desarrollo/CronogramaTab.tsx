@@ -978,46 +978,56 @@ export default function CronogramaTab() {
                           </div>
                           <span className={`crono-act-text ${isCompleted ? 'text-completed' : ''}`}>{titleText}</span>
 
-                          {/* Interactive Status Toggle Badge (o Bloqueado para Ulibro) */}
-                          {act.type === 'ulibro' ? (
-                            <span className="crono-status-locked-badge">
-                              <Lock size={12} />
-                              <span>Bloqueado</span>
-                            </span>
-                          ) : (
-                            <button
-                              type="button"
-                              onClick={() => toggleCompleted(act.id)}
-                              className={`crono-status-btn ${isCompleted ? 'completed' : 'pending'}`}
-                              title={isCompleted ? 'Haz clic para marcar como pendiente' : 'Requiere verificación: rama + commit + descripción'}
-                            >
-                              {isCompleted ? (
-                                <>
-                                  <CheckCircle2 size={12} />
-                                  <span>Entregado</span>
-                                </>
-                              ) : (
-                                <>
-                                  <Clock size={12} />
-                                  <span>En progreso</span>
-                                </>
-                              )}
-                            </button>
-                          )}
+                          {/* Columna de Estado: Commit Sha encima de Entregado */}
+                          <div className="crono-status-column" style={{ display: 'inline-flex', flexDirection: 'column', alignItems: 'center', gap: 4, flexShrink: 0 }}>
+                            {evidence && (
+                              <a
+                                href={evidence.htmlUrl}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="crono-evidence-badge"
+                                title={`Evidencia: ${evidence.shortSha} en ${evidence.branch} — ${evidence.message}`}
+                                onClick={(e) => e.stopPropagation()}
+                              >
+                                <GitCommit size={11} />
+                                <span>{evidence.shortSha}</span>
+                              </a>
+                            )}
 
-                          {evidence && (
-                            <a
-                              href={evidence.htmlUrl}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="crono-evidence-badge"
-                              title={`Evidencia: ${evidence.shortSha} en ${evidence.branch} — ${evidence.message}`}
-                              onClick={(e) => e.stopPropagation()}
-                            >
-                              <GitCommit size={11} />
-                              <span>{evidence.shortSha}</span>
-                            </a>
-                          )}
+                            {act.type === 'ulibro' ? (
+                              <span className="crono-status-locked-badge">
+                                <Lock size={12} />
+                                <span>Bloqueado</span>
+                              </span>
+                            ) : (
+                              <button
+                                type="button"
+                                onClick={(e) => {
+                                  if (isCompleted) {
+                                    e.stopPropagation();
+                                    setCursorTooltip({ show: false, x: 0, y: 0, text: '' });
+                                    setDetailsItemKey(itemKey);
+                                  } else {
+                                    toggleCompleted(act.id);
+                                  }
+                                }}
+                                className={`crono-status-btn ${isCompleted ? 'completed' : 'pending'}`}
+                                title={isCompleted ? 'Haz clic para ver detalles de la entrega' : 'Requiere verificación: rama + commit + descripción'}
+                              >
+                                {isCompleted ? (
+                                  <>
+                                    <CheckCircle2 size={12} />
+                                    <span>Entregado</span>
+                                  </>
+                                ) : (
+                                  <>
+                                    <Clock size={12} />
+                                    <span>En progreso</span>
+                                  </>
+                                )}
+                              </button>
+                            )}
+                          </div>
                         </div>
 
                         {/* Timeline Grid (14 columns) */}
@@ -1099,43 +1109,53 @@ export default function CronogramaTab() {
                     </div>
 
                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: 4, flexWrap: 'wrap', gap: 8 }}>
-                      {act.type === 'ulibro' ? (
-                        <span className="crono-status-locked-badge">
-                          <Lock size={12} />
-                          <span>Bloqueado</span>
-                        </span>
-                      ) : (
-                        <button
-                          type="button"
-                          onClick={() => toggleCompleted(act.id)}
-                          className={`crono-status-btn ${isCompleted ? 'completed' : 'pending'}`}
-                        >
-                          {isCompleted ? (
-                            <>
-                              <CheckCircle2 size={12} />
-                              <span>Entregado</span>
-                            </>
-                          ) : (
-                            <>
-                              <Clock size={12} />
-                              <span>En progreso</span>
-                            </>
-                          )}
-                        </button>
-                      )}
+                      <div className="crono-status-column" style={{ display: 'inline-flex', flexDirection: 'column', alignItems: 'flex-start', gap: 4, marginLeft: 'auto' }}>
+                        {evidence && (
+                          <a
+                            href={evidence.htmlUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="crono-evidence-badge"
+                            onClick={(e) => e.stopPropagation()}
+                          >
+                            <GitCommit size={11} />
+                            <span>{evidence.shortSha}</span>
+                          </a>
+                        )}
 
-                      {evidence && (
-                        <a
-                          href={evidence.htmlUrl}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="crono-evidence-badge"
-                          onClick={(e) => e.stopPropagation()}
-                        >
-                          <GitCommit size={11} />
-                          <span>{evidence.shortSha}</span>
-                        </a>
-                      )}
+                        {act.type === 'ulibro' ? (
+                          <span className="crono-status-locked-badge">
+                            <Lock size={12} />
+                            <span>Bloqueado</span>
+                          </span>
+                        ) : (
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              if (isCompleted) {
+                                e.stopPropagation();
+                                setCursorTooltip({ show: false, x: 0, y: 0, text: '' });
+                                setDetailsItemKey(itemKey);
+                              } else {
+                                toggleCompleted(act.id);
+                              }
+                            }}
+                            className={`crono-status-btn ${isCompleted ? 'completed' : 'pending'}`}
+                          >
+                            {isCompleted ? (
+                              <>
+                                <CheckCircle2 size={12} />
+                                <span>Entregado</span>
+                              </>
+                            ) : (
+                              <>
+                                <Clock size={12} />
+                                <span>En progreso</span>
+                              </>
+                            )}
+                          </button>
+                        )}
+                      </div>
                     </div>
                   </div>
                 );
@@ -2215,17 +2235,6 @@ export default function CronogramaTab() {
 
                   <button
                     type="button"
-                    className="crono-cal-nav-btn"
-                    onClick={() => {
-                      setDetailsItemKey(null);
-                      toggleCompleted(dActId);
-                    }}
-                  >
-                    Revertir a Pendiente
-                  </button>
-
-                  <button
-                    type="button"
                     className="crono-verify-confirm-btn"
                     onClick={() => setDetailsItemKey(null)}
                   >
@@ -2313,11 +2322,11 @@ export default function CronogramaTab() {
                     )}
 
                     <div className="crono-verify-field">
-                      <label className="crono-verify-label">Contraseña de {publisherMember?.name.split(' ')[0] || 'Autor'}</label>
-                      <div style={{ position: 'relative' }}>
+                      <label className="crono-verify-label">Contraseña de <strong>{publisherMember?.name.split(' ')[0] || 'Autor'}</strong>:</label>
+                      <div className="password-input-wrap" style={{ marginTop: 6 }}>
                         <input
                           type={editShowPassword ? 'text' : 'password'}
-                          className="crono-verify-input"
+                          className="crono-verify-input dev-auth-input"
                           placeholder="Ingresa la contraseña del autor..."
                           value={editPassword}
                           onChange={(e) => setEditPassword(e.target.value)}
@@ -2325,8 +2334,9 @@ export default function CronogramaTab() {
                         />
                         <button
                           type="button"
-                          className="crono-pwd-toggle-btn"
+                          className="password-toggle-btn"
                           onClick={() => setEditShowPassword((v) => !v)}
+                          tabIndex={-1}
                         >
                           {editShowPassword ? <EyeOff size={15} /> : <Eye size={15} />}
                         </button>
@@ -2544,7 +2554,7 @@ export default function CronogramaTab() {
                       </label>
                       <input
                         type="text"
-                        className="crono-verify-input"
+                        className="crono-verify-input dev-auth-input"
                         placeholder={`Escribe "${eAct?.dateLabel}" para confirmar...`}
                         value={deleteDateInput}
                         onChange={(e) => setDeleteDateInput(e.target.value)}
@@ -2610,8 +2620,7 @@ export default function CronogramaTab() {
 
                       <button
                         type="button"
-                        className="crono-edit-delete-btn"
-                        style={{ backgroundColor: '#EF4444', color: '#FFFFFF' }}
+                        className="crono-delete-confirm-btn"
                         onClick={handleConfirmDelete}
                         disabled={editSubmitting || deleteDateInput.trim().toLowerCase() !== (eAct?.dateLabel || '').trim().toLowerCase()}
                       >
