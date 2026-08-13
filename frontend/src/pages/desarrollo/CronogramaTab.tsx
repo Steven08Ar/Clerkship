@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
-  Calendar, Flag, Clock, Filter, Layers, Eye, ChevronDown, Check,
+  Calendar, Flag, Clock, Filter, Layers, Eye, EyeOff, ChevronDown, Check,
   CheckCircle2, AlertTriangle, Lock,
   ChevronLeft, ChevronRight, X, GitCommit, GitBranch, ShieldCheck
 } from 'lucide-react';
@@ -17,7 +17,6 @@ import { subscribeCuestionarioAnswers } from '../../data/cuestionarioStore';
 import { getReposForCategory } from '../../data/repos';
 import { authenticateMember, authErrorMessage, isFirstLogin, setNewPassword, validateNewPassword } from '../../data/devAuth';
 import { TEAM_MEMBERS } from '../../data/teamData';
-import DevAuthFields from '../../components/shared/DevAuthFields';
 import NewPasswordFields from '../../components/shared/NewPasswordFields';
 
 /* ══════════════════════════════════════════════════════
@@ -342,11 +341,41 @@ export default function CronogramaTab() {
   const [verifyErrorMsg, setVerifyErrorMsg] = useState('');
   const [verifyFormError, setVerifyFormError] = useState('');
   const [verifySubmitting, setVerifySubmitting] = useState(false);
+  // Flujo en 2 Pasos: Paso 1 (profile) -> Autenticación; Paso 2 (details) -> Formulario de entrega
+  const [verifyStep, setVerifyStep] = useState<'profile' | 'details'>('profile');
+  const [verifyShowPassword, setVerifyShowPassword] = useState(false);
   // Si la cuenta nunca ha iniciado sesión, se exige cambiar la contraseña
   // temporal antes de dejar continuar con la acción pendiente.
   const [verifyAuthPhase, setVerifyAuthPhase] = useState<'login' | 'newPassword'>('login');
   const [verifyNewPassword1, setVerifyNewPassword1] = useState('');
   const [verifyNewPassword2, setVerifyNewPassword2] = useState('');
+
+  const handleStep1Auth = async () => {
+    if (!verifyMemberId) {
+      setVerifyFormError('Selecciona tu perfil de Mente Maestra para continuar.');
+      return;
+    }
+    if (!verifyPassword) {
+      setVerifyFormError('Ingresa tu contraseña para continuar.');
+      return;
+    }
+
+    setVerifySubmitting(true);
+    setVerifyFormError('');
+
+    try {
+      const user = await authenticateMember(verifyMemberId, verifyPassword);
+      if (isFirstLogin(user)) {
+        setVerifyAuthPhase('newPassword');
+      } else {
+        setVerifyStep('details');
+      }
+    } catch (err) {
+      setVerifyFormError(authErrorMessage(err));
+    } finally {
+      setVerifySubmitting(false);
+    }
+  };
 
   const toggleCompleted = (actId: string) => {
     const act = activities.find(a => a.id === actId);
@@ -355,11 +384,11 @@ export default function CronogramaTab() {
     const key = `${selectedCat}-${actId}`;
     const willComplete = !completedMap[key];
 
-    // Tanto marcar como entregado como revertirlo exigen identificar quién
-    // registra el cambio (contraseña de Firebase Auth).
     const allowedRepos = getReposForCategory(selectedCat);
     setVerifyItemKey(key);
     setVerifyMode(willComplete ? 'complete' : 'revert');
+    setVerifyStep('profile');
+    setVerifyShowPassword(false);
     setVerifyRepoId(allowedRepos.length === 1 ? allowedRepos[0].id : '');
     setVerifyRepoOpen(false);
     setVerifyBranch('');
@@ -379,6 +408,8 @@ export default function CronogramaTab() {
 
   const closeVerifyModal = () => {
     setVerifyItemKey(null);
+    setVerifyStep('profile');
+    setVerifyShowPassword(false);
     setVerifyRepoOpen(false);
     setVerifyBranchOpen(false);
     setVerifyCommitOpen(false);
@@ -1373,6 +1404,7 @@ export default function CronogramaTab() {
           const selectedCommit = verifyCommits.find((c) => c.sha === verifyCommitSha);
           const verifyAllowedRepos = getReposForCategory(vCatId);
           const verifySelectedRepo = verifyAllowedRepos.find((r) => r.id === verifyRepoId);
+          const selectedMember = TEAM_MEMBERS.find((m) => m.id === verifyMemberId);
 
           return (
             <div className="crono-verify-overlay" onClick={closeVerifyModal}>
@@ -1390,7 +1422,9 @@ export default function CronogramaTab() {
                     <span>
                       {verifyAuthPhase === 'newPassword'
                         ? 'Crea tu propia contraseña'
-                        : verifyMode === 'complete' ? 'Verificar Entrega' : 'Confirmar Cambio a Pendiente'}
+                        : verifyStep === 'profile'
+                          ? 'Autenticación de Integrante'
+                          : verifyMode === 'complete' ? 'Verificar Entrega' : 'Confirmar Cambio a Pendiente'}
                     </span>
                   </div>
                   <button type="button" className="crono-gcal-close" onClick={closeVerifyModal}>
@@ -1402,6 +1436,79 @@ export default function CronogramaTab() {
                   {vCat ? `${vCat.label} — ` : ''}{vAct ? vAct.title : verifyItemKey}
                 </p>
 
+                {/* ── PASO 1: Selección de Perfil de Mente Maestra + Contraseña ── */}
+                {verifyStep === 'profile' && verifyAuthPhase === 'login' && (
+                  <div className="crono-verify-step1">
+                    <label className="crono-verify-label" style={{ marginBottom: 12, display: 'block' }}>
+                      ¿Quién registra este cambio? Selecciona tu perfil:
+                    </label>
+
+                    <div className="crono-profile-grid">
+                      {TEAM_MEMBERS.map((m) => {
+                        const isSelected = verifyMemberId === m.id;
+                        return (
+                          <motion.button
+                            key={m.id}
+                            type="button"
+                            whileHover={{ scale: 1.03 }}
+                            whileTap={{ scale: 0.96 }}
+                            onClick={() => { setVerifyMemberId(m.id); setVerifyFormError(''); }}
+                            className={`crono-profile-card ${isSelected ? 'selected' : ''}`}
+                            style={{
+                              borderColor: isSelected ? m.color : undefined,
+                              boxShadow: isSelected ? `0 0 0 3px ${m.color}35, 0 8px 20px ${m.color}20` : undefined
+                            }}
+                          >
+                            <div className="crono-profile-avatar" style={{ backgroundColor: `${m.color}20`, border: `2px solid ${m.color}` }}>
+                              <img src={m.avatarUrl} alt={m.name} className="crono-profile-img" />
+                            </div>
+                            <div className="crono-profile-name" style={{ color: isSelected ? m.color : undefined }}>
+                              {m.name.split(' ')[0]}
+                            </div>
+                            <div className="crono-profile-badge" style={{ backgroundColor: isSelected ? m.color : undefined, color: isSelected ? '#FFF' : undefined }}>
+                              {m.initials}
+                            </div>
+                          </motion.button>
+                        );
+                      })}
+                    </div>
+
+                    {/* Formulario de Contraseña para el perfil seleccionado */}
+                    {verifyMemberId && selectedMember && (
+                      <motion.div
+                        initial={{ opacity: 0, y: 8 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        className="crono-verify-password-box"
+                        style={{ marginTop: 16 }}
+                      >
+                        <label className="crono-verify-label">
+                          Ingresa la contraseña de <strong>{selectedMember.name.split(' ')[0]}</strong>:
+                        </label>
+                        <div className="password-input-wrap" style={{ marginTop: 6 }}>
+                          <input
+                            type={verifyShowPassword ? 'text' : 'password'}
+                            className="crono-verify-input dev-auth-input"
+                            placeholder="••••••••"
+                            value={verifyPassword}
+                            onChange={(e) => setVerifyPassword(e.target.value)}
+                            onKeyDown={(e) => { if (e.key === 'Enter') handleStep1Auth(); }}
+                            autoFocus
+                          />
+                          <button
+                            type="button"
+                            className="password-toggle-btn"
+                            onClick={() => setVerifyShowPassword(!verifyShowPassword)}
+                            tabIndex={-1}
+                          >
+                            {verifyShowPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                          </button>
+                        </div>
+                      </motion.div>
+                    )}
+                  </div>
+                )}
+
+                {/* Cambiar contraseña si es primer ingreso */}
                 {verifyAuthPhase === 'newPassword' && (
                   <>
                     <p className="crono-verify-subtitle">
@@ -1417,205 +1524,228 @@ export default function CronogramaTab() {
                   </>
                 )}
 
-                {verifyAuthPhase === 'login' && verifyMode === 'complete' && (
+                {/* ── PASO 2: Formulario de Entrega (Una vez autenticado) ── */}
+                {verifyStep === 'details' && verifyAuthPhase === 'login' && (
                   <>
-                    {/* Repositorio */}
-                    {verifyAllowedRepos.length > 1 ? (
-                      <div className="crono-verify-field">
-                        <label className="crono-verify-label">Repositorio del commit</label>
-                        <div className={`crono-dd-wrap ${verifyRepoOpen ? 'dd-open' : ''}`}>
-                          <button
-                            type="button"
-                            className="crono-dd-trigger"
-                            style={{ width: '100%', justifyContent: 'space-between' }}
-                            onClick={() => setVerifyRepoOpen((o) => !o)}
-                          >
-                            <span className="crono-dd-text">
-                              <GitBranch size={13} style={{ marginRight: 6, display: 'inline-block', verticalAlign: 'middle' }} />
-                              {verifySelectedRepo ? verifySelectedRepo.label : 'Selecciona un repositorio'}
-                            </span>
-                            <ChevronDown size={14} className={`crono-dd-chevron ${verifyRepoOpen ? 'open' : ''}`} />
-                          </button>
-                          <AnimatePresence>
-                            {verifyRepoOpen && (
-                              <motion.div
-                                initial={{ opacity: 0, y: 6, scale: 0.98 }}
-                                animate={{ opacity: 1, y: 0, scale: 1 }}
-                                exit={{ opacity: 0, y: 6, scale: 0.98 }}
-                                transition={{ duration: 0.18 }}
-                                className="crono-dd-menu tech-select-menu"
-                                style={{ width: '100%' }}
+                    {/* Badge de Identidad Verificada */}
+                    <div className="crono-verified-user-badge" style={{ backgroundColor: `${selectedMember?.color}15`, border: `1px solid ${selectedMember?.color}40`, marginBottom: 16 }}>
+                      <div className="crono-verified-avatar" style={{ backgroundColor: `${selectedMember?.color}20`, border: `1.5px solid ${selectedMember?.color}` }}>
+                        <img src={selectedMember?.avatarUrl} alt="" className="crono-verified-img" />
+                      </div>
+                      <div>
+                        <span className="crono-verified-label">Identidad Verificada:</span>
+                        <strong className="crono-verified-name" style={{ color: selectedMember?.color }}>
+                          {selectedMember?.name}
+                        </strong>
+                      </div>
+                      <CheckCircle2 size={18} style={{ color: selectedMember?.color, marginLeft: 'auto' }} />
+                    </div>
+
+                    {verifyMode === 'complete' && (
+                      <>
+                        {/* Repositorio */}
+                        {verifyAllowedRepos.length > 1 ? (
+                          <div className="crono-verify-field">
+                            <label className="crono-verify-label">Repositorio del commit</label>
+                            <div className={`crono-dd-wrap ${verifyRepoOpen ? 'dd-open' : ''}`}>
+                              <button
+                                type="button"
+                                className="crono-dd-trigger"
+                                style={{ width: '100%', justifyContent: 'space-between' }}
+                                onClick={() => setVerifyRepoOpen((o) => !o)}
                               >
-                                {verifyAllowedRepos.map((r) => (
-                                  <button
-                                    key={r.id}
-                                    type="button"
-                                    onClick={() => { setVerifyRepoId(r.id); setVerifyRepoOpen(false); }}
-                                    className={`crono-dd-item ${r.id === verifyRepoId ? 'active' : ''}`}
+                                <span className="crono-dd-text">
+                                  <GitBranch size={13} style={{ marginRight: 6, display: 'inline-block', verticalAlign: 'middle' }} />
+                                  {verifySelectedRepo ? verifySelectedRepo.label : 'Selecciona un repositorio'}
+                                </span>
+                                <ChevronDown size={14} className={`crono-dd-chevron ${verifyRepoOpen ? 'open' : ''}`} />
+                              </button>
+                              <AnimatePresence>
+                                {verifyRepoOpen && (
+                                  <motion.div
+                                    initial={{ opacity: 0, y: 6, scale: 0.98 }}
+                                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                                    exit={{ opacity: 0, y: 6, scale: 0.98 }}
+                                    transition={{ duration: 0.18 }}
+                                    className="crono-dd-menu tech-select-menu"
+                                    style={{ width: '100%' }}
                                   >
-                                    <span className="crono-dd-item-label">{r.label}</span>
-                                    {r.id === verifyRepoId && <Check size={14} className="crono-dd-check" />}
-                                  </button>
-                                ))}
-                              </motion.div>
-                            )}
-                          </AnimatePresence>
+                                    {verifyAllowedRepos.map((r) => (
+                                      <button
+                                        key={r.id}
+                                        type="button"
+                                        onClick={() => { setVerifyRepoId(r.id); setVerifyRepoOpen(false); }}
+                                        className={`crono-dd-item ${r.id === verifyRepoId ? 'active' : ''}`}
+                                      >
+                                        <span className="crono-dd-item-label">{r.label}</span>
+                                        {r.id === verifyRepoId && <Check size={14} className="crono-dd-check" />}
+                                      </button>
+                                    ))}
+                                  </motion.div>
+                                )}
+                              </AnimatePresence>
+                            </div>
+                          </div>
+                        ) : verifySelectedRepo && (
+                          <p className="crono-verify-subtitle">
+                            Repositorio: <strong>{verifySelectedRepo.label}</strong>
+                          </p>
+                        )}
+
+                        {/* Rama */}
+                        <div className="crono-verify-field">
+                          <label className="crono-verify-label">Rama del commit</label>
+                          <div className={`crono-dd-wrap ${verifyBranchOpen ? 'dd-open' : ''}`}>
+                            <button
+                              type="button"
+                              className="crono-dd-trigger"
+                              style={{ width: '100%', justifyContent: 'space-between' }}
+                              onClick={() => setVerifyBranchOpen((o) => !o)}
+                              disabled={!verifyRepoId || verifyBranchesStatus !== 'ok'}
+                            >
+                              <span className="crono-dd-text">
+                                <GitBranch size={13} style={{ marginRight: 6, display: 'inline-block', verticalAlign: 'middle' }} />
+                                {!verifyRepoId
+                                  ? 'Selecciona primero un repositorio'
+                                  : verifyBranchesStatus === 'loading' ? 'Cargando ramas...' : (verifyBranch || 'Selecciona una rama')}
+                              </span>
+                              <ChevronDown size={14} className={`crono-dd-chevron ${verifyBranchOpen ? 'open' : ''}`} />
+                            </button>
+                            <AnimatePresence>
+                              {verifyBranchOpen && verifyBranchesStatus === 'ok' && (
+                                <motion.div
+                                  initial={{ opacity: 0, y: 6, scale: 0.98 }}
+                                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                                  exit={{ opacity: 0, y: 6, scale: 0.98 }}
+                                  transition={{ duration: 0.18 }}
+                                  className="crono-dd-menu tech-select-menu"
+                                  style={{ width: '100%' }}
+                                >
+                                  {verifyBranches.map((b) => (
+                                    <button
+                                      key={b.name}
+                                      type="button"
+                                      onClick={() => { setVerifyBranch(b.name); setVerifyBranchOpen(false); }}
+                                      className={`crono-dd-item ${b.name === verifyBranch ? 'active' : ''}`}
+                                    >
+                                      <span className="crono-dd-item-label">{b.name}</span>
+                                      {b.name === verifyBranch && <Check size={14} className="crono-dd-check" />}
+                                    </button>
+                                  ))}
+                                </motion.div>
+                              )}
+                            </AnimatePresence>
+                          </div>
                         </div>
-                      </div>
-                    ) : verifySelectedRepo && (
-                      <p className="crono-verify-subtitle">
-                        Repositorio: <strong>{verifySelectedRepo.label}</strong>
-                      </p>
-                    )}
 
-                    {/* Rama */}
-                    <div className="crono-verify-field">
-                      <label className="crono-verify-label">Rama del commit</label>
-                      <div className={`crono-dd-wrap ${verifyBranchOpen ? 'dd-open' : ''}`}>
-                        <button
-                          type="button"
-                          className="crono-dd-trigger"
-                          style={{ width: '100%', justifyContent: 'space-between' }}
-                          onClick={() => setVerifyBranchOpen((o) => !o)}
-                          disabled={!verifyRepoId || verifyBranchesStatus !== 'ok'}
-                        >
-                          <span className="crono-dd-text">
-                            <GitBranch size={13} style={{ marginRight: 6, display: 'inline-block', verticalAlign: 'middle' }} />
-                            {!verifyRepoId
-                              ? 'Selecciona primero un repositorio'
-                              : verifyBranchesStatus === 'loading' ? 'Cargando ramas...' : (verifyBranch || 'Selecciona una rama')}
-                          </span>
-                          <ChevronDown size={14} className={`crono-dd-chevron ${verifyBranchOpen ? 'open' : ''}`} />
-                        </button>
-                        <AnimatePresence>
-                          {verifyBranchOpen && verifyBranchesStatus === 'ok' && (
-                            <motion.div
-                              initial={{ opacity: 0, y: 6, scale: 0.98 }}
-                              animate={{ opacity: 1, y: 0, scale: 1 }}
-                              exit={{ opacity: 0, y: 6, scale: 0.98 }}
-                              transition={{ duration: 0.18 }}
-                              className="crono-dd-menu tech-select-menu"
-                              style={{ width: '100%' }}
+                        {/* Commit */}
+                        <div className="crono-verify-field">
+                          <label className="crono-verify-label">Commit de evidencia</label>
+                          <div className={`crono-dd-wrap ${verifyCommitOpen ? 'dd-open' : ''}`}>
+                            <button
+                              type="button"
+                              className="crono-dd-trigger"
+                              style={{ width: '100%', justifyContent: 'space-between' }}
+                              onClick={() => setVerifyCommitOpen((o) => !o)}
+                              disabled={verifyCommitsStatus !== 'ok'}
                             >
-                              {verifyBranches.map((b) => (
-                                <button
-                                  key={b.name}
-                                  type="button"
-                                  onClick={() => { setVerifyBranch(b.name); setVerifyBranchOpen(false); }}
-                                  className={`crono-dd-item ${b.name === verifyBranch ? 'active' : ''}`}
+                              <span className="crono-dd-text">
+                                {verifyCommitsStatus === 'idle'
+                                  ? 'Selecciona primero una rama'
+                                  : verifyCommitsStatus === 'loading'
+                                    ? 'Cargando commits...'
+                                    : selectedCommit
+                                      ? `${selectedCommit.sha.slice(0, 7)} — ${selectedCommit.commit.message.split('\n')[0].slice(0, 40)}`
+                                      : 'Selecciona un commit'}
+                              </span>
+                              <ChevronDown size={14} className={`crono-dd-chevron ${verifyCommitOpen ? 'open' : ''}`} />
+                            </button>
+                            <AnimatePresence>
+                              {verifyCommitOpen && verifyCommitsStatus === 'ok' && (
+                                <motion.div
+                                  initial={{ opacity: 0, y: 6, scale: 0.98 }}
+                                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                                  exit={{ opacity: 0, y: 6, scale: 0.98 }}
+                                  transition={{ duration: 0.18 }}
+                                  className="crono-dd-menu tech-select-menu"
+                                  style={{ width: '100%' }}
                                 >
-                                  <span className="crono-dd-item-label">{b.name}</span>
-                                  {b.name === verifyBranch && <Check size={14} className="crono-dd-check" />}
-                                </button>
-                              ))}
-                            </motion.div>
-                          )}
-                        </AnimatePresence>
-                      </div>
-                    </div>
+                                  {verifyCommits.map((c) => (
+                                    <button
+                                      key={c.sha}
+                                      type="button"
+                                      onClick={() => { setVerifyCommitSha(c.sha); setVerifyCommitOpen(false); }}
+                                      className={`crono-dd-item ${c.sha === verifyCommitSha ? 'active' : ''}`}
+                                    >
+                                      <span className="crono-dd-item-label">
+                                        <span className="crono-verify-commit-sha">{c.sha.slice(0, 7)}</span>
+                                        {c.commit.message.split('\n')[0].slice(0, 50)}
+                                      </span>
+                                      {c.sha === verifyCommitSha && <Check size={14} className="crono-dd-check" />}
+                                    </button>
+                                  ))}
+                                </motion.div>
+                              )}
+                            </AnimatePresence>
+                          </div>
+                        </div>
 
-                    {/* Commit */}
-                    <div className="crono-verify-field">
-                      <label className="crono-verify-label">Commit de evidencia</label>
-                      <div className={`crono-dd-wrap ${verifyCommitOpen ? 'dd-open' : ''}`}>
-                        <button
-                          type="button"
-                          className="crono-dd-trigger"
-                          style={{ width: '100%', justifyContent: 'space-between' }}
-                          onClick={() => setVerifyCommitOpen((o) => !o)}
-                          disabled={verifyCommitsStatus !== 'ok'}
-                        >
-                          <span className="crono-dd-text">
-                            {verifyCommitsStatus === 'idle'
-                              ? 'Selecciona primero una rama'
-                              : verifyCommitsStatus === 'loading'
-                                ? 'Cargando commits...'
-                                : selectedCommit
-                                  ? `${selectedCommit.sha.slice(0, 7)} — ${selectedCommit.commit.message.split('\n')[0].slice(0, 40)}`
-                                  : 'Selecciona un commit'}
-                          </span>
-                          <ChevronDown size={14} className={`crono-dd-chevron ${verifyCommitOpen ? 'open' : ''}`} />
-                        </button>
-                        <AnimatePresence>
-                          {verifyCommitOpen && verifyCommitsStatus === 'ok' && (
-                            <motion.div
-                              initial={{ opacity: 0, y: 6, scale: 0.98 }}
-                              animate={{ opacity: 1, y: 0, scale: 1 }}
-                              exit={{ opacity: 0, y: 6, scale: 0.98 }}
-                              transition={{ duration: 0.18 }}
-                              className="crono-dd-menu tech-select-menu"
-                              style={{ width: '100%' }}
-                            >
-                              {verifyCommits.map((c) => (
-                                <button
-                                  key={c.sha}
-                                  type="button"
-                                  onClick={() => { setVerifyCommitSha(c.sha); setVerifyCommitOpen(false); }}
-                                  className={`crono-dd-item ${c.sha === verifyCommitSha ? 'active' : ''}`}
-                                >
-                                  <span className="crono-dd-item-label">
-                                    <span className="crono-verify-commit-sha">{c.sha.slice(0, 7)}</span>
-                                    {c.commit.message.split('\n')[0].slice(0, 50)}
-                                  </span>
-                                  {c.sha === verifyCommitSha && <Check size={14} className="crono-dd-check" />}
-                                </button>
-                              ))}
-                            </motion.div>
-                          )}
-                        </AnimatePresence>
-                      </div>
-                    </div>
+                        {(verifyBranchesStatus === 'error' || verifyCommitsStatus === 'error') && (
+                          <div className="crono-verify-error-box">
+                            <AlertTriangle size={14} /> <span>{verifyErrorMsg}</span>
+                          </div>
+                        )}
 
-                    {(verifyBranchesStatus === 'error' || verifyCommitsStatus === 'error') && (
-                      <div className="crono-verify-error-box">
-                        <AlertTriangle size={14} /> <span>{verifyErrorMsg}</span>
-                      </div>
+                        {/* Descripción */}
+                        <div className="crono-verify-field">
+                          <label className="crono-verify-label">Descripción de la entrega</label>
+                          <textarea
+                            className="crono-verify-textarea"
+                            placeholder="Describe qué se implementó, probó o corrigió en este commit..."
+                            value={verifyDescription}
+                            onChange={(e) => setVerifyDescription(e.target.value)}
+                          />
+                        </div>
+                      </>
                     )}
-
-                    {/* Descripción */}
-                    <div className="crono-verify-field">
-                      <label className="crono-verify-label">Descripción de la entrega</label>
-                      <textarea
-                        className="crono-verify-textarea"
-                        placeholder="Describe qué se implementó, probó o corrigió en este commit..."
-                        value={verifyDescription}
-                        onChange={(e) => setVerifyDescription(e.target.value)}
-                      />
-                    </div>
                   </>
-                )}
-
-                {/* Quién registra + contraseña — obligatorio en ambos modos */}
-                {verifyAuthPhase === 'login' && (
-                  <DevAuthFields
-                    memberId={verifyMemberId}
-                    onMemberChange={setVerifyMemberId}
-                    password={verifyPassword}
-                    onPasswordChange={setVerifyPassword}
-                  />
                 )}
 
                 {verifyFormError && <p className="crono-verify-form-error">{verifyFormError}</p>}
 
+                {/* Acciones del Modal */}
                 <div className="crono-verify-actions">
                   <button type="button" className="crono-cal-nav-btn" onClick={closeVerifyModal} disabled={verifySubmitting}>
                     Cancelar
                   </button>
-                  <button
-                    type="button"
-                    className="crono-verify-confirm-btn"
-                    onClick={handleConfirmVerification}
-                    disabled={verifySubmitting}
-                  >
-                    <ShieldCheck size={15} />
-                    {verifyAuthPhase === 'newPassword'
-                      ? (verifySubmitting ? 'Guardando...' : 'Guardar Contraseña y Continuar')
-                      : verifySubmitting
-                        ? 'Verificando...'
-                        : verifyMode === 'complete'
-                          ? 'Confirmar y Marcar como Entregado'
-                          : 'Confirmar y Marcar como Pendiente'}
-                  </button>
+
+                  {verifyStep === 'profile' && verifyAuthPhase === 'login' ? (
+                    <button
+                      type="button"
+                      className="crono-verify-confirm-btn"
+                      onClick={handleStep1Auth}
+                      disabled={verifySubmitting || !verifyMemberId || !verifyPassword}
+                    >
+                      <ShieldCheck size={15} />
+                      {verifySubmitting ? 'Autenticando...' : 'Verificar Contraseña y Continuar →'}
+                    </button>
+                  ) : (
+                    <button
+                      type="button"
+                      className="crono-verify-confirm-btn"
+                      onClick={handleConfirmVerification}
+                      disabled={verifySubmitting}
+                    >
+                      <ShieldCheck size={15} />
+                      {verifyAuthPhase === 'newPassword'
+                        ? (verifySubmitting ? 'Guardando...' : 'Guardar Contraseña y Continuar')
+                        : verifySubmitting
+                          ? 'Verificando...'
+                          : verifyMode === 'complete'
+                            ? 'Confirmar y Marcar como Entregado'
+                            : 'Confirmar y Marcar como Pendiente'}
+                    </button>
+                  )}
                 </div>
               </motion.div>
             </div>

@@ -3171,3 +3171,160 @@
     border: 1px dashed rgba(255, 255, 255, 0.1);
   }
 }
+
+/* ══════════════════════════════════════════════════════
+   VERIFICACIÓN EN 2 PASOS — TARJETAS DE PERFIL Y AUTENTICACIÓN
+══════════════════════════════════════════════════════ */
+.crono-verify-step1 {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.crono-profile-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+  width: 100%;
+}
+
+@media (min-width: 640px) {
+  .crono-profile-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+.crono-profile-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 14px 10px;
+  background: #F8FAFC;
+  border: 2px solid #E2E8F0;
+  border-radius: 14px;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  outline: none;
+}
+
+[data-theme="dark"] .crono-profile-card {
+  background: #0F172A;
+  border-color: #334155;
+}
+
+.crono-profile-card:hover {
+  transform: translateY(-2px);
+}
+
+.crono-profile-card.selected {
+  background: #FFFFFF !important;
+}
+
+[data-theme="dark"] .crono-profile-card.selected {
+  background: #1E293B !important;
+}
+
+.crono-profile-avatar {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.crono-profile-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.crono-profile-name {
+  font-size: 0.86rem;
+  font-weight: 800;
+  color: #1E293B;
+  text-align: center;
+  line-height: 1.1;
+}
+
+[data-theme="dark"] .crono-profile-name {
+  color: #F8FAFC;
+}
+
+.crono-profile-badge {
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+  padding: 2px 8px;
+  border-radius: 99px;
+  background: #E2E8F0;
+  color: #64748B;
+  transition: all 0.2s ease;
+}
+
+[data-theme="dark"] .crono-profile-badge {
+  background: #334155;
+  color: #94A3B8;
+}
+
+.crono-verify-password-box {
+  background: rgba(59, 130, 246, 0.04);
+  border: 1px solid rgba(59, 130, 246, 0.2);
+  border-radius: 12px;
+  padding: 14px;
+}
+
+[data-theme="dark"] .crono-verify-password-box {
+  background: rgba(59, 130, 246, 0.08);
+  border-color: rgba(59, 130, 246, 0.3);
+}
+
+/* Badge de usuario verificado en Paso 2 */
+.crono-verified-user-badge {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 14px;
+  border-radius: 12px;
+}
+
+.crono-verified-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.crono-verified-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.crono-verified-label {
+  display: block;
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: #64748B;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+}
+
+[data-theme="dark"] .crono-verified-label {
+  color: #94A3B8;
+}
+
+.crono-verified-name {
+  font-size: 0.92rem;
+  font-weight: 800;
+}
