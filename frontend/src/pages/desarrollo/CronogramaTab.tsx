@@ -886,16 +886,16 @@ export default function CronogramaTab() {
         ══════════════════════════════════════════════════════ */}
         {selectedView === 'semana' && (
           <div className="crono-week-view-wrapper">
-            {/* Header de Navegación entre Semanas */}
+            {/* Header de Navegación entre Semanas (Título centrado + Íconos sin texto) */}
             <div className="crono-cal-nav">
               <button
                 type="button"
-                className="crono-cal-nav-btn"
+                className="crono-cal-nav-btn crono-icon-only-btn"
                 disabled={activeWeekNum <= 1}
                 onClick={() => setActiveWeekNum(w => Math.max(1, w - 1))}
+                aria-label="Semana anterior"
               >
-                <ChevronLeft size={16} />
-                <span>Semana Anterior</span>
+                <ChevronLeft size={18} />
               </button>
 
               <div className="crono-cal-title-wrap">
@@ -909,12 +909,12 @@ export default function CronogramaTab() {
 
               <button
                 type="button"
-                className="crono-cal-nav-btn"
+                className="crono-cal-nav-btn crono-icon-only-btn"
                 disabled={activeWeekNum >= 14}
                 onClick={() => setActiveWeekNum(w => Math.min(14, w + 1))}
+                aria-label="Semana siguiente"
               >
-                <span>Semana Siguiente</span>
-                <ChevronRight size={16} />
+                <ChevronRight size={18} />
               </button>
             </div>
 
@@ -932,8 +932,8 @@ export default function CronogramaTab() {
               ))}
             </div>
 
-            {/* Grid de 7 Días de la Semana Seleccionada */}
-            <div className="crono-week-days-grid">
+            {/* Grid de 7 Días de la Semana Seleccionada (Desktop) */}
+            <div className="crono-week-days-grid crono-desktop-only">
               {(WEEKS_CALENDAR_DAYS[activeWeekNum] || []).map(day => {
                 const dayActivities = activities.filter(act =>
                   isActivityOnDay(act.dateLabel, day.dayNum, day.monthName)
@@ -1012,6 +1012,109 @@ export default function CronogramaTab() {
                 );
               })}
             </div>
+
+            {/* Vista Feed por Semana para Móvil (Google Calendar Mobile) */}
+            <div className="crono-mobile-week-agenda crono-mobile-only">
+              {(WEEKS_CALENDAR_DAYS[activeWeekNum] || []).map(day => {
+                const dayActivities = activities.filter(act =>
+                  isActivityOnDay(act.dateLabel, day.dayNum, day.monthName)
+                );
+
+                return (
+                  <div key={`${day.dayNum}-${day.monthName}`} className="crono-mobile-day-block">
+                    <div className="crono-mobile-day-header">
+                      <span className="crono-mobile-day-name">{day.dayName}</span>
+                      <span className="crono-mobile-day-date">{day.dayNum} {day.monthName}</span>
+                    </div>
+
+                    <div className="crono-mobile-day-content">
+                      {dayActivities.length === 0 ? (
+                        <div className="crono-mobile-empty-day">Sin entregas programadas</div>
+                      ) : (
+                        dayActivities.map(act => {
+                          const itemKey = `${selectedCat}-${act.id}`;
+                          const isCompleted = !!completedMap[itemKey];
+                          const evidence = evidenceMap[itemKey];
+                          const IconComponent = act.icon;
+
+                          let badgeColor = act.color || activeCategory.color;
+                          if (act.type === 'ulibro') badgeColor = '#F59E0B';
+                          if (act.type === 'avance') badgeColor = '#EF4444';
+                          if (act.type === 'candidata' || act.type === 'final') badgeColor = '#10B981';
+
+                          const titleText = resolveTitleWithTech(act);
+
+                          return (
+                            <div
+                              key={act.id}
+                              className={`crono-mobile-card ${act.type ? `crono-row-${act.type}` : ''} ${isCompleted ? 'is-completed' : ''}`}
+                              style={{ borderLeft: `4px solid ${isCompleted ? '#10B981' : badgeColor}` }}
+                            >
+                              <div className="crono-mobile-card-top">
+                                <span className="crono-mobile-card-num">#{act.id}</span>
+                                <span className={`crono-date-badge ${act.type ? `badge-${act.type}` : ''} ${isCompleted ? 'badge-completed' : ''}`}>
+                                  {isCompleted && <Check size={12} style={{ marginRight: 3, display: 'inline-block', verticalAlign: 'middle' }} />}
+                                  {act.dateLabel}
+                                </span>
+                              </div>
+
+                              <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                                <div className="crono-act-icon-box" style={{ color: isCompleted ? '#10B981' : badgeColor, flexShrink: 0 }}>
+                                  <IconComponent size={16} />
+                                </div>
+                                <span className={`crono-mobile-card-title ${isCompleted ? 'text-completed' : ''}`}>
+                                  {titleText}
+                                </span>
+                              </div>
+
+                              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: 4, flexWrap: 'wrap', gap: 8 }}>
+                                {act.type === 'ulibro' ? (
+                                  <span className="crono-status-locked-badge">
+                                    <Lock size={12} />
+                                    <span>Bloqueado</span>
+                                  </span>
+                                ) : (
+                                  <button
+                                    type="button"
+                                    onClick={() => toggleCompleted(act.id)}
+                                    className={`crono-status-btn ${isCompleted ? 'completed' : 'pending'}`}
+                                  >
+                                    {isCompleted ? (
+                                      <>
+                                        <CheckCircle2 size={12} />
+                                        <span>Entregado</span>
+                                      </>
+                                    ) : (
+                                      <>
+                                        <Clock size={12} />
+                                        <span>En progreso</span>
+                                      </>
+                                    )}
+                                  </button>
+                                )}
+
+                                {evidence && (
+                                  <a
+                                    href={evidence.htmlUrl}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="crono-evidence-badge"
+                                    onClick={(e) => e.stopPropagation()}
+                                  >
+                                    <GitCommit size={11} />
+                                    <span>{evidence.shortSha}</span>
+                                  </a>
+                                )}
+                              </div>
+                            </div>
+                          );
+                        })
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
           </div>
         )}
 
@@ -1022,32 +1125,32 @@ export default function CronogramaTab() {
           <div className="crono-month-view-wrapper">
             {/* Header Fijo y Pegajoso del Mes (Navegación + Días de la semana) */}
             <div className="crono-month-sticky-header">
-              {/* Header de Navegación por Meses */}
+              {/* Header de Navegación por Meses (Título centrado + Íconos sin texto) */}
               <div className="crono-cal-nav">
                 <button
                   type="button"
-                  className="crono-cal-nav-btn"
+                  className="crono-cal-nav-btn crono-icon-only-btn"
                   disabled={activeMonthIdx <= 0}
                   onClick={() => setActiveMonthIdx(m => Math.max(0, m - 1))}
+                  aria-label="Mes anterior"
                 >
-                  <ChevronLeft size={16} />
-                  <span>Mes Anterior</span>
+                  <ChevronLeft size={18} />
                 </button>
 
                 <div className="crono-cal-title-wrap">
                   <h3 className="crono-cal-main-title">
-                    {MONTH_CALENDARS[activeMonthIdx]?.name}
+                    {MONTH_CALENDARS[activeMonthIdx]?.name} 2026
                   </h3>
                 </div>
 
                 <button
                   type="button"
-                  className="crono-cal-nav-btn"
+                  className="crono-cal-nav-btn crono-icon-only-btn"
                   disabled={activeMonthIdx >= MONTH_CALENDARS.length - 1}
                   onClick={() => setActiveMonthIdx(m => Math.min(MONTH_CALENDARS.length - 1, m + 1))}
+                  aria-label="Mes siguiente"
                 >
-                  <span>Mes Siguiente</span>
-                  <ChevronRight size={16} />
+                  <ChevronRight size={18} />
                 </button>
               </div>
 
