@@ -3535,3 +3535,113 @@
   background: #000000;
   transform: translateY(-1px);
 }
+
+/* Botón de Editar Entrega (Lápiz) */
+.crono-pencil-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 8px;
+  border: 1px solid rgba(16, 185, 129, 0.3);
+  background: rgba(16, 185, 129, 0.1);
+  color: #10B981;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  padding: 0;
+}
+
+.crono-pencil-btn:hover {
+  background: #10B981;
+  color: #FFFFFF;
+  transform: scale(1.08);
+}
+
+.crono-details-edit-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  background: #3B82F6;
+  color: #FFFFFF !important;
+  font-size: 0.78rem;
+  font-weight: 700;
+  border-radius: 10px;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+}
+
+.crono-details-edit-btn:hover {
+  background: #2563EB;
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(59, 130, 246, 0.4);
+}
+
+.crono-edit-delete-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  background: rgba(239, 68, 68, 0.12);
+  color: #EF4444 !important;
+  font-size: 0.78rem;
+  font-weight: 700;
+  border-radius: 10px;
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.crono-edit-delete-btn:hover {
+  background: #EF4444;
+  color: #FFFFFF !important;
+  border-color: #EF4444;
+}
+
+.crono-delete-confirm-box {
+  background: rgba(239, 68, 68, 0.08);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  border-radius: 12px;
+  padding: 14px;
+  margin-bottom: 16px;
+}
+
+.crono-delete-confirm-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.85rem;
+  font-weight: 800;
+  color: #DC2626;
+  margin-bottom: 6px;
+}
+
+[data-theme="dark"] .crono-delete-confirm-title {
+  color: #FCA5A5;
+}
+
+.crono-delete-confirm-text {
+  font-size: 0.78rem;
+  color: #475569;
+  margin: 0 0 10px 0;
+  line-height: 1.4;
+}
+
+[data-theme="dark"] .crono-delete-confirm-text {
+  color: #CBD5E1;
+}
+
+.crono-delete-date-target {
+  display: inline-block;
+  font-family: monospace;
+  font-weight: 800;
+  background: #EF4444;
+  color: #FFFFFF;
+  padding: 2px 8px;
+  border-radius: 6px;
+  font-size: 0.82rem;
+  margin: 0 4px;
+}
