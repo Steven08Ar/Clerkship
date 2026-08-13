@@ -3,6 +3,7 @@ import './styles/landing.css';
 import './styles/auth.css';
 import './styles/inner.css';
 import './styles/dashboard.css';
+import './styles/theme.css';
 
 import LandingPage from './pages/landing/LandingPage';
 import ProyectoPage from './pages/landing/ProyectoPage';
@@ -24,38 +25,59 @@ import AnatomiaPage from './pages/anatomia/AnatomiaPage';
 import SimulacionPage from './pages/simulacion/SimulacionPage';
 import CasosPage from './pages/simulacion/CasosPage';
 import HistorialPage from './pages/simulacion/HistorialPage';
+import CuestionarioPage from './pages/cuestionario/CuestionarioPage';
+import CronogramaPage from './pages/cronograma/CronogramaPage';
+import DesarrolloPage from './pages/desarrollo/DesarrolloPage';
+import ThemeToggleFloating from './components/shared/ThemeToggleFloating';
 
-import CronogramaPage from './pages/desarrollo/CronogramaPage';
+function ProtectedRoute({ children }: { children: React.ReactNode }) {
+  const isAuthenticated =
+    localStorage.getItem('clerkship_auth') === 'true' ||
+    localStorage.getItem('clerkship_consent') === 'accepted';
+
+  if (!isAuthenticated) {
+    return <Navigate to="/login" replace />;
+  }
+
+  return <>{children}</>;
+}
 
 export default function App() {
   return (
     <BrowserRouter>
+      {/* Botón Flotante Fijo a la Derecha en TODAS las Pestañas */}
+      <ThemeToggleFloating />
+
       <Routes>
-        {/* Landing */}
+        {/* Landing Public Pages */}
         <Route path="/"                       element={<LandingPage />} />
         <Route path="/proyecto"               element={<ProyectoPage />} />
+        <Route path="/cronograma"             element={<CronogramaPage />} />
 
         {/* Auth */}
         <Route path="/login"                  element={<LoginPage />} />
         <Route path="/register"               element={<RegisterPage />} />
         <Route path="/consent"                element={<ConsentPage />} />
-        <Route path="/dashboard"              element={<DashboardPage />} />
 
-        {/* Inner pages */}
-        <Route path="/cronograma"             element={<CronogramaPage />} />
-        <Route path="/explorar"               element={<ExplorarPage />} />
+        {/* Protected Dashboard & Clinical App Routes */}
+        <Route path="/dashboard"              element={<ProtectedRoute><DashboardPage /></ProtectedRoute>} />
+        <Route path="/cuestionario"           element={<ProtectedRoute><CuestionarioPage /></ProtectedRoute>} />
+        <Route path="/desarrollo"             element={<ProtectedRoute><DesarrolloPage /></ProtectedRoute>} />
+        <Route path="/explorar"               element={<ProtectedRoute><ExplorarPage /></ProtectedRoute>} />
+        <Route path="/documentacion"          element={<ProtectedRoute><DocumentacionPage /></ProtectedRoute>} />
+        <Route path="/biblioteca"             element={<ProtectedRoute><BibliotecaPage /></ProtectedRoute>} />
+        <Route path="/simulacion"             element={<ProtectedRoute><SimulacionPage /></ProtectedRoute>} />
+        <Route path="/casos"                  element={<ProtectedRoute><CasosPage /></ProtectedRoute>} />
+        <Route path="/historial"              element={<ProtectedRoute><HistorialPage /></ProtectedRoute>} />
+        <Route path="/anatomia"               element={<ProtectedRoute><AnatomiaPage /></ProtectedRoute>} />
+
+        {/* Informative Pages */}
         <Route path="/equipo/desarrolladores" element={<DesarrolladoresPage />} />
         <Route path="/equipo/direccion"       element={<DireccionPage />} />
         <Route path="/equipo/institucion"     element={<InstitucionPage />} />
         <Route path="/legal/terminos"         element={<TerminosPage />} />
         <Route path="/legal/privacidad"       element={<PrivacidadPage />} />
         <Route path="/legal/licencia"         element={<LicenciaPage />} />
-        <Route path="/documentacion"          element={<DocumentacionPage />} />
-        <Route path="/biblioteca"             element={<BibliotecaPage />} />
-        <Route path="/simulacion"             element={<SimulacionPage />} />
-        <Route path="/casos"                  element={<CasosPage />} />
-        <Route path="/historial"              element={<HistorialPage />} />
-        <Route path="/anatomia"               element={<AnatomiaPage />} />
 
         {/* Catch-all → landing */}
         <Route path="*"                       element={<Navigate to="/" replace />} />
