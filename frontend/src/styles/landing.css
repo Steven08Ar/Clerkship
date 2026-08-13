@@ -3529,7 +3529,10 @@ img { display: block; }
   }
 }
 
-.lp-header-theme-toggle-btn,
+.lp-header-theme-toggle-btn {
+  display: none !important;
+}
+
 .lp-header-theme-toggle-btn-mobile {
   width: 36px;
   height: 36px;
