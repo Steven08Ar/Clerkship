@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Menu, X, ArrowRight, LayoutDashboard, Calendar, FileText, Sparkles, Sun, Moon } from 'lucide-react';
+import { Menu, X, ArrowRight, Calendar, FileText, Sparkles, Sun, Moon } from 'lucide-react';
 import logoUrl from '../../assets/Logo Clerkship.svg';
 
 interface HeaderNavProps {
@@ -186,22 +186,6 @@ export default function HeaderNav({ activeTab }: HeaderNavProps) {
                   onClick={() => setMobileOpen(false)}
                 >
                   <Calendar size={16} /> Cronograma
-                </Link>
-
-                <Link
-                  to="/cuestionario"
-                  className="lp-mobile-menu-item"
-                  onClick={() => setMobileOpen(false)}
-                >
-                  <FileText size={16} /> Registro Técnico
-                </Link>
-
-                <Link
-                  to="/desarrollo"
-                  className="lp-mobile-menu-item"
-                  onClick={() => setMobileOpen(false)}
-                >
-                  <LayoutDashboard size={16} /> Hub de Desarrollo
                 </Link>
               </div>
 
