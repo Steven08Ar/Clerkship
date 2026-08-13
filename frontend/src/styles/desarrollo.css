@@ -3334,3 +3334,204 @@
   font-size: 0.92rem;
   font-weight: 800;
 }
+
+/* ══════════════════════════════════════════════════════
+   TOOLTIP SIGUIENDO AL CURSOR PARA ENTREGAS CONFIRMADAS
+══════════════════════════════════════════════════════ */
+.crono-cursor-tooltip {
+  position: fixed;
+  padding: 6px 12px;
+  background: #0F172A;
+  color: #F8FAFC;
+  font-size: 0.74rem;
+  font-weight: 700;
+  border-radius: 8px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  white-space: nowrap;
+  pointer-events: none;
+  z-index: 999999;
+  transition: opacity 0.15s ease;
+}
+
+[data-theme="light"] .crono-cursor-tooltip {
+  background: #1E293B;
+  color: #FFFFFF;
+}
+
+/* Modal de Detalles de Entrega Confirmada */
+.crono-details-modal {
+  max-width: 500px !important;
+}
+
+.crono-details-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 4px 10px;
+  border-radius: 8px;
+  margin-bottom: 10px;
+}
+
+.crono-details-title {
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: #0F172A;
+  margin: 0 0 16px 0;
+  line-height: 1.35;
+}
+
+[data-theme="dark"] .crono-details-title {
+  color: #F8FAFC;
+}
+
+.crono-details-section {
+  margin-bottom: 16px;
+}
+
+.crono-details-label {
+  display: block;
+  font-size: 0.76rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  color: #64748B;
+  margin-bottom: 6px;
+}
+
+[data-theme="dark"] .crono-details-label {
+  color: #94A3B8;
+}
+
+.crono-details-time {
+  display: block;
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: #64748B;
+  margin-top: 2px;
+}
+
+[data-theme="dark"] .crono-details-time {
+  color: #94A3B8;
+}
+
+.crono-details-commit-box {
+  background: #F8FAFC;
+  border: 1px solid #E2E8F0;
+  border-radius: 12px;
+  padding: 14px;
+  margin-bottom: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+[data-theme="dark"] .crono-details-commit-box {
+  background: #0F172A;
+  border-color: #334155;
+}
+
+.crono-details-commit-row {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+  font-size: 0.8rem;
+  color: #334155;
+}
+
+[data-theme="dark"] .crono-details-commit-row {
+  color: #CBD5E1;
+}
+
+.crono-details-meta-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.crono-details-commit-msg {
+  font-size: 0.8rem;
+  color: #0F172A;
+  background: rgba(255, 255, 255, 0.6);
+  border-radius: 8px;
+  padding: 8px 10px;
+  border-left: 3px solid #3B82F6;
+}
+
+[data-theme="dark"] .crono-details-commit-msg {
+  color: #F8FAFC;
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.crono-details-commit-msg p {
+  margin: 4px 0 0 0;
+  font-family: monospace;
+  font-size: 0.78rem;
+}
+
+.crono-details-commit-author {
+  font-size: 0.74rem;
+  color: #64748B;
+}
+
+[data-theme="dark"] .crono-details-commit-author {
+  color: #94A3B8;
+}
+
+.crono-details-desc-box {
+  background: rgba(16, 185, 129, 0.06);
+  border: 1px solid rgba(16, 185, 129, 0.25);
+  border-radius: 12px;
+  padding: 12px 14px;
+  font-size: 0.84rem;
+  line-height: 1.45;
+  color: #0F172A;
+}
+
+[data-theme="dark"] .crono-details-desc-box {
+  background: rgba(16, 185, 129, 0.1);
+  border-color: rgba(16, 185, 129, 0.3);
+  color: #F8FAFC;
+}
+
+.crono-details-desc-box p {
+  margin: 0;
+}
+
+.crono-details-no-desc {
+  font-size: 0.8rem;
+  font-style: italic;
+  color: #94A3B8;
+  margin: 0;
+}
+
+.crono-details-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 20px;
+  flex-wrap: wrap;
+}
+
+.crono-details-gh-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  background: #24292F;
+  color: #FFFFFF !important;
+  font-size: 0.78rem;
+  font-weight: 700;
+  border-radius: 10px;
+  text-decoration: none;
+  transition: all 0.2s ease;
+}
+
+.crono-details-gh-btn:hover {
+  background: #000000;
+  transform: translateY(-1px);
+}

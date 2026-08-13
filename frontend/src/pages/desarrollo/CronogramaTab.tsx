@@ -350,6 +350,33 @@ export default function CronogramaTab() {
   const [verifyNewPassword1, setVerifyNewPassword1] = useState('');
   const [verifyNewPassword2, setVerifyNewPassword2] = useState('');
 
+  // Tooltip flotante siguiendo al cursor para entregas confirmadas
+  const [cursorTooltip, setCursorTooltip] = useState<{
+    show: boolean;
+    x: number;
+    y: number;
+    text: string;
+  }>({ show: false, x: 0, y: 0, text: '' });
+
+  // Modal de Detalles de Entrega Confirmada (muestra la metadata guardada en Firebase)
+  const [detailsItemKey, setDetailsItemKey] = useState<string | null>(null);
+
+  const handleCompletedHover = (e: React.MouseEvent, isCompleted: boolean) => {
+    if (isCompleted) {
+      setCursorTooltip({ show: true, x: e.clientX, y: e.clientY, text: 'Click para ver detalles 🔍' });
+    }
+  };
+
+  const handleCompletedMove = (e: React.MouseEvent, isCompleted: boolean) => {
+    if (isCompleted) {
+      setCursorTooltip((prev) => ({ ...prev, show: true, x: e.clientX, y: e.clientY }));
+    }
+  };
+
+  const handleCompletedLeave = () => {
+    setCursorTooltip({ show: false, x: 0, y: 0, text: '' });
+  };
+
   const handleStep1Auth = async () => {
     if (!verifyMemberId) {
       setVerifyFormError('Selecciona tu perfil de Mente Maestra para continuar.');
@@ -737,6 +764,16 @@ export default function CronogramaTab() {
                       <div
                         key={act.id}
                         className={`crono-row crono-activity-row ${act.type ? `crono-row-${act.type}` : ''} ${isCompleted ? 'is-completed' : ''}`}
+                        onClick={() => {
+                          if (isCompleted) {
+                            setCursorTooltip({ show: false, x: 0, y: 0, text: '' });
+                            setDetailsItemKey(itemKey);
+                          }
+                        }}
+                        onMouseEnter={(e) => handleCompletedHover(e, isCompleted)}
+                        onMouseMove={(e) => handleCompletedMove(e, isCompleted)}
+                        onMouseLeave={handleCompletedLeave}
+                        style={{ cursor: isCompleted ? 'pointer' : undefined }}
                       >
                         <div className="crono-col-id">{act.id}</div>
                         
@@ -845,7 +882,16 @@ export default function CronogramaTab() {
                   <div
                     key={act.id}
                     className={`crono-mobile-card ${act.type ? `crono-row-${act.type}` : ''} ${isCompleted ? 'is-completed' : ''}`}
-                    style={{ borderLeft: `4px solid ${isCompleted ? '#10B981' : barColor}` }}
+                    style={{ borderLeft: `4px solid ${isCompleted ? '#10B981' : barColor}`, cursor: isCompleted ? 'pointer' : undefined }}
+                    onClick={() => {
+                      if (isCompleted) {
+                        setCursorTooltip({ show: false, x: 0, y: 0, text: '' });
+                        setDetailsItemKey(itemKey);
+                      }
+                    }}
+                    onMouseEnter={(e) => handleCompletedHover(e, isCompleted)}
+                    onMouseMove={(e) => handleCompletedMove(e, isCompleted)}
+                    onMouseLeave={handleCompletedLeave}
                   >
                     <div className="crono-mobile-card-top">
                       <span className="crono-mobile-card-num">#{act.id}</span>
@@ -995,9 +1041,20 @@ export default function CronogramaTab() {
                             <motion.div
                               key={act.id}
                               whileHover={{ scale: 1.02 }}
-                              onClick={(e) => handleOpenPopover(e, act, `${day.dayName} ${day.dayNum} ${day.monthName} 2026`)}
+                              onClick={(e) => {
+                                if (isCompleted) {
+                                  e.stopPropagation();
+                                  setCursorTooltip({ show: false, x: 0, y: 0, text: '' });
+                                  setDetailsItemKey(itemKey);
+                                } else {
+                                  handleOpenPopover(e, act, `${day.dayName} ${day.dayNum} ${day.monthName} 2026`);
+                                }
+                              }}
+                              onMouseEnter={(e) => handleCompletedHover(e, isCompleted)}
+                              onMouseMove={(e) => handleCompletedMove(e, isCompleted)}
+                              onMouseLeave={handleCompletedLeave}
                               className={`crono-week-event-card ${isCompleted ? 'is-completed' : ''}`}
-                              style={{ borderLeft: `4px solid ${isCompleted ? '#10B981' : badgeColor}` }}
+                              style={{ borderLeft: `4px solid ${isCompleted ? '#10B981' : badgeColor}`, cursor: isCompleted ? 'pointer' : undefined }}
                             >
                               <div className="crono-week-event-top">
                                 <span className="crono-week-event-tag" style={{ backgroundColor: `${badgeColor}20`, color: badgeColor }}>
@@ -1077,7 +1134,16 @@ export default function CronogramaTab() {
                             <div
                               key={act.id}
                               className={`crono-mobile-card ${act.type ? `crono-row-${act.type}` : ''} ${isCompleted ? 'is-completed' : ''}`}
-                              style={{ borderLeft: `4px solid ${isCompleted ? '#10B981' : badgeColor}` }}
+                              style={{ borderLeft: `4px solid ${isCompleted ? '#10B981' : badgeColor}`, cursor: isCompleted ? 'pointer' : undefined }}
+                              onClick={() => {
+                                if (isCompleted) {
+                                  setCursorTooltip({ show: false, x: 0, y: 0, text: '' });
+                                  setDetailsItemKey(itemKey);
+                                }
+                              }}
+                              onMouseEnter={(e) => handleCompletedHover(e, isCompleted)}
+                              onMouseMove={(e) => handleCompletedMove(e, isCompleted)}
+                              onMouseLeave={handleCompletedLeave}
                             >
                               <div className="crono-mobile-card-top">
                                 <span className="crono-mobile-card-num">#{act.id}</span>
@@ -1234,9 +1300,20 @@ export default function CronogramaTab() {
                             <motion.div
                               key={act.id}
                               whileHover={{ scale: 1.03 }}
-                              onClick={(e) => handleOpenPopover(e, act, `${dayNum} de ${monthMeta.name}`)}
+                              onClick={(e) => {
+                                if (isCompleted) {
+                                  e.stopPropagation();
+                                  setCursorTooltip({ show: false, x: 0, y: 0, text: '' });
+                                  setDetailsItemKey(itemKey);
+                                } else {
+                                  handleOpenPopover(e, act, `${dayNum} de ${monthMeta.name}`);
+                                }
+                              }}
+                              onMouseEnter={(e) => handleCompletedHover(e, isCompleted)}
+                              onMouseMove={(e) => handleCompletedMove(e, isCompleted)}
+                              onMouseLeave={handleCompletedLeave}
                               className={`crono-gcal-chip ${isCompleted ? 'chip-completed' : ''}`}
-                              style={{ backgroundColor: isCompleted ? '#10B981' : chipColor }}
+                              style={{ backgroundColor: isCompleted ? '#10B981' : chipColor, cursor: isCompleted ? 'pointer' : undefined }}
                               title={`${titleText} (${isCompleted ? 'Entregado' : 'En progreso'})`}
                             >
                               {isCompleted ? <Check size={11} /> : <Clock size={11} />}
@@ -1776,6 +1853,183 @@ export default function CronogramaTab() {
                             : 'Confirmar y Marcar como Pendiente'}
                     </button>
                   )}
+                </div>
+              </motion.div>
+            </div>
+          );
+        })()}
+      </AnimatePresence>
+
+      {/* ── Tooltip Flotante Siguiendo al Cursor para Entregas Confirmadas ── */}
+      {cursorTooltip.show && (
+        <div
+          className="crono-cursor-tooltip"
+          style={{
+            position: 'fixed',
+            left: cursorTooltip.x + 12,
+            top: cursorTooltip.y + 16,
+            pointerEvents: 'none',
+            zIndex: 999999,
+          }}
+        >
+          {cursorTooltip.text}
+        </div>
+      )}
+
+      {/* ── Modal de Detalles de Entrega Confirmada ── */}
+      <AnimatePresence>
+        {detailsItemKey && (() => {
+          const dashIdx = detailsItemKey.indexOf('-');
+          const dCatId = detailsItemKey.slice(0, dashIdx) as CategoryId;
+          const dActId = detailsItemKey.slice(dashIdx + 1);
+          const dAct = (CRONOGRAMA_DATA[dCatId] || []).find((a) => a.id === dActId);
+          const dCat = CATEGORIES.find((c) => c.id === dCatId);
+          const evidence = evidenceMap[detailsItemKey];
+
+          const registeredMember = TEAM_MEMBERS.find((m) =>
+            evidence?.registeredBy && (
+              evidence.registeredBy.toLowerCase().includes(m.id) ||
+              evidence.registeredBy.toLowerCase().includes(m.name.split(' ')[0].toLowerCase())
+            )
+          );
+
+          const formattedDate = evidence?.taggedAt
+            ? new Date(evidence.taggedAt).toLocaleString('es-ES', {
+                dateStyle: 'medium',
+                timeStyle: 'short',
+              })
+            : null;
+
+          return (
+            <div className="crono-verify-overlay" onClick={() => setDetailsItemKey(null)}>
+              <motion.div
+                initial={{ opacity: 0, scale: 0.95, y: 12 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.95, y: 12 }}
+                transition={{ duration: 0.2 }}
+                className="crono-verify-modal crono-details-modal"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <div className="crono-verify-header">
+                  <div className="crono-verify-header-title">
+                    <CheckCircle2 size={20} style={{ color: '#10B981' }} />
+                    <span>Detalles de la Entrega Confirmada</span>
+                  </div>
+                  <button type="button" className="crono-gcal-close" onClick={() => setDetailsItemKey(null)}>
+                    <X size={16} />
+                  </button>
+                </div>
+
+                {dCat && (
+                  <div className="crono-details-tag" style={{ backgroundColor: `${dCat.color}18`, color: dCat.color }}>
+                    <Layers size={13} />
+                    <span>{dCat.label}</span> — Hito #{dActId} ({dAct?.dateLabel})
+                  </div>
+                )}
+
+                <h3 className="crono-details-title">
+                  {dAct ? resolveTitleWithTech(dAct) : detailsItemKey}
+                </h3>
+
+                {/* Registrado Por */}
+                {evidence?.registeredBy && (
+                  <div className="crono-details-section">
+                    <label className="crono-details-label">Registrado por:</label>
+                    <div className="crono-verified-user-badge" style={{ backgroundColor: `${registeredMember?.color || '#10B981'}15`, border: `1px solid ${registeredMember?.color || '#10B981'}40` }}>
+                      <div className="crono-verified-avatar" style={{ backgroundColor: `${registeredMember?.color || '#10B981'}20`, border: `1.5px solid ${registeredMember?.color || '#10B981'}` }}>
+                        <img src={registeredMember?.avatarUrl} alt="" className="crono-verified-img" />
+                      </div>
+                      <div>
+                        <strong className="crono-verified-name" style={{ color: registeredMember?.color || '#10B981' }}>
+                          {evidence.registeredBy}
+                        </strong>
+                        {formattedDate && (
+                          <span className="crono-details-time">
+                            Confirmado el {formattedDate}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Evidencia de Commit de GitHub */}
+                {evidence && (
+                  <div className="crono-details-commit-box">
+                    <div className="crono-details-commit-row">
+                      <span className="crono-details-meta-item">
+                        <GitBranch size={13} />
+                        <strong>Rama:</strong> {evidence.branch}
+                      </span>
+                      <span className="crono-details-meta-item">
+                        <GitCommit size={13} />
+                        <strong>Commit:</strong> <code className="crono-verify-commit-sha">{evidence.shortSha}</code>
+                      </span>
+                    </div>
+
+                    {evidence.message && (
+                      <div className="crono-details-commit-msg">
+                        <strong>Mensaje de GitHub:</strong>
+                        <p>{evidence.message}</p>
+                      </div>
+                    )}
+
+                    {evidence.author && (
+                      <div className="crono-details-commit-author">
+                        <span>Autor del commit: <strong>{evidence.author}</strong></span>
+                        {evidence.date && <span> ({new Date(evidence.date).toLocaleDateString('es-ES')})</span>}
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {/* Descripción Personal de la Entrega */}
+                {evidence?.description ? (
+                  <div className="crono-details-section">
+                    <label className="crono-details-label">Descripción de la entrega:</label>
+                    <div className="crono-details-desc-box">
+                      <p>{evidence.description}</p>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="crono-details-section">
+                    <label className="crono-details-label">Descripción de la entrega:</label>
+                    <p className="crono-details-no-desc">Sin descripción personalizada registrada.</p>
+                  </div>
+                )}
+
+                {/* Acciones */}
+                <div className="crono-details-actions">
+                  {evidence?.htmlUrl && (
+                    <a
+                      href={evidence.htmlUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="crono-details-gh-btn"
+                    >
+                      <GitCommit size={15} />
+                      Ver en GitHub ↗
+                    </a>
+                  )}
+
+                  <button
+                    type="button"
+                    className="crono-cal-nav-btn"
+                    onClick={() => {
+                      setDetailsItemKey(null);
+                      toggleCompleted(dActId);
+                    }}
+                  >
+                    Revertir a Pendiente
+                  </button>
+
+                  <button
+                    type="button"
+                    className="crono-verify-confirm-btn"
+                    onClick={() => setDetailsItemKey(null)}
+                  >
+                    Cerrar
+                  </button>
                 </div>
               </motion.div>
             </div>
