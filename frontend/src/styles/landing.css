@@ -3517,8 +3517,41 @@ img { display: block; }
   color: #F8FAFC !important;
 }
 
-.lp-hamburger-btn:hover {
-  background: rgba(255, 255, 255, 0.1);
+.lp-mobile-nav-controls {
+  display: none;
+  align-items: center;
+  gap: 8px;
+}
+
+@media (max-width: 768px) {
+  .lp-mobile-nav-controls {
+    display: flex !important;
+  }
+}
+
+.lp-header-theme-toggle-btn,
+.lp-header-theme-toggle-btn-mobile {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+[data-theme="light"] .lp-header-theme-toggle-btn,
+[data-theme="light"] .lp-header-theme-toggle-btn-mobile {
+  background: #E2E8F0;
+  border-color: #CBD5E1;
+}
+
+.lp-header-theme-toggle-btn:hover,
+.lp-header-theme-toggle-btn-mobile:hover {
+  transform: scale(1.08);
 }
 
 .lp-mobile-drawer-overlay {
