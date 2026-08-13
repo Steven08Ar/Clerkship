@@ -646,156 +646,239 @@ export default function CronogramaTab() {
         className="crono-gantt-card"
       >
         {/* ══════════════════════════════════════════════════════
-           MODO 1: PREDETERMINADO (Gantt Matrix Completo)
+           MODO 1: PREDETERMINADO (Gantt Matrix Completo / Feed Móvil)
         ══════════════════════════════════════════════════════ */}
         {selectedView === 'predeterminado' && (
-          <div className="crono-table-overflow">
-            <div className="crono-table">
-              {/* Header Matrix Row 1: Month Groups */}
-              <div className="crono-row crono-header-row-top">
-                <div className="crono-col-id icon-col"><Filter size={15} /></div>
-                <div className="crono-col-date">FECHA</div>
-                <div className="crono-col-title">ENTREGA / ACTIVIDAD</div>
-                
-                <div className="crono-months-grid">
-                  {MONTHS.map((m, idx) => (
-                    <div
-                      key={idx}
-                      className="crono-month-cell"
-                      style={{ gridColumn: `span ${m.weeks.length}` }}
-                    >
-                      {m.name}
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              {/* Header Matrix Row 2: Week Numbers */}
-              <div className="crono-row crono-header-row-bottom">
-                <div className="crono-col-id">#</div>
-                <div className="crono-col-date">RANGO</div>
-                <div className="crono-col-title">DESCRIPCIÓN TÉCNICA</div>
-
-                <div className="crono-weeks-grid">
-                  {MONTHS.map((m) =>
-                    m.weeks.map((w, wIdx) => (
-                      <div key={`${m.name}-${wIdx}`} className="crono-week-cell">
-                        {w}
+          <>
+            {/* Vista Tabla Desktop */}
+            <div className="crono-table-overflow crono-desktop-only">
+              <div className="crono-table">
+                {/* Header Matrix Row 1: Month Groups */}
+                <div className="crono-row crono-header-row-top">
+                  <div className="crono-col-id icon-col"><Filter size={15} /></div>
+                  <div className="crono-col-date">FECHA</div>
+                  <div className="crono-col-title">ENTREGA / ACTIVIDAD</div>
+                  
+                  <div className="crono-months-grid">
+                    {MONTHS.map((m, idx) => (
+                      <div
+                        key={idx}
+                        className="crono-month-cell"
+                        style={{ gridColumn: `span ${m.weeks.length}` }}
+                      >
+                        {m.name}
                       </div>
-                    ))
-                  )}
+                    ))}
+                  </div>
                 </div>
-              </div>
 
-              {/* Activities Rows */}
-              <div className="crono-body">
-                {activities.map((act) => {
-                  const itemKey = `${selectedCat}-${act.id}`;
-                  const isCompleted = !!completedMap[itemKey];
-                  const evidence = evidenceMap[itemKey];
-                  const IconComponent = act.icon;
+                {/* Header Matrix Row 2: Week Numbers */}
+                <div className="crono-row crono-header-row-bottom">
+                  <div className="crono-col-id">#</div>
+                  <div className="crono-col-date">RANGO</div>
+                  <div className="crono-col-title">DESCRIPCIÓN TÉCNICA</div>
 
-                  let barColor = act.color || activeCategory.color;
-                  if (act.type === 'ulibro') barColor = '#F59E0B';
-                  if (act.type === 'avance') barColor = '#EF4444';
-                  if (act.type === 'candidata' || act.type === 'final') barColor = '#10B981';
-
-                  const titleText = resolveTitleWithTech(act);
-
-                  return (
-                    <div
-                      key={act.id}
-                      className={`crono-row crono-activity-row ${act.type ? `crono-row-${act.type}` : ''} ${isCompleted ? 'is-completed' : ''}`}
-                    >
-                      <div className="crono-col-id">{act.id}</div>
-                      
-                      <div className="crono-col-date">
-                        <span className={`crono-date-badge ${act.type ? `badge-${act.type}` : ''} ${isCompleted ? 'badge-completed' : ''}`}>
-                          {isCompleted && <Check size={12} style={{ marginRight: 3, display: 'inline-block', verticalAlign: 'middle' }} />}
-                          {act.dateLabel}
-                        </span>
-                      </div>
-
-                      <div className="crono-col-title">
-                        <div className="crono-act-icon-box" style={{ color: isCompleted ? '#10B981' : barColor }}>
-                          <IconComponent size={15} />
+                  <div className="crono-weeks-grid">
+                    {MONTHS.map((m) =>
+                      m.weeks.map((w, wIdx) => (
+                        <div key={`${m.name}-${wIdx}`} className="crono-week-cell">
+                          {w}
                         </div>
-                        <span className={`crono-act-text ${isCompleted ? 'text-completed' : ''}`}>{titleText}</span>
+                      ))
+                    )}
+                  </div>
+                </div>
 
-                        {/* Interactive Status Toggle Badge (o Bloqueado para Ulibro) */}
-                        {act.type === 'ulibro' ? (
-                          <span className="crono-status-locked-badge">
-                            <Lock size={12} />
-                            <span>Bloqueado</span>
-                          </span>
-                        ) : (
-                          <button
-                            type="button"
-                            onClick={() => toggleCompleted(act.id)}
-                            className={`crono-status-btn ${isCompleted ? 'completed' : 'pending'}`}
-                            title={isCompleted ? 'Haz clic para marcar como pendiente' : 'Requiere verificación: rama + commit + descripción'}
-                          >
-                            {isCompleted ? (
-                              <>
-                                <CheckCircle2 size={12} />
-                                <span>Entregado</span>
-                              </>
-                            ) : (
-                              <>
-                                <Clock size={12} />
-                                <span>En progreso</span>
-                              </>
-                            )}
-                          </button>
-                        )}
+                {/* Activities Rows */}
+                <div className="crono-body">
+                  {activities.map((act) => {
+                    const itemKey = `${selectedCat}-${act.id}`;
+                    const isCompleted = !!completedMap[itemKey];
+                    const evidence = evidenceMap[itemKey];
+                    const IconComponent = act.icon;
 
-                        {evidence && (
-                          <a
-                            href={evidence.htmlUrl}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="crono-evidence-badge"
-                            title={`Evidencia: ${evidence.shortSha} en ${evidence.branch} — ${evidence.message}`}
-                            onClick={(e) => e.stopPropagation()}
-                          >
-                            <GitCommit size={11} />
-                            <span>{evidence.shortSha}</span>
-                          </a>
-                        )}
-                      </div>
+                    let barColor = act.color || activeCategory.color;
+                    if (act.type === 'ulibro') barColor = '#F59E0B';
+                    if (act.type === 'avance') barColor = '#EF4444';
+                    if (act.type === 'candidata' || act.type === 'final') barColor = '#10B981';
 
-                      {/* Timeline Grid (14 columns) */}
-                      <div className="crono-weeks-grid crono-grid-bg">
-                        {/* Grid background lines */}
-                        {Array.from({ length: 14 }).map((_, i) => (
-                          <div key={i} className="crono-grid-line-cell" />
-                        ))}
+                    const titleText = resolveTitleWithTech(act);
 
-                        {/* Floating Timeline Pill Bar */}
-                        <motion.div
-                          className={`crono-pill-bar ${isCompleted ? 'pill-completed' : ''}`}
-                          initial={{ opacity: 0, scaleX: 0.2 }}
-                          animate={{ opacity: 1, scaleX: 1 }}
-                          transition={{ duration: 0.35, ease: 'easeOut' }}
-                          style={{
-                            gridColumnStart: act.startWeek,
-                            gridColumnEnd: `span ${act.duration}`,
-                            backgroundColor: isCompleted ? '#10B981' : barColor,
-                            boxShadow: isCompleted ? '0 4px 14px rgba(16, 185, 129, 0.45)' : `0 4px 12px ${barColor}35`,
-                          }}
-                        >
-                          <span className="crono-pill-text">
-                            {isCompleted && <Check size={12} style={{ marginRight: 4, display: 'inline-block', verticalAlign: 'middle' }} />}
+                    return (
+                      <div
+                        key={act.id}
+                        className={`crono-row crono-activity-row ${act.type ? `crono-row-${act.type}` : ''} ${isCompleted ? 'is-completed' : ''}`}
+                      >
+                        <div className="crono-col-id">{act.id}</div>
+                        
+                        <div className="crono-col-date">
+                          <span className={`crono-date-badge ${act.type ? `badge-${act.type}` : ''} ${isCompleted ? 'badge-completed' : ''}`}>
+                            {isCompleted && <Check size={12} style={{ marginRight: 3, display: 'inline-block', verticalAlign: 'middle' }} />}
                             {act.dateLabel}
                           </span>
-                        </motion.div>
+                        </div>
+
+                        <div className="crono-col-title">
+                          <div className="crono-act-icon-box" style={{ color: isCompleted ? '#10B981' : barColor }}>
+                            <IconComponent size={15} />
+                          </div>
+                          <span className={`crono-act-text ${isCompleted ? 'text-completed' : ''}`}>{titleText}</span>
+
+                          {/* Interactive Status Toggle Badge (o Bloqueado para Ulibro) */}
+                          {act.type === 'ulibro' ? (
+                            <span className="crono-status-locked-badge">
+                              <Lock size={12} />
+                              <span>Bloqueado</span>
+                            </span>
+                          ) : (
+                            <button
+                              type="button"
+                              onClick={() => toggleCompleted(act.id)}
+                              className={`crono-status-btn ${isCompleted ? 'completed' : 'pending'}`}
+                              title={isCompleted ? 'Haz clic para marcar como pendiente' : 'Requiere verificación: rama + commit + descripción'}
+                            >
+                              {isCompleted ? (
+                                <>
+                                  <CheckCircle2 size={12} />
+                                  <span>Entregado</span>
+                                </>
+                              ) : (
+                                <>
+                                  <Clock size={12} />
+                                  <span>En progreso</span>
+                                </>
+                              )}
+                            </button>
+                          )}
+
+                          {evidence && (
+                            <a
+                              href={evidence.htmlUrl}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="crono-evidence-badge"
+                              title={`Evidencia: ${evidence.shortSha} en ${evidence.branch} — ${evidence.message}`}
+                              onClick={(e) => e.stopPropagation()}
+                            >
+                              <GitCommit size={11} />
+                              <span>{evidence.shortSha}</span>
+                            </a>
+                          )}
+                        </div>
+
+                        {/* Timeline Grid (14 columns) */}
+                        <div className="crono-weeks-grid crono-grid-bg">
+                          {Array.from({ length: 14 }).map((_, i) => (
+                            <div key={i} className="crono-grid-line-cell" />
+                          ))}
+
+                          <motion.div
+                            className={`crono-pill-bar ${isCompleted ? 'pill-completed' : ''}`}
+                            initial={{ opacity: 0, scaleX: 0.2 }}
+                            animate={{ opacity: 1, scaleX: 1 }}
+                            transition={{ duration: 0.35, ease: 'easeOut' }}
+                            style={{
+                              gridColumnStart: act.startWeek,
+                              gridColumnEnd: `span ${act.duration}`,
+                              backgroundColor: isCompleted ? '#10B981' : barColor,
+                              boxShadow: isCompleted ? '0 4px 14px rgba(16, 185, 129, 0.45)' : `0 4px 12px ${barColor}35`,
+                            }}
+                          >
+                            <span className="crono-pill-text">
+                              {isCompleted && <Check size={12} style={{ marginRight: 4, display: 'inline-block', verticalAlign: 'middle' }} />}
+                              {act.dateLabel}
+                            </span>
+                          </motion.div>
+                        </div>
                       </div>
-                    </div>
-                  );
-                })}
+                    );
+                  })}
+                </div>
               </div>
             </div>
-          </div>
+
+            {/* Vista Feed de Tarjetas Móviles */}
+            <div className="crono-mobile-feed crono-mobile-only">
+              {activities.map((act) => {
+                const itemKey = `${selectedCat}-${act.id}`;
+                const isCompleted = !!completedMap[itemKey];
+                const evidence = evidenceMap[itemKey];
+                const IconComponent = act.icon;
+
+                let barColor = act.color || activeCategory.color;
+                if (act.type === 'ulibro') barColor = '#F59E0B';
+                if (act.type === 'avance') barColor = '#EF4444';
+                if (act.type === 'candidata' || act.type === 'final') barColor = '#10B981';
+
+                const titleText = resolveTitleWithTech(act);
+
+                return (
+                  <div
+                    key={act.id}
+                    className={`crono-mobile-card ${act.type ? `crono-row-${act.type}` : ''} ${isCompleted ? 'is-completed' : ''}`}
+                    style={{ borderLeft: `4px solid ${isCompleted ? '#10B981' : barColor}` }}
+                  >
+                    <div className="crono-mobile-card-top">
+                      <span className="crono-mobile-card-num">#{act.id}</span>
+                      <span className={`crono-date-badge ${act.type ? `badge-${act.type}` : ''} ${isCompleted ? 'badge-completed' : ''}`}>
+                        {isCompleted && <Check size={12} style={{ marginRight: 3, display: 'inline-block', verticalAlign: 'middle' }} />}
+                        {act.dateLabel}
+                      </span>
+                    </div>
+
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                      <div className="crono-act-icon-box" style={{ color: isCompleted ? '#10B981' : barColor, flexShrink: 0 }}>
+                        <IconComponent size={16} />
+                      </div>
+                      <span className={`crono-mobile-card-title ${isCompleted ? 'text-completed' : ''}`}>
+                        {titleText}
+                      </span>
+                    </div>
+
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: 4, flexWrap: 'wrap', gap: 8 }}>
+                      {act.type === 'ulibro' ? (
+                        <span className="crono-status-locked-badge">
+                          <Lock size={12} />
+                          <span>Bloqueado</span>
+                        </span>
+                      ) : (
+                        <button
+                          type="button"
+                          onClick={() => toggleCompleted(act.id)}
+                          className={`crono-status-btn ${isCompleted ? 'completed' : 'pending'}`}
+                        >
+                          {isCompleted ? (
+                            <>
+                              <CheckCircle2 size={12} />
+                              <span>Entregado</span>
+                            </>
+                          ) : (
+                            <>
+                              <Clock size={12} />
+                              <span>En progreso</span>
+                            </>
+                          )}
+                        </button>
+                      )}
+
+                      {evidence && (
+                        <a
+                          href={evidence.htmlUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="crono-evidence-badge"
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          <GitCommit size={11} />
+                          <span>{evidence.shortSha}</span>
+                        </a>
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </>
         )}
 
         {/* ══════════════════════════════════════════════════════

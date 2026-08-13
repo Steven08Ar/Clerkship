@@ -2915,3 +2915,110 @@
   color: #CBD5E1;
   background: rgba(255, 255, 255, 0.08);
 }
+
+/* ══════════════════════════════════════════════════════════════
+   DISEÑO MÓVIL EXCLUSIVO PARA CRONOGRAMA DE ENTREGAS
+   ══════════════════════════════════════════════════════════════ */
+.crono-desktop-only {
+  display: block;
+}
+
+.crono-mobile-only {
+  display: none !important;
+}
+
+@media (max-width: 768px) {
+  .crono-desktop-only {
+    display: none !important;
+  }
+
+  .crono-mobile-only {
+    display: flex !important;
+  }
+
+  .crono-mobile-feed {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding: 14px;
+    width: 100%;
+  }
+
+  .crono-mobile-card {
+    background: #FFFFFF;
+    border: 1px solid #E2E8F0;
+    border-radius: 16px;
+    padding: 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+  }
+
+  [data-theme="dark"] .crono-mobile-card {
+    background: rgba(30, 41, 59, 0.85) !important;
+    border-color: rgba(255, 255, 255, 0.12) !important;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.3) !important;
+  }
+
+  .crono-mobile-card-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+  }
+
+  .crono-mobile-card-num {
+    font-size: 0.76rem;
+    font-weight: 800;
+    color: #94A3B8;
+  }
+
+  .crono-mobile-card-title {
+    font-size: 0.86rem;
+    font-weight: 700;
+    color: #0F172A;
+    line-height: 1.4;
+    text-align: left;
+  }
+
+  [data-theme="dark"] .crono-mobile-card-title {
+    color: #F8FAFC !important;
+  }
+
+  /* Ajuste de Barra de Resumen en Móvil (Cero Flotado ni Superposición) */
+  .crono-summary-bar {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 12px !important;
+    padding: 16px !important;
+    margin-top: 12px !important;
+    position: relative !important;
+    inset: auto !important;
+    width: 100% !important;
+    border-top: 1px solid #E2E8F0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+  }
+
+  [data-theme="dark"] .crono-summary-bar {
+    border-top-color: rgba(255, 255, 255, 0.1) !important;
+  }
+
+  .crono-summary-divider {
+    display: none !important;
+  }
+
+  .crono-summary-item {
+    width: 100% !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: flex-start !important;
+    gap: 12px !important;
+  }
+
+  .crono-summary-val {
+    text-align: left !important;
+  }
+}
