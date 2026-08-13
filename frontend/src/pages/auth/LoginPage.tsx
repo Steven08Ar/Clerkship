@@ -69,6 +69,7 @@ export default function LoginPage() {
        3. onExitComplete waits then navigates                */
     setIsLogged(true);
     setSuccess(true);
+    localStorage.setItem('clerkship_auth', 'true');
   }
 
   function handleExitComplete() {
