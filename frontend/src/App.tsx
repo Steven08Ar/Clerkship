@@ -53,6 +53,10 @@ export default function App() {
         <Route path="/"                       element={<LandingPage />} />
         <Route path="/proyecto"               element={<ProyectoPage />} />
         <Route path="/cronograma"             element={<CronogramaPage />} />
+        {/* Módulo de Desarrollo: público, tiene su propia autenticación
+            por integrante (Firebase) — no depende del login clínico */}
+        <Route path="/cuestionario"           element={<CuestionarioPage />} />
+        <Route path="/desarrollo"             element={<DesarrolloPage />} />
 
         {/* Auth */}
         <Route path="/login"                  element={<LoginPage />} />
@@ -61,8 +65,6 @@ export default function App() {
 
         {/* Protected Dashboard & Clinical App Routes */}
         <Route path="/dashboard"              element={<ProtectedRoute><DashboardPage /></ProtectedRoute>} />
-        <Route path="/cuestionario"           element={<ProtectedRoute><CuestionarioPage /></ProtectedRoute>} />
-        <Route path="/desarrollo"             element={<ProtectedRoute><DesarrolloPage /></ProtectedRoute>} />
         <Route path="/explorar"               element={<ProtectedRoute><ExplorarPage /></ProtectedRoute>} />
         <Route path="/documentacion"          element={<ProtectedRoute><DocumentacionPage /></ProtectedRoute>} />
         <Route path="/biblioteca"             element={<ProtectedRoute><BibliotecaPage /></ProtectedRoute>} />
