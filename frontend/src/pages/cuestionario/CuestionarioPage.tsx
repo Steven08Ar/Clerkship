@@ -11,7 +11,7 @@ export default function CuestionarioPage() {
       onDragStart={(e) => e.preventDefault()}
       style={{
         minHeight: '100vh',
-        width: '100vw',
+        width: '100%',
         background: '#0B0F19',
         display: 'flex',
         alignItems: 'center',
@@ -24,6 +24,7 @@ export default function CuestionarioPage() {
 
       {/* Contenido Principal Centrado en Pantalla Completa (SIN HEADER) */}
       <main
+        className="cuestionario-page-main"
         style={{
           width: '100%',
           maxWidth: '1200px',
