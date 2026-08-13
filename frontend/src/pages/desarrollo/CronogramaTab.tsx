@@ -14,7 +14,7 @@ import type { GitHubBranch, GitHubCommit } from '../../data/githubApi';
 import { CATEGORIES, CRONOGRAMA_DATA } from '../../data/cronogramaActivities';
 import type { CategoryId, ActivityItem } from '../../data/cronogramaActivities';
 import { subscribeCuestionarioAnswers } from '../../data/cuestionarioStore';
-import { getReposForCategory } from '../../data/repos';
+import { REPOS, getReposForCategory } from '../../data/repos';
 import { authenticateMember, authErrorMessage, isFirstLogin, setNewPassword, validateNewPassword } from '../../data/devAuth';
 import { TEAM_MEMBERS } from '../../data/teamData';
 import NewPasswordFields from '../../components/shared/NewPasswordFields';
@@ -421,8 +421,7 @@ export default function CronogramaTab() {
   // Carga las ramas al abrir el modal, una vez se sabe el repo (solo hace falta al marcar como entregado)
   useEffect(() => {
     if (!verifyItemKey || verifyMode !== 'complete' || !verifyRepoId) return;
-    const repo = getReposForCategory(verifyItemKey.slice(0, verifyItemKey.indexOf('-')) as CategoryId)
-      .find((r) => r.id === verifyRepoId);
+    const repo = REPOS.find((r) => r.id === verifyRepoId);
     if (!repo) return;
 
     let cancelled = false;
@@ -446,8 +445,7 @@ export default function CronogramaTab() {
   // Carga los commits cada vez que cambia la rama seleccionada dentro del modal
   useEffect(() => {
     if (!verifyItemKey || verifyMode !== 'complete' || !verifyRepoId || !verifyBranch) return;
-    const repo = getReposForCategory(verifyItemKey.slice(0, verifyItemKey.indexOf('-')) as CategoryId)
-      .find((r) => r.id === verifyRepoId);
+    const repo = REPOS.find((r) => r.id === verifyRepoId);
     if (!repo) return;
 
     let cancelled = false;
@@ -1402,8 +1400,7 @@ export default function CronogramaTab() {
           const vAct = (CRONOGRAMA_DATA[vCatId] || []).find((a) => a.id === vActId);
           const vCat = CATEGORIES.find((c) => c.id === vCatId);
           const selectedCommit = verifyCommits.find((c) => c.sha === verifyCommitSha);
-          const verifyAllowedRepos = getReposForCategory(vCatId);
-          const verifySelectedRepo = verifyAllowedRepos.find((r) => r.id === verifyRepoId);
+          const verifySelectedRepo = REPOS.find((r) => r.id === verifyRepoId);
           const selectedMember = TEAM_MEMBERS.find((m) => m.id === verifyMemberId);
 
           return (
@@ -1543,54 +1540,48 @@ export default function CronogramaTab() {
 
                     {verifyMode === 'complete' && (
                       <>
-                        {/* Repositorio */}
-                        {verifyAllowedRepos.length > 1 ? (
-                          <div className="crono-verify-field">
-                            <label className="crono-verify-label">Repositorio del commit</label>
-                            <div className={`crono-dd-wrap ${verifyRepoOpen ? 'dd-open' : ''}`}>
-                              <button
-                                type="button"
-                                className="crono-dd-trigger"
-                                style={{ width: '100%', justifyContent: 'space-between' }}
-                                onClick={() => setVerifyRepoOpen((o) => !o)}
-                              >
-                                <span className="crono-dd-text">
-                                  <GitBranch size={13} style={{ marginRight: 6, display: 'inline-block', verticalAlign: 'middle' }} />
-                                  {verifySelectedRepo ? verifySelectedRepo.label : 'Selecciona un repositorio'}
-                                </span>
-                                <ChevronDown size={14} className={`crono-dd-chevron ${verifyRepoOpen ? 'open' : ''}`} />
-                              </button>
-                              <AnimatePresence>
-                                {verifyRepoOpen && (
-                                  <motion.div
-                                    initial={{ opacity: 0, y: 6, scale: 0.98 }}
-                                    animate={{ opacity: 1, y: 0, scale: 1 }}
-                                    exit={{ opacity: 0, y: 6, scale: 0.98 }}
-                                    transition={{ duration: 0.18 }}
-                                    className="crono-dd-menu tech-select-menu"
-                                    style={{ width: '100%' }}
-                                  >
-                                    {verifyAllowedRepos.map((r) => (
-                                      <button
-                                        key={r.id}
-                                        type="button"
-                                        onClick={() => { setVerifyRepoId(r.id); setVerifyRepoOpen(false); }}
-                                        className={`crono-dd-item ${r.id === verifyRepoId ? 'active' : ''}`}
-                                      >
-                                        <span className="crono-dd-item-label">{r.label}</span>
-                                        {r.id === verifyRepoId && <Check size={14} className="crono-dd-check" />}
-                                      </button>
-                                    ))}
-                                  </motion.div>
-                                )}
-                              </AnimatePresence>
-                            </div>
+                        {/* Repositorio — siempre editable, no queda fijo por categoría */}
+                        <div className="crono-verify-field">
+                          <label className="crono-verify-label">Repositorio del commit</label>
+                          <div className={`crono-dd-wrap ${verifyRepoOpen ? 'dd-open' : ''}`}>
+                            <button
+                              type="button"
+                              className="crono-dd-trigger"
+                              style={{ width: '100%', justifyContent: 'space-between' }}
+                              onClick={() => setVerifyRepoOpen((o) => !o)}
+                            >
+                              <span className="crono-dd-text">
+                                <GitBranch size={13} style={{ marginRight: 6, display: 'inline-block', verticalAlign: 'middle' }} />
+                                {verifySelectedRepo ? verifySelectedRepo.label : 'Selecciona un repositorio'}
+                              </span>
+                              <ChevronDown size={14} className={`crono-dd-chevron ${verifyRepoOpen ? 'open' : ''}`} />
+                            </button>
+                            <AnimatePresence>
+                              {verifyRepoOpen && (
+                                <motion.div
+                                  initial={{ opacity: 0, y: 6, scale: 0.98 }}
+                                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                                  exit={{ opacity: 0, y: 6, scale: 0.98 }}
+                                  transition={{ duration: 0.18 }}
+                                  className="crono-dd-menu tech-select-menu"
+                                  style={{ width: '100%' }}
+                                >
+                                  {REPOS.map((r) => (
+                                    <button
+                                      key={r.id}
+                                      type="button"
+                                      onClick={() => { setVerifyRepoId(r.id); setVerifyRepoOpen(false); }}
+                                      className={`crono-dd-item ${r.id === verifyRepoId ? 'active' : ''}`}
+                                    >
+                                      <span className="crono-dd-item-label">{r.label}</span>
+                                      {r.id === verifyRepoId && <Check size={14} className="crono-dd-check" />}
+                                    </button>
+                                  ))}
+                                </motion.div>
+                              )}
+                            </AnimatePresence>
                           </div>
-                        ) : verifySelectedRepo && (
-                          <p className="crono-verify-subtitle">
-                            Repositorio: <strong>{verifySelectedRepo.label}</strong>
-                          </p>
-                        )}
+                        </div>
 
                         {/* Rama */}
                         <div className="crono-verify-field">

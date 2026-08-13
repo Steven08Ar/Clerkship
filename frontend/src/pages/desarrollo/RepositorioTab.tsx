@@ -10,7 +10,7 @@ import { subscribeEvidenceMap, saveEvidence, removeEvidence } from '../../data/r
 import type { RepoEvidence } from '../../data/repoEvidence';
 import { fetchBranches, fetchCommits, githubFetchErrorMessage } from '../../data/githubApi';
 import type { GitHubBranch, GitHubCommit } from '../../data/githubApi';
-import { REPOS, repoUrl, getReposForCategory } from '../../data/repos';
+import { REPOS, repoUrl } from '../../data/repos';
 import type { RepoConfig } from '../../data/repos';
 import { authenticateMember, authErrorMessage, isFirstLogin, setNewPassword, validateNewPassword } from '../../data/devAuth';
 import { TEAM_MEMBERS } from '../../data/teamData';
@@ -217,10 +217,8 @@ export default function RepositorioTab() {
     }
   };
 
-  // Solo se pueden etiquetar hitos cuyo repo de evidencia válido incluya el repo que se está viendo
-  const milestonesForSelectedRepo = MILESTONES.filter((m) =>
-    getReposForCategory(m.catId).some((r) => r.id === selectedRepo.id)
-  );
+  // Cualquier hito puede etiquetarse con un commit de cualquiera de los repos —
+  // no se restringe por categoría, para poder corregir manualmente si hace falta.
 
   return (
     <div className="repo-wrapper">
@@ -376,7 +374,7 @@ export default function RepositorioTab() {
                             className="crono-dd-menu tech-select-menu repo-milestone-menu"
                           >
                             <div className="crono-dd-header">¿A QUÉ ENTREGA CORRESPONDE?</div>
-                            {milestonesForSelectedRepo.map((m) => (
+                            {MILESTONES.map((m) => (
                               <button
                                 key={m.key}
                                 type="button"

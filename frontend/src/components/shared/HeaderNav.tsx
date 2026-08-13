@@ -72,16 +72,6 @@ export default function HeaderNav({ activeTab }: HeaderNavProps) {
 
         {/* ── Actions Right (Desktop) ────────────────────────────── */}
         <div className="lp-nav-actions">
-          <button
-            type="button"
-            className="lp-header-theme-toggle-btn"
-            onClick={toggleTheme}
-            title={theme === 'dark' ? 'Cambiar a Modo Claro' : 'Cambiar a Modo Oscuro'}
-            aria-label="Cambiar tema"
-          >
-            {theme === 'dark' ? <Sun size={18} style={{ color: '#FBBF24' }} /> : <Moon size={18} style={{ color: '#4F46E5' }} />}
-          </button>
-
           <div className="lp-lang-toggle">
             <span className="lp-lang-on">ES</span>
             <div className="lp-lang-switch"></div>
