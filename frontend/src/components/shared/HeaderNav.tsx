@@ -1,4 +1,7 @@
+import { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Menu, X, ArrowRight, LayoutDashboard, Calendar, FileText, Sparkles } from 'lucide-react';
 import logoUrl from '../../assets/Logo Clerkship.svg';
 
 interface HeaderNavProps {
@@ -7,6 +10,7 @@ interface HeaderNavProps {
 
 export default function HeaderNav({ activeTab }: HeaderNavProps) {
   const { pathname } = useLocation();
+  const [mobileOpen, setMobileOpen] = useState(false);
 
   const isCurrent = (tab: string, route: string) => {
     if (activeTab) return activeTab === tab;
@@ -18,55 +22,174 @@ export default function HeaderNav({ activeTab }: HeaderNavProps) {
     localStorage.getItem('clerkship_consent') === 'accepted';
 
   return (
-    <nav className="lp-nav">
-      {/* ── Logo Left ────────────────────────────────────────── */}
-      <div className="lp-nav-left">
-        <Link to="/" className="lp-logo">
-          <img src={logoUrl} alt="Clerkship" className="lp-logo-img" />
-          Clerkship
-        </Link>
-      </div>
-
-      {/* ── Centered Navigation Links ── */}
-      <div className="lp-navlinks-centered">
-        <Link
-          to="/"
-          className={`lp-navlink ${isCurrent('inicio', '/') ? 'lp-navlink-on' : ''}`}
-        >
-          Inicio
-        </Link>
-
-        <Link
-          to="/proyecto"
-          className={`lp-navlink ${isCurrent('como-funciona', '/proyecto') ? 'lp-navlink-on' : ''}`}
-        >
-          Cómo funciona
-        </Link>
-
-        <Link
-          to="/cronograma"
-          className={`lp-navlink ${isCurrent('cronograma', '/cronograma') ? 'lp-navlink-on' : ''}`}
-        >
-          Cronograma
-        </Link>
-      </div>
-
-      {/* ── Actions Right ────────────────────────────────────── */}
-      <div className="lp-nav-actions">
-        <div className="lp-lang-toggle">
-          <span className="lp-lang-on">ES</span>
-          <div className="lp-lang-switch"></div>
+    <>
+      <nav className="lp-nav">
+        {/* ── Logo Left ────────────────────────────────────────── */}
+        <div className="lp-nav-left">
+          <Link to="/" className="lp-logo" onClick={() => setMobileOpen(false)}>
+            <img src={logoUrl} alt="Clerkship" className="lp-logo-img" />
+            Clerkship
+          </Link>
         </div>
 
-        {isAuthenticated ? (
-          <Link to="/dashboard" className="lp-btn-solid">Ir al Dashboard</Link>
-        ) : (
-          <>
-            <Link to="/login" className="lp-btn-outline">Ingresar</Link>
-            <Link to="/register" className="lp-btn-solid">Registrarse</Link>
-          </>
+        {/* ── Centered Navigation Links (Desktop) ── */}
+        <div className="lp-navlinks-centered">
+          <Link
+            to="/"
+            className={`lp-navlink ${isCurrent('inicio', '/') ? 'lp-navlink-on' : ''}`}
+          >
+            Inicio
+          </Link>
+
+          <Link
+            to="/proyecto"
+            className={`lp-navlink ${isCurrent('como-funciona', '/proyecto') ? 'lp-navlink-on' : ''}`}
+          >
+            Cómo funciona
+          </Link>
+
+          <Link
+            to="/cronograma"
+            className={`lp-navlink ${isCurrent('cronograma', '/cronograma') ? 'lp-navlink-on' : ''}`}
+          >
+            Cronograma
+          </Link>
+        </div>
+
+        {/* ── Actions Right (Desktop) ────────────────────────────── */}
+        <div className="lp-nav-actions">
+          <div className="lp-lang-toggle">
+            <span className="lp-lang-on">ES</span>
+            <div className="lp-lang-switch"></div>
+          </div>
+
+          {isAuthenticated ? (
+            <Link to="/dashboard" className="lp-btn-solid">Ir al Dashboard</Link>
+          ) : (
+            <>
+              <Link to="/login" className="lp-btn-outline">Ingresar</Link>
+              <Link to="/register" className="lp-btn-solid">Registrarse</Link>
+            </>
+          )}
+        </div>
+
+        {/* ── Botón Hamburguesa para Móvil ─────────────────────── */}
+        <button
+          className="lp-hamburger-btn"
+          onClick={() => setMobileOpen(!mobileOpen)}
+          aria-label="Abrir menú"
+          type="button"
+        >
+          {mobileOpen ? <X size={22} /> : <Menu size={22} />}
+        </button>
+      </nav>
+
+      {/* ── Menú Desplegable Móvil (Drawer Overlay) ───────────── */}
+      <AnimatePresence>
+        {mobileOpen && (
+          <motion.div
+            className="lp-mobile-drawer-overlay"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={() => setMobileOpen(false)}
+          >
+            <motion.div
+              className="lp-mobile-drawer-content"
+              initial={{ y: -20, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              exit={{ y: -20, opacity: 0 }}
+              transition={{ duration: 0.22, ease: 'easeOut' }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="lp-mobile-drawer-header">
+                <div className="lp-logo">
+                  <img src={logoUrl} alt="Clerkship" className="lp-logo-img" />
+                  <span>Clerkship</span>
+                </div>
+                <button
+                  className="lp-mobile-close-btn"
+                  onClick={() => setMobileOpen(false)}
+                  type="button"
+                >
+                  <X size={20} />
+                </button>
+              </div>
+
+              <div className="lp-mobile-menu-links">
+                <Link
+                  to="/"
+                  className={`lp-mobile-menu-item ${isCurrent('inicio', '/') ? 'active' : ''}`}
+                  onClick={() => setMobileOpen(false)}
+                >
+                  <Sparkles size={16} /> Inicio
+                </Link>
+
+                <Link
+                  to="/proyecto"
+                  className={`lp-mobile-menu-item ${isCurrent('como-funciona', '/proyecto') ? 'active' : ''}`}
+                  onClick={() => setMobileOpen(false)}
+                >
+                  <FileText size={16} /> Cómo funciona
+                </Link>
+
+                <Link
+                  to="/cronograma"
+                  className={`lp-mobile-menu-item ${isCurrent('cronograma', '/cronograma') ? 'active' : ''}`}
+                  onClick={() => setMobileOpen(false)}
+                >
+                  <Calendar size={16} /> Cronograma
+                </Link>
+
+                <Link
+                  to="/cuestionario"
+                  className="lp-mobile-menu-item"
+                  onClick={() => setMobileOpen(false)}
+                >
+                  <FileText size={16} /> Registro Técnico
+                </Link>
+
+                <Link
+                  to="/desarrollo"
+                  className="lp-mobile-menu-item"
+                  onClick={() => setMobileOpen(false)}
+                >
+                  <LayoutDashboard size={16} /> Hub de Desarrollo
+                </Link>
+              </div>
+
+              <div className="lp-mobile-drawer-footer">
+                {isAuthenticated ? (
+                  <Link
+                    to="/dashboard"
+                    className="lp-mobile-btn-solid"
+                    onClick={() => setMobileOpen(false)}
+                  >
+                    Ir al Dashboard <ArrowRight size={16} />
+                  </Link>
+                ) : (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 10, width: '100%' }}>
+                    <Link
+                      to="/login"
+                      className="lp-mobile-btn-outline"
+                      onClick={() => setMobileOpen(false)}
+                    >
+                      Ingresar
+                    </Link>
+                    <Link
+                      to="/register"
+                      className="lp-mobile-btn-solid"
+                      onClick={() => setMobileOpen(false)}
+                    >
+                      Registrarse <ArrowRight size={16} />
+                    </Link>
+                  </div>
+                )}
+              </div>
+            </motion.div>
+          </motion.div>
         )}
-      </div>
-    </nav>
+      </AnimatePresence>
+    </>
   );
 }
