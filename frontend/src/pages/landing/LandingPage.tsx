@@ -4,7 +4,6 @@ import {
   ClipboardList, PenTool, Code, CheckCircle, Settings,
   BrainCircuit, Database, FileText, Network, Sparkles, Layout, Cloud
 } from 'lucide-react';
-import logoUrl from '../../assets/Logo Clerkship.svg';
 import InteractiveBackgroundCanvas from '../../components/shared/InteractiveBackgroundCanvas';
 
 /* ══════════════════════════════════════════════════════
@@ -67,6 +66,8 @@ const MET_STEPS = [
   { id: 4, title: 'Gestionar',   Icon: Settings,      desc: 'Dirección del sprint, Longitud de iteración' },
 ];
 
+import HeaderNav from '../../components/shared/HeaderNav';
+
 /* ══════════════════════════════════════════════════════
    Page
 ══════════════════════════════════════════════════════ */
@@ -105,38 +106,8 @@ export default function LandingPage() {
       onDragStart={e => e.preventDefault()}
     >
       <InteractiveBackgroundCanvas />
-      {/* ── Navbar ── */}
-      <nav className="lp-nav">
-        <div className="lp-nav-left">
-          <button className="lp-logo" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>
-            <img src={logoUrl} alt="Clerkship" className="lp-logo-img" />
-            Clerkship
-          </button>
-        </div>
-
-        <div className="lp-navlinks-wrap">
-          <div className="lp-navlinks">
-            <button className="lp-navlink lp-navlink-on" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>Inicio</button>
-            <button className="lp-navlink" onClick={() => scrollTo('tecnologia')}>Casos clínicos</button>
-            <a href="/proyecto" className="lp-navlink">Cómo funciona</a>
-          </div>
-          <button className="lp-menu-btn">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
-              <line x1="4" y1="8" x2="20" y2="8" />
-              <line x1="4" y1="16" x2="20" y2="16" />
-            </svg>
-          </button>
-        </div>
-
-        <div className="lp-nav-actions">
-          <div className="lp-lang-toggle">
-            <span className="lp-lang-on">ES</span>
-            <div className="lp-lang-switch"></div>
-          </div>
-          <a href="/login" className="lp-btn-outline">Ingresar</a>
-          <a href="/register" className="lp-btn-solid">Registrarse</a>
-        </div>
-      </nav>
+      {/* ── Navbar centrada ── */}
+      <HeaderNav activeTab="inicio" />
 
       {/* ══════════════════════════════════════════════
           Hero
@@ -339,7 +310,7 @@ export default function LandingPage() {
         {/* Top Wave Transition */}
         <div className="lp-met-wave-top">
           <svg viewBox="0 0 1440 120" preserveAspectRatio="none">
-            <path fill="rgba(255, 255, 255, 0.75)" d="M0,40L60,48C120,56,240,72,360,74.7C480,77,600,67,720,53.3C840,40,960,21,1080,16C1200,11,1320,21,1380,26.7L1440,32L1440,120L1380,120C1320,120,1200,120,1080,120C960,120,840,120,720,120C600,120,480,120,360,120C240,120,120,120,60,120L0,120Z"></path>
+            <path className="lp-met-wave-path" d="M0,40L60,48C120,56,240,72,360,74.7C480,77,600,67,720,53.3C840,40,960,21,1080,16C1200,11,1320,21,1380,26.7L1440,32L1440,120L1380,120C1320,120,1200,120,1080,120C960,120,840,120,720,120C600,120,480,120,360,120C240,120,120,120,60,120L0,120Z"></path>
           </svg>
         </div>
 
@@ -361,10 +332,11 @@ export default function LandingPage() {
           <div className="lp-met-timeline">
             
             {/* Background Line Wrapper */}
-            <div style={{ position: 'absolute', top: '63px', left: '24px', right: '24px', height: '2px', background: '#E2E8F0', zIndex: 0 }}>
+            <div className="lp-met-line-wrap" style={{ position: 'absolute', top: '63px', left: '24px', right: '24px', height: '2px', zIndex: 0 }}>
               {/* Animated Progress Line */}
               <motion.div 
-                style={{ position: 'absolute', top: '0', left: '0', bottom: '0', zIndex: 1, background: '#1976D2' }}
+                className="lp-met-line-progress"
+                style={{ position: 'absolute', top: '0', left: '0', bottom: '0', zIndex: 1 }}
                 animate={{ width: `${(activeMetStep / (MET_STEPS.length - 1)) * 100}%` }}
                 transition={{ duration: 0.6, ease: 'easeInOut' }}
               />
@@ -388,6 +360,9 @@ export default function LandingPage() {
                 >
                   {/* Node Circle */}
                   <motion.div
+                    className="lp-met-node"
+                    data-active={isActive}
+                    data-past={isPast}
                     style={{
                       width: '48px',
                       height: '48px',
@@ -395,11 +370,7 @@ export default function LandingPage() {
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
-                      background: isActive ? '#1976D2' : (isPast ? '#0D47A1' : '#FFFFFF'),
-                      color: isActive || isPast ? '#FFFFFF' : '#94A3B8',
-                      cursor: 'pointer',
-                      border: isPast ? `2px solid #0D47A1` : `2px solid #CFD8DC`,
-                      boxShadow: isActive ? '0 0 0 8px rgba(25, 118, 210, 0.15)' : 'none'
+                      cursor: 'pointer'
                     }}
                     animate={{
                       scale: isActive ? 1.15 : 1,
@@ -411,7 +382,7 @@ export default function LandingPage() {
                   </motion.div>
 
                   {/* Node Label */}
-                  <div style={{ marginTop: '16px', fontWeight: isActive ? 700 : 600, color: isActive ? '#0D47A1' : '#78909C', fontSize: '0.85rem', transition: 'all 0.3s' }}>
+                  <div className="lp-met-label" data-active={isActive} style={{ marginTop: '16px', fontWeight: isActive ? 700 : 600, fontSize: '0.85rem', transition: 'all 0.3s' }}>
                     {step.title}
                   </div>
 
@@ -430,25 +401,23 @@ export default function LandingPage() {
                     <AnimatePresence>
                       {isActive && (
                         <motion.div
+                          className="lp-met-popover"
                           initial={{ opacity: 0, y: 10 }}
                           animate={{ opacity: 1, y: 0 }}
                           exit={{ opacity: 0, y: -10 }}
                           transition={{ duration: 0.3 }}
                           style={{
-                            background: '#FFFFFF',
                             padding: '24px',
                             borderRadius: '16px',
-                            boxShadow: '0 20px 40px -10px rgba(13,71,161,0.12)',
                             width: '100%',
                             textAlign: 'left',
-                            border: '1px solid #E3F2FD',
                             position: 'relative'
                           }}
                         >
-                          <h3 style={{ fontSize: '1.05rem', fontWeight: 800, color: '#0D47A1', marginBottom: '8px' }}>
+                          <h3 className="lp-met-popover-h3" style={{ fontSize: '1.05rem', fontWeight: 800, marginBottom: '8px' }}>
                             {step.title}
                           </h3>
-                          <p style={{ fontSize: '0.85rem', color: '#455A64', lineHeight: 1.6, margin: 0 }}>
+                          <p className="lp-met-popover-p" style={{ fontSize: '0.85rem', lineHeight: 1.6, margin: 0 }}>
                             {step.desc}
                           </p>
                         </motion.div>
@@ -464,7 +433,7 @@ export default function LandingPage() {
         {/* Bottom Wave Transition */}
         <div className="lp-met-wave-bottom">
           <svg viewBox="0 0 1440 120" preserveAspectRatio="none">
-            <path fill="rgba(255, 255, 255, 0.75)" d="M0,64L60,69.3C120,75,240,85,360,80C480,75,600,53,720,48C840,43,960,53,1080,64C1200,75,1320,85,1380,90.7L1440,96L1440,0L1380,0C1320,0,1200,0,1080,0C960,0,840,0,720,0C600,0,480,0,360,0C240,0,120,0,60,0L0,0Z"></path>
+            <path className="lp-met-wave-path" d="M0,64L60,69.3C120,75,240,85,360,80C480,75,600,53,720,48C840,43,960,53,1080,64C1200,75,1320,85,1380,90.7L1440,96L1440,0L1380,0C1320,0,1200,0,1080,0C960,0,840,0,720,0C600,0,480,0,360,0C240,0,120,0,60,0L0,0Z"></path>
           </svg>
         </div>
       </section>
@@ -560,7 +529,12 @@ export default function LandingPage() {
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ delay: i * 0.1, duration: 0.4 }}
               viewport={{ once: true }}
-              style={{ borderTop: `4px solid ${d.color}` }}
+              onMouseMove={(e) => {
+                const rect = e.currentTarget.getBoundingClientRect();
+                e.currentTarget.style.setProperty('--mouse-x', `${e.clientX - rect.left}px`);
+                e.currentTarget.style.setProperty('--mouse-y', `${e.clientY - rect.top}px`);
+              }}
+              style={{ borderTop: `4px solid ${d.color}`, '--dev-color': d.color } as React.CSSProperties}
             >
                <div className="lp-equipo-avatar-box" style={{ borderColor: `${d.color}40` }}>
                  <img 
@@ -585,10 +559,6 @@ export default function LandingPage() {
                      </span>
                    ))}
                  </div>
-               </div>
-               
-               <div className="lp-equipo-pill">
-                 <span className="lp-equipo-initials" style={{ color: d.color }}>{d.initials}</span>
                </div>
             </motion.div>
           ))}

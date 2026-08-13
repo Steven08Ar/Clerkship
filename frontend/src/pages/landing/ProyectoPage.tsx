@@ -1,12 +1,11 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import logoUrl from '../../assets/Clerkship.svg';
 import InteractiveBackgroundCanvas from '../../components/shared/InteractiveBackgroundCanvas';
 import {
   Stethoscope, Activity, Microscope,
   ShieldCheck, Database, BrainCircuit,
-  Users, CheckCircle2, FlaskConical, MapPin,
-  Code, Layout, Cloud, Cpu, Sparkles, User, FileText,
+  Users, CheckCircle2, FlaskConical,
+  Code, Layout, Cloud, Cpu, Sparkles, FileText,
   Network, ChevronRight, BookOpen, FileSpreadsheet
 } from 'lucide-react';
 
@@ -14,59 +13,43 @@ import {
    Data Structures
 ══════════════════════════════════════════════════════ */
 
-const TEAM_MEMBERS = [
-  {
-    name: 'Zabdiel Julian Quintero Monroy',
-    role: 'Especialista en Agentes de IA',
-    color: '#1976D2',
-    seed: 'Felix',
-    desc: 'Mente detrás de los agentes de IA, arquitecturas multi-agente, generación RAG y motor de razonamiento Chain-of-Thought.',
+const DEVS = [
+  { initials: 'ZQ', name: 'Zabdiel Julian Quintero Monroy', seed: 'Felix', color: '#3B82F6',
+    focus: 'Agentes de IA · Motor LLM · Prompts CoT · RAG',
+    desc: 'Líder en arquitectura de IA. Diseña y optimiza los modelos de lenguaje, el motor RAG y el razonamiento Chain-of-Thought para la generación de casos clínicos.',
     skills: [
       { label: 'Agentes IA', icon: BrainCircuit },
       { label: 'LLM & RAG', icon: Database },
       { label: 'Prompts CoT', icon: FileText },
-    ],
-    location: 'Colombia | AI Lead Architect',
+    ]
   },
-  {
-    name: 'Juan Camilo Rojas',
-    role: 'Especialista en Agentes de IA',
-    color: '#0288D1',
-    seed: 'Leo',
-    desc: 'Mente detrás de la orquestación de agentes de IA, simulación de pacientes virtuales y análisis de razonamiento.',
+  { initials: 'JR', name: 'Juan Camilo Rojas', seed: 'Leo', color: '#EC4899',
+    focus: 'Agentes de IA · Multi-Agente · CoT · Arquitectura IA',
+    desc: 'Especialista en agentes inteligentes. Orquesta el flujo multi-agente, la simulación del paciente virtual y el análisis automatizado de sesgos cognitivos.',
     skills: [
       { label: 'Agentes IA', icon: BrainCircuit },
       { label: 'Multi-Agente', icon: Network },
       { label: 'Fine-Tuning', icon: Sparkles },
-    ],
-    location: 'Colombia | AI Agent Specialist',
+    ]
   },
-  {
-    name: 'Santiago Steven Arias Estupiñan',
-    role: 'Desarrollador Frontend & Conexión',
-    color: '#0097A7',
-    seed: 'Aneka',
-    desc: 'Mente detrás de la interfaz de usuario, diseño interactivo, experiencia visual y conexión directa del sistema.',
+  { initials: 'SA', name: 'Santiago Steven Arias Estupiñan', seed: 'Aneka', color: '#10B981',
+    focus: 'Frontend · React · UI/UX · Conexión del Sistema',
+    desc: 'Líder de desarrollo Frontend. Diseña y construye la interfaz interactiva en React 19, los visores 3D y la conexión integral con el motor clínico.',
     skills: [
-      { label: 'React 18', icon: Code },
+      { label: 'React', icon: Code },
       { label: 'TypeScript', icon: Layout },
       { label: 'UI/UX', icon: Sparkles },
-    ],
-    location: 'Colombia | Frontend Engineer',
+    ]
   },
-  {
-    name: 'Camilo Andres Bueno Rey',
-    role: 'Desarrollador Backend & Conexión',
-    color: '#0D47A1',
-    seed: 'Jasper',
-    desc: 'Mente detrás del servidor backend, consumo de APIs, servicios REST y la arquitectura de conexión de componentes.',
+  { initials: 'CB', name: 'Camilo Andres Bueno Rey', seed: 'Jasper', color: '#8B5CF6',
+    focus: 'Backend · Node.js · API REST · Conexión del Sistema',
+    desc: 'Líder de arquitectura Backend. Construye el servidor API REST en Node.js, la gestión de datos y la infraestructura de conexión entre sistemas.',
     skills: [
-      { label: 'FastAPI', icon: Cloud },
+      { label: 'Node.js', icon: Cloud },
       { label: 'API REST', icon: Database },
-      { label: 'LangGraph', icon: Network },
-    ],
-    location: 'Colombia | Backend & Integration',
-  }
+      { label: 'Backend', icon: Cpu },
+    ]
+  },
 ];
 
 const METRICS = [
@@ -121,6 +104,8 @@ const REFERENCES = [
   { authors: 'Singhal, K., et al.', title: 'Large language models encode clinical knowledge (Med-PaLM).', where: 'Nature, 620, 172–180. 2023.' }
 ];
 
+import HeaderNav from '../../components/shared/HeaderNav';
+
 /* ══════════════════════════════════════════════════════
    Component
 ══════════════════════════════════════════════════════ */
@@ -137,38 +122,8 @@ export default function ProyectoPage() {
       {/* Interactive Floating Background Canvas (Fixed behind everything) */}
       <InteractiveBackgroundCanvas />
 
-      {/* ── Navbar ── */}
-      <nav className="lp-nav">
-        <div className="lp-nav-left">
-          <a href="/" className="lp-logo">
-            <img src={logoUrl} alt="Clerkship" className="lp-logo-img" />
-            Clerkship
-          </a>
-        </div>
-
-        <div className="lp-navlinks-wrap">
-          <div className="lp-navlinks">
-            <a href="/" className="lp-navlink">Inicio</a>
-            <a href="/#tecnologia" className="lp-navlink">Casos clínicos</a>
-            <a href="/proyecto" className="lp-navlink lp-navlink-on">Cómo funciona</a>
-          </div>
-          <button className="lp-menu-btn">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
-              <line x1="4" y1="8" x2="20" y2="8" />
-              <line x1="4" y1="16" x2="20" y2="16" />
-            </svg>
-          </button>
-        </div>
-
-        <div className="lp-nav-actions">
-          <div className="lp-lang-toggle">
-            <span className="lp-lang-on">ES</span>
-            <div className="lp-lang-switch"></div>
-          </div>
-          <a href="/login" className="lp-btn-outline">Ingresar</a>
-          <a href="/register" className="lp-btn-solid">Registrarse</a>
-        </div>
-      </nav>
+      {/* ── Header Centrado Sin Hamburguesa ── */}
+      <HeaderNav activeTab="como-funciona" />
 
       {/* ══════════════════════════════════════════════
           Hero Section
@@ -393,7 +348,7 @@ export default function ProyectoPage() {
         {/* Top Wave */}
         <div className="lp-met-wave-top">
           <svg viewBox="0 0 1440 120" preserveAspectRatio="none">
-            <path fill="rgba(255, 255, 255, 0.75)" d="M0,40L60,48C120,56,240,72,360,74.7C480,77,600,67,720,53.3C840,40,960,21,1080,16C1200,11,1320,21,1380,26.7L1440,32L1440,120L1380,120C1320,120,1200,120,1080,120C960,120,840,120,720,120C600,120,480,120,360,120C240,120,120,120,60,120L0,120Z"></path>
+            <path className="lp-met-wave-path" d="M0,40L60,48C120,56,240,72,360,74.7C480,77,600,67,720,53.3C840,40,960,21,1080,16C1200,11,1320,21,1380,26.7L1440,32L1440,120L1380,120C1320,120,1200,120,1080,120C960,120,840,120,720,120C600,120,480,120,360,120C240,120,120,120,60,120L0,120Z"></path>
           </svg>
         </div>
 
@@ -435,7 +390,7 @@ export default function ProyectoPage() {
         {/* Bottom Wave */}
         <div className="lp-met-wave-bottom">
           <svg viewBox="0 0 1440 120" preserveAspectRatio="none">
-            <path fill="rgba(255, 255, 255, 0.75)" d="M0,64L60,69.3C120,75,240,85,360,80C480,75,600,53,720,48C840,43,960,53,1080,64C1200,75,1320,85,1380,90.7L1440,96L1440,0L1380,0C1320,0,1200,0,1080,0C960,0,840,0,720,0C600,0,480,0,360,0C240,0,120,0,60,0L0,0Z"></path>
+            <path className="lp-met-wave-path" d="M0,64L60,69.3C120,75,240,85,360,80C480,75,600,53,720,48C840,43,960,53,1080,64C1200,75,1320,85,1380,90.7L1440,96L1440,0L1380,0C1320,0,1200,0,1080,0C960,0,840,0,720,0C600,0,480,0,360,0C240,0,120,0,60,0L0,0Z"></path>
           </svg>
         </div>
       </section>
@@ -481,38 +436,47 @@ export default function ProyectoPage() {
           </p>
         </div>
 
-        <div className="proy-team-grid-web">
-          {TEAM_MEMBERS.map((m, i) => (
-            <div key={i} className="proy-team-web-card" style={{ borderTop: `4px solid ${m.color}` }}>
-              <div className="proy-team-web-avatar-box">
-                <img 
-                  src={`https://api.dicebear.com/7.x/notionists/svg?seed=${m.seed}&backgroundColor=${m.color.replace('#','')}`} 
-                  alt={m.name} 
-                  className="proy-team-web-avatar" 
-                />
-                <div className="proy-team-web-badge" style={{ backgroundColor: m.color }}>
-                  <User size={14} color="#fff" />
-                </div>
-              </div>
+        <div className="lp-equipo-cards">
+          {DEVS.map((d, i) => (
+            <motion.div 
+              key={d.initials} 
+              className="lp-equipo-card"
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ delay: i * 0.1, duration: 0.4 }}
+              viewport={{ once: true }}
+              onMouseMove={(e) => {
+                const rect = e.currentTarget.getBoundingClientRect();
+                e.currentTarget.style.setProperty('--mouse-x', `${e.clientX - rect.left}px`);
+                e.currentTarget.style.setProperty('--mouse-y', `${e.clientY - rect.top}px`);
+              }}
+              style={{ borderTop: `4px solid ${d.color}`, '--dev-color': d.color } as React.CSSProperties}
+            >
+               <div className="lp-equipo-avatar-box" style={{ borderColor: `${d.color}40` }}>
+                 <img 
+                   src={`https://api.dicebear.com/7.x/notionists/svg?seed=${d.seed}&backgroundColor=${d.color.replace('#','')}`} 
+                   alt={d.name} 
+                   className="lp-equipo-avatar" 
+                 />
+               </div>
 
-              <h3 className="proy-team-web-name">{m.name}</h3>
-              <span className="proy-team-web-role" style={{ color: m.color }}>{m.role}</span>
-              <p className="proy-team-web-desc">{m.desc}</p>
+               <div className="lp-equipo-card-top">
+                 <h4 className="lp-equipo-card-name">{d.name}</h4>
+                 <p className="lp-equipo-card-focus" style={{ color: d.color }}>{d.focus}</p>
+                 <p className="lp-equipo-card-desc">{d.desc}</p>
+               </div>
 
-              <div className="proy-team-web-skills">
-                {m.skills.map((s, j) => (
-                  <span key={j} className="proy-team-web-skill">
-                    <s.icon size={13} />
-                    {s.label}
-                  </span>
-                ))}
-              </div>
-
-              <div className="proy-team-web-loc">
-                <MapPin size={12} style={{ color: m.color }} />
-                <span>{m.location}</span>
-              </div>
-            </div>
+               <div className="lp-equipo-skills-wrap">
+                 <div className="lp-equipo-skills-divider" />
+                 <div className="lp-equipo-skills">
+                   {d.skills.map((s, j) => (
+                     <span key={j} className="lp-equipo-skill-tag">
+                       <s.icon size={13} /> {s.label}
+                     </span>
+                   ))}
+                 </div>
+               </div>
+            </motion.div>
           ))}
         </div>
       </section>
