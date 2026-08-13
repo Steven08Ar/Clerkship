@@ -1548,7 +1548,16 @@ export default function CronogramaTab() {
                               type="button"
                               className="crono-dd-trigger"
                               style={{ width: '100%', justifyContent: 'space-between' }}
-                              onClick={() => setVerifyRepoOpen((o) => !o)}
+                              onClick={() => {
+                                setVerifyRepoOpen((o) => {
+                                  const next = !o;
+                                  if (next) {
+                                    setVerifyBranchOpen(false);
+                                    setVerifyCommitOpen(false);
+                                  }
+                                  return next;
+                                });
+                              }}
                             >
                               <span className="crono-dd-text">
                                 <GitBranch size={13} style={{ marginRight: 6, display: 'inline-block', verticalAlign: 'middle' }} />
@@ -1570,7 +1579,12 @@ export default function CronogramaTab() {
                                     <button
                                       key={r.id}
                                       type="button"
-                                      onClick={() => { setVerifyRepoId(r.id); setVerifyRepoOpen(false); }}
+                                      onClick={() => {
+                                        setVerifyRepoId(r.id);
+                                        setVerifyRepoOpen(false);
+                                        setVerifyBranchOpen(false);
+                                        setVerifyCommitOpen(false);
+                                      }}
                                       className={`crono-dd-item ${r.id === verifyRepoId ? 'active' : ''}`}
                                     >
                                       <span className="crono-dd-item-label">{r.label}</span>
@@ -1591,7 +1605,16 @@ export default function CronogramaTab() {
                               type="button"
                               className="crono-dd-trigger"
                               style={{ width: '100%', justifyContent: 'space-between' }}
-                              onClick={() => setVerifyBranchOpen((o) => !o)}
+                              onClick={() => {
+                                setVerifyBranchOpen((o) => {
+                                  const next = !o;
+                                  if (next) {
+                                    setVerifyRepoOpen(false);
+                                    setVerifyCommitOpen(false);
+                                  }
+                                  return next;
+                                });
+                              }}
                               disabled={!verifyRepoId || verifyBranchesStatus !== 'ok'}
                             >
                               <span className="crono-dd-text">
@@ -1616,7 +1639,11 @@ export default function CronogramaTab() {
                                     <button
                                       key={b.name}
                                       type="button"
-                                      onClick={() => { setVerifyBranch(b.name); setVerifyBranchOpen(false); }}
+                                      onClick={() => {
+                                        setVerifyBranch(b.name);
+                                        setVerifyBranchOpen(false);
+                                        setVerifyCommitOpen(false);
+                                      }}
                                       className={`crono-dd-item ${b.name === verifyBranch ? 'active' : ''}`}
                                     >
                                       <span className="crono-dd-item-label">{b.name}</span>
@@ -1637,7 +1664,16 @@ export default function CronogramaTab() {
                               type="button"
                               className="crono-dd-trigger"
                               style={{ width: '100%', justifyContent: 'space-between' }}
-                              onClick={() => setVerifyCommitOpen((o) => !o)}
+                              onClick={() => {
+                                setVerifyCommitOpen((o) => {
+                                  const next = !o;
+                                  if (next) {
+                                    setVerifyRepoOpen(false);
+                                    setVerifyBranchOpen(false);
+                                  }
+                                  return next;
+                                });
+                              }}
                               disabled={verifyCommitsStatus !== 'ok'}
                             >
                               <span className="crono-dd-text">
@@ -1665,7 +1701,10 @@ export default function CronogramaTab() {
                                     <button
                                       key={c.sha}
                                       type="button"
-                                      onClick={() => { setVerifyCommitSha(c.sha); setVerifyCommitOpen(false); }}
+                                      onClick={() => {
+                                        setVerifyCommitSha(c.sha);
+                                        setVerifyCommitOpen(false);
+                                      }}
                                       className={`crono-dd-item ${c.sha === verifyCommitSha ? 'active' : ''}`}
                                     >
                                       <span className="crono-dd-item-label">

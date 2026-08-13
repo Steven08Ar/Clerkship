@@ -2719,6 +2719,12 @@
 
 .crono-verify-field {
   margin-bottom: 16px;
+  position: relative;
+  z-index: 1;
+}
+
+.crono-verify-field:has(.dd-open) {
+  z-index: 900 !important;
 }
 
 .crono-verify-label {
