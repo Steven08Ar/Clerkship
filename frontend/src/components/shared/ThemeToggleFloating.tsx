@@ -28,12 +28,10 @@ export default function ThemeToggleFloating() {
   };
 
   return (
-    <motion.button
+    <button
       type="button"
       className="theme-toggle-floating-btn"
       onClick={toggleTheme}
-      whileHover={{ scale: 1.15 }}
-      whileTap={{ scale: 0.9 }}
       title={theme === 'dark' ? 'Cambiar a Modo Claro' : 'Cambiar a Modo Oscuro'}
       aria-label="Cambiar tema claro/oscuro"
     >
@@ -53,6 +51,6 @@ export default function ThemeToggleFloating() {
           )}
         </motion.div>
       </AnimatePresence>
-    </motion.button>
+    </button>
   );
 }

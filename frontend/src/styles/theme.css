@@ -39,12 +39,11 @@ html.theme-animating .crono-gantt-card {
               box-shadow 0.45s cubic-bezier(0.4, 0, 0.2, 1) !important;
 }
 
-/* ── Botón Flotante Fijo a la Derecha ───────────────────────── */
+/* ── Botón Flotante Fijo a la Derecha (Estático e Inmóvil) ───────────────────────── */
 .theme-toggle-floating-btn {
   position: fixed;
   right: 22px;
-  top: 50%;
-  transform: translateY(-50%);
+  top: calc(50% - 25px);
   z-index: 99999;
   width: 50px;
   height: 50px;
@@ -54,16 +53,16 @@ html.theme-animating .crono-gantt-card {
   align-items: center;
   justify-content: center;
   backdrop-filter: blur(16px);
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: background-color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease, transform 0.2s ease;
   outline: none;
 }
 
 .theme-toggle-floating-btn:hover {
-  transform: translateY(-50%) scale(1.12);
+  transform: scale(1.08);
 }
 
 .theme-toggle-floating-btn:active {
-  transform: translateY(-50%) scale(0.95);
+  transform: scale(0.95);
 }
 
 @media (max-width: 768px) {
