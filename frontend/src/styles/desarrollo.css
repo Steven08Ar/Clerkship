@@ -998,8 +998,31 @@
   background: #FFFFFF;
   padding: 6px 14px;
   border-radius: 999px;
-  border: 1px solid #E2E8F0;
+  border: 1.5px solid #E2E8F0;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
+  transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.crono-avatar-item-wrap {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.crono-avatar-expanded-name {
+  font-size: 0.82rem;
+  font-weight: 800;
+  white-space: nowrap;
+  letter-spacing: -0.01em;
+  padding-left: 2px;
+  padding-right: 6px;
+  display: inline-block;
+}
+
+@media (max-width: 768px) {
+  .crono-responsible-group.has-active .crono-avatar-item-wrap:not(.is-active) {
+    display: none !important;
+  }
 }
 
 [data-theme="dark"] .crono-responsible-group {
@@ -1085,10 +1108,34 @@
 }
 
 /* Cuando varios crono-dd-wrap quedan apilados verticalmente (modales,
-   grids de selects), el que está abierto debe pintarse por encima de
-   los que vienen después en el DOM. */
+   grids de selects o toolbar móvil), el que está abierto se pinta por
+   encima de todos los demás elementos. */
 .crono-dd-wrap.dd-open {
-  z-index: 700;
+  z-index: 99999 !important;
+}
+
+@media (max-width: 768px) {
+  .crono-top-toolbar {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+  }
+
+  .crono-dd-wrap {
+    width: 100%;
+  }
+
+  .crono-dd-trigger {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .crono-dd-text {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    max-width: 80%;
+  }
 }
 
 .crono-dd-trigger {
