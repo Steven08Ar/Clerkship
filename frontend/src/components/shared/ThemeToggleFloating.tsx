@@ -1,22 +1,30 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Sun, Moon } from 'lucide-react';
+import { getInitialTheme, setInstantTheme, triggerThemeToggle, type ThemeMode } from '../../utils/themeHelper';
 import '../../styles/theme.css';
 
 export default function ThemeToggleFloating() {
-  const [theme, setTheme] = useState<'dark' | 'light'>(() => {
-    const saved = localStorage.getItem('clerkship_theme');
-    return (saved as 'dark' | 'light') || 'dark';
-  });
+  const [theme, setTheme] = useState<ThemeMode>(getInitialTheme);
 
   useEffect(() => {
-    document.documentElement.setAttribute('data-theme', theme);
-    document.body.setAttribute('data-theme', theme);
-    localStorage.setItem('clerkship_theme', theme);
-  }, [theme]);
+    // Aplicación instantánea inicial sin clase de animación
+    setInstantTheme(theme);
+
+    const handleThemeChange = (e: Event) => {
+      const customEv = e as CustomEvent<ThemeMode>;
+      if (customEv.detail) {
+        setTheme(customEv.detail);
+      }
+    };
+
+    window.addEventListener('clerkship-theme-change', handleThemeChange);
+    return () => window.removeEventListener('clerkship-theme-change', handleThemeChange);
+  }, []);
 
   const toggleTheme = () => {
-    setTheme((prev) => (prev === 'dark' ? 'light' : 'dark'));
+    const next = triggerThemeToggle(theme);
+    setTheme(next);
   };
 
   return (

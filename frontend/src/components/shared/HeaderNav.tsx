@@ -4,6 +4,8 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Menu, X, ArrowRight, Calendar, FileText, Sparkles, Sun, Moon } from 'lucide-react';
 import logoUrl from '../../assets/Logo Clerkship.svg';
 
+import { getInitialTheme, setInstantTheme, triggerThemeToggle, type ThemeMode } from '../../utils/themeHelper';
+
 interface HeaderNavProps {
   activeTab?: 'inicio' | 'como-funciona' | 'cronograma';
 }
@@ -11,19 +13,25 @@ interface HeaderNavProps {
 export default function HeaderNav({ activeTab }: HeaderNavProps) {
   const { pathname } = useLocation();
   const [mobileOpen, setMobileOpen] = useState(false);
-  const [theme, setTheme] = useState<'dark' | 'light'>(() => {
-    const saved = localStorage.getItem('clerkship_theme');
-    return (saved as 'dark' | 'light') || 'dark';
-  });
+  const [theme, setTheme] = useState<ThemeMode>(getInitialTheme);
 
   useEffect(() => {
-    document.documentElement.setAttribute('data-theme', theme);
-    document.body.setAttribute('data-theme', theme);
-    localStorage.setItem('clerkship_theme', theme);
-  }, [theme]);
+    setInstantTheme(theme);
+
+    const handleThemeChange = (e: Event) => {
+      const customEv = e as CustomEvent<ThemeMode>;
+      if (customEv.detail) {
+        setTheme(customEv.detail);
+      }
+    };
+
+    window.addEventListener('clerkship-theme-change', handleThemeChange);
+    return () => window.removeEventListener('clerkship-theme-change', handleThemeChange);
+  }, []);
 
   const toggleTheme = () => {
-    setTheme((prev) => (prev === 'dark' ? 'light' : 'dark'));
+    const next = triggerThemeToggle(theme);
+    setTheme(next);
   };
 
   const isCurrent = (tab: string, route: string) => {
