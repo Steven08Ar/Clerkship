@@ -6,6 +6,8 @@ import {
   AlertCircle, ArrowLeft, ArrowRight,
 } from 'lucide-react';
 import logoUrl from '../../assets/Logo Clerkship.svg';
+import SplineBackground from '../../components/three/SplineBackground';
+import ThemeToggleFloating from '../../components/shared/ThemeToggleFloating';
 
 /* ── Tipos ─────────────────────────────────────────────── */
 interface FormState {
@@ -76,11 +78,14 @@ export default function RegisterPage() {
   }
 
   return (
-    <div className="auth-shell">
+    <div className="auth-shell auth-shell-spline">
+      <ThemeToggleFloating />
+      <SplineBackground isLogged={false} />
+
       {/* ── Cuerpo centrado ─────────────────────────────────────── */}
       <div className="auth-body">
         <motion.div
-          className="auth-card"
+          className="auth-card auth-card-glass"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}

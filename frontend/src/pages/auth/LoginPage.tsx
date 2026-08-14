@@ -7,6 +7,7 @@ import {
 } from 'lucide-react';
 import logoUrl from '../../assets/Logo Clerkship.svg';
 import SplineBackground from '../../components/three/SplineBackground';
+import ThemeToggleFloating from '../../components/shared/ThemeToggleFloating';
 
 /* ── Tipos ─────────────────────────────────────────────── */
 interface FormState {
@@ -82,6 +83,7 @@ export default function LoginPage() {
 
   return (
     <div className="auth-shell auth-shell-spline">
+      <ThemeToggleFloating />
 
       {/* ── Spline animated background — receives isLogged to trigger assembly ── */}
       <SplineBackground isLogged={isLogged} />
