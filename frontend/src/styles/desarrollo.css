@@ -948,6 +948,8 @@
    ══════════════════════════════════════════════════════════════ */
 .crono-wrapper {
   width: 100%;
+  max-width: 1840px;
+  margin: 0 auto;
   height: 100%;
   display: flex;
   flex-direction: column;
@@ -3048,22 +3050,25 @@
   flex: 1;
   padding-top: 80px;
   padding-bottom: 24px;
-  padding-left: 20px;
-  padding-right: 20px;
+  padding-left: 16px;
+  padding-right: 16px;
   position: relative;
   z-index: 10;
   display: flex;
   flex-direction: column;
+  align-items: center;
   box-sizing: border-box;
+  width: 100%;
 }
 
 .crono-page-container {
   width: 100%;
-  max-width: 1720px;
+  max-width: 1840px;
   margin: 0 auto;
   flex: 1;
   display: flex;
   flex-direction: column;
+  align-items: center;
 }
 
 .crono-desktop-only {
