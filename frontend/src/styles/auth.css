@@ -552,7 +552,7 @@
 ══════════════════════════════════════════════════════════ */
 .cp-shell {
   min-height: 100vh;
-  background: var(--bg);
+  background: transparent;
   display: flex;
   flex-direction: column;
   position: relative;

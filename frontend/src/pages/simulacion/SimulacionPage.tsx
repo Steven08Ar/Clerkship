@@ -100,7 +100,7 @@ const TEST_RESULTS: Record<string, string> = {
   hemograma:  'Hb: 11.8 g/dL · GB: 9.200/μL · Plaquetas: 285.000/μL. Leve anemia normocítica.',
   eco:        'Hígado, páncreas y vesícula sin alteraciones. Sin líquido libre.',
   tac:        'Engrosamiento leve de mucosa gástrica en antro. Sin masas.',
-  evda:       '⚠️ HALLAZGO CLAVE — Úlcera péptica en antro gástrico 1.2 cm (Forrest IIc). Gastritis eritematosa difusa.',
+  evda:       '⚠️ HALLAZGO CLAVE - Úlcera péptica en antro gástrico 1.2 cm (Forrest IIc). Gastritis eritematosa difusa.',
 };
 
 /* ═══════════════════════════════════════════════════════════
