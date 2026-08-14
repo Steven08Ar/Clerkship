@@ -283,7 +283,7 @@ const isActivityOnDay = (dateLabel: string, dayNum: number, monthName: string): 
 
 
 export default function CronogramaTab() {
-  const [selectedCat, setSelectedCat] = useState<CategoryId>('modelos');
+  const [selectedCat, setSelectedCat] = useState<CategoryId>('general');
   const [selectedView, setSelectedView] = useState<ViewModeId>('predeterminado');
   const [catOpen, setCatOpen] = useState(false);
   const [viewOpen, setViewOpen] = useState(false);
@@ -784,7 +784,7 @@ export default function CronogramaTab() {
     }
   };
 
-  const activeCategory = CATEGORIES.find(c => c.id === selectedCat) || CATEGORIES[1];
+  const activeCategory = CATEGORIES.find(c => c.id === selectedCat) || CATEGORIES[0];
   const activeView = VIEW_OPTIONS.find(v => v.id === selectedView) || VIEW_OPTIONS[0];
   const activities = CRONOGRAMA_DATA[selectedCat] || [];
 
@@ -839,6 +839,55 @@ export default function CronogramaTab() {
               </motion.div>
             )}
           </AnimatePresence>
+        </div>
+
+        {/* Sección Central: Responsable(s) del Módulo o Equipo General */}
+        <div className="crono-responsible-badge">
+          {selectedCat === 'general' ? (
+            <div className="crono-responsible-group">
+              <span className="crono-responsible-label">RESPONSABLES:</span>
+              <div className="crono-responsible-avatars">
+                {TEAM_MEMBERS.map((member) => (
+                  <div
+                    key={member.id}
+                    className="crono-avatar-circle"
+                    title={`${member.name} (${member.role})`}
+                    style={{ borderColor: member.color, boxShadow: `0 0 10px ${member.color}33` }}
+                  >
+                    <img src={member.avatarUrl} alt={member.name} />
+                  </div>
+                ))}
+              </div>
+            </div>
+          ) : (
+            (() => {
+              const respMember =
+                selectedCat === 'modelos' ? TEAM_MEMBERS.find(m => m.id === 'zabdiel') :
+                selectedCat === 'agentes' ? TEAM_MEMBERS.find(m => m.id === 'juan-camilo') :
+                selectedCat === 'backend' ? TEAM_MEMBERS.find(m => m.id === 'camilo-bueno') :
+                selectedCat === 'frontend' ? TEAM_MEMBERS.find(m => m.id === 'santiago') : null;
+
+              if (!respMember) return null;
+
+              return (
+                <div
+                  className="crono-responsible-single"
+                  style={{ borderColor: `${respMember.color}50`, backgroundColor: `${respMember.color}15` }}
+                >
+                  <span className="crono-responsible-tag" style={{ color: respMember.color }}>RESPONSABLE:</span>
+                  <div
+                    className="crono-avatar-circle single"
+                    style={{ borderColor: respMember.color, boxShadow: `0 0 12px ${respMember.color}44` }}
+                  >
+                    <img src={respMember.avatarUrl} alt={respMember.name} />
+                  </div>
+                  <span className="crono-responsible-name" style={{ color: respMember.color }}>
+                    {respMember.name}
+                  </span>
+                </div>
+              );
+            })()
+          )}
         </div>
 
         {/* Filtro Derecho: Visualización del Cronograma */}
