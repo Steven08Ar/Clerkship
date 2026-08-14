@@ -200,10 +200,10 @@ const WEEKS_CALENDAR_DAYS: Record<number, WeekDayInfo[]> = {
 };
 
 const MONTH_CALENDARS = [
-  { id: 'ago', name: 'AGOSTO 2026',     monthIndex: 8,  startDayOfWeek: 5, totalDays: 31 }, // 5 = Sábado
-  { id: 'sep', name: 'SEPTIEMBRE 2026', monthIndex: 9,  startDayOfWeek: 1, totalDays: 30 }, // 1 = Martes
-  { id: 'oct', name: 'OCTUBRE 2026',    monthIndex: 10, startDayOfWeek: 3, totalDays: 31 }, // 3 = Jueves
-  { id: 'nov', name: 'NOVIEMBRE 2026',  monthIndex: 11, startDayOfWeek: 6, totalDays: 30 }, // 6 = Domingo
+  { id: 'ago', name: 'AGOSTO',     monthIndex: 8,  startDayOfWeek: 5, totalDays: 31 }, // 5 = Sábado
+  { id: 'sep', name: 'SEPTIEMBRE', monthIndex: 9,  startDayOfWeek: 1, totalDays: 30 }, // 1 = Martes
+  { id: 'oct', name: 'OCTUBRE',    monthIndex: 10, startDayOfWeek: 3, totalDays: 31 }, // 3 = Jueves
+  { id: 'nov', name: 'NOVIEMBRE',  monthIndex: 11, startDayOfWeek: 6, totalDays: 30 }, // 6 = Domingo
 ];
 
 const isActivityOnDay = (dateLabel: string, dayNum: number, monthName: string): boolean => {
