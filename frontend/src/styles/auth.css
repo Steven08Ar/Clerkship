@@ -552,25 +552,31 @@
 ══════════════════════════════════════════════════════════ */
 .cp-shell {
   min-height: 100vh;
-  background: #F7F8FC;
+  background: transparent;
   display: flex;
   flex-direction: column;
+  position: relative;
   font-family: var(--font);
   color: var(--ink);
 }
 
-/* Navbar */
+/* Navbar (Sin fondo y ubicado detrás de la card en z-index 1) */
 .cp-nav {
   height: 72px;
   padding: 0 48px;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  position: sticky;
+  position: absolute;
   top: 0;
-  z-index: 10;
-  background: rgba(247,248,252,0.88);
-  backdrop-filter: blur(14px);
+  left: 0;
+  width: 100%;
+  z-index: 1;
+  background: transparent !important;
+  border-bottom: none !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  box-shadow: none !important;
 }
 
 .cp-logo {
@@ -595,31 +601,40 @@
   gap: 7px;
   padding: 6px 16px;
   border-radius: var(--r-ful);
-  background: var(--surface);
+  background: rgba(255, 255, 255, 0.8);
   font-size: 0.72rem;
   font-weight: 700;
   color: var(--ink2);
   letter-spacing: 0.05em;
   text-transform: uppercase;
   box-shadow: var(--sh-sm);
+  backdrop-filter: blur(12px);
 }
 
-/* Body */
+/* Body (Card centrada literalmente en la pestaña) */
 .cp-body {
   flex: 1;
+  min-height: 100vh;
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   justify-content: center;
-  padding: 28px 24px 60px;
+  padding: 80px 24px 40px;
+  position: relative;
+  z-index: 10;
 }
 
 .cp-wrap {
   width: 100%;
   max-width: 680px;
-  background: var(--surface);
+  background: rgba(255, 255, 255, 0.88);
+  border: 1px solid rgba(255, 255, 255, 0.7);
   border-radius: var(--r-2xl);
-  box-shadow: var(--sh-lg);
+  backdrop-filter: blur(28px);
+  -webkit-backdrop-filter: blur(28px);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.08), 0 1px 0 rgba(255, 255, 255, 0.9) inset;
   overflow: hidden;
+  position: relative;
+  z-index: 10;
 }
 
 /* Header */
