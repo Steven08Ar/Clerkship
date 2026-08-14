@@ -311,7 +311,7 @@ export default function CronogramaTab() {
     const timer = setTimeout(() => {
       setActiveAvatarId(null);
       setAvatarTimeoutId(null);
-    }, 5000);
+    }, 3000);
     setAvatarTimeoutId(timer);
   };
   const [popover, setPopover] = useState<{
@@ -907,17 +907,18 @@ export default function CronogramaTab() {
                             <img src={member.avatarUrl} alt={member.name} />
                           </button>
 
-                          <AnimatePresence>
+                          <AnimatePresence mode="wait">
                             {isSelected && (
                               <motion.span
                                 initial={{ opacity: 0, width: 0, x: -16 }}
                                 animate={{ opacity: 1, width: 'auto', x: 0 }}
-                                exit={{ opacity: 0, width: 0, x: -16 }}
+                                exit={{ opacity: 0, width: 0, x: 16 }}
                                 transition={{
-                                  duration: 0.45,
+                                  duration: 0.35,
                                   ease: [0.25, 1, 0.5, 1],
-                                  opacity: { duration: 0.4, ease: 'easeOut' },
-                                  width: { duration: 0.45, ease: [0.25, 1, 0.5, 1] },
+                                  opacity: { duration: 0.3, ease: 'easeInOut' },
+                                  width: { duration: 0.35, ease: [0.25, 1, 0.5, 1] },
+                                  x: { duration: 0.35, ease: [0.25, 1, 0.5, 1] },
                                 }}
                                 className="crono-avatar-expanded-name"
                                 style={{ color: member.color }}
