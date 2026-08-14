@@ -104,8 +104,81 @@
   padding-top: 8px;
 }
 
-/* Profile avatar button */
-.sb-profile-wrap { position: relative; }
+/* Profile avatar button & Settings popover */
+.sb-profile-wrap,
+.sb-settings-wrap { position: relative; }
+
+.sb-sun-icon {
+  color: #F59E0B !important;
+}
+
+.sb-moon-icon {
+  color: #6366F1 !important;
+}
+
+.sb-settings-popover {
+  bottom: 0;
+  left: calc(100% + 10px);
+  width: 230px;
+  padding: 12px;
+}
+
+.sb-theme-section {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 6px 0 2px;
+}
+
+.sb-theme-label {
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: var(--ink3);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.sb-theme-pill-group {
+  display: flex;
+  background: var(--surface2);
+  border-radius: 10px;
+  padding: 3px;
+  gap: 3px;
+  border: 1px solid var(--border);
+}
+
+.sb-theme-pill {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 6px 10px;
+  border-radius: 8px;
+  border: none;
+  background: transparent;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--ink3);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.sb-theme-pill:hover {
+  color: var(--ink);
+}
+
+.sb-theme-pill.is-active {
+  background: var(--surface);
+  color: var(--ink);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.12);
+}
+
+[data-theme="dark"] .sb-theme-pill.is-active {
+  background: rgba(59, 130, 246, 0.25) !important;
+  color: #60A5FA !important;
+  box-shadow: 0 1px 6px rgba(0, 0, 0, 0.4) !important;
+}
 
 .sb-avatar-btn {
   width: 34px;
