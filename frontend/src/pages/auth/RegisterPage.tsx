@@ -6,7 +6,7 @@ import {
   AlertCircle, ArrowLeft, ArrowRight,
 } from 'lucide-react';
 import logoUrl from '../../assets/Logo Clerkship.svg';
-import SplineBackground from '../../components/three/SplineBackground';
+import InteractiveBackgroundCanvas from '../../components/shared/InteractiveBackgroundCanvas';
 import ThemeToggleFloating from '../../components/shared/ThemeToggleFloating';
 
 /* ── Tipos ─────────────────────────────────────────────── */
@@ -80,7 +80,7 @@ export default function RegisterPage() {
   return (
     <div className="auth-shell auth-shell-spline">
       <ThemeToggleFloating />
-      <SplineBackground isLogged={false} />
+      <InteractiveBackgroundCanvas />
 
       {/* ── Cuerpo centrado ─────────────────────────────────────── */}
       <div className="auth-body">
