@@ -26,6 +26,8 @@ CREATE TABLE consultations (
 
     course_id UUID NOT NULL,
 
+    title VARCHAR(255) NOT NULL,
+
     specialty VARCHAR(100) NOT NULL,
 
     difficulty difficulty_level NOT NULL,
