@@ -6,8 +6,10 @@ import {
   AlertCircle, ArrowLeft, ArrowRight,
 } from 'lucide-react';
 import logoUrl from '../../assets/Logo Clerkship.svg';
+import HeaderNav from '../../components/shared/HeaderNav';
 import InteractiveBackgroundCanvas from '../../components/shared/InteractiveBackgroundCanvas';
-import ThemeToggleFloating from '../../components/shared/ThemeToggleFloating';
+import '../../styles/landing.css';
+import '../../styles/auth.css';
 
 /* ── Tipos ─────────────────────────────────────────────── */
 interface FormState {
@@ -78,9 +80,12 @@ export default function RegisterPage() {
   }
 
   return (
-    <div className="auth-shell auth-shell-spline">
-      <ThemeToggleFloating />
+    <div className="lp-root proy-web-root auth-page-root">
+      {/* Fondo interactivo animado con puntos conectados (mismo del Home) */}
       <InteractiveBackgroundCanvas />
+
+      {/* Header Nav Idéntico al Home */}
+      <HeaderNav />
 
       {/* ── Cuerpo centrado ─────────────────────────────────────── */}
       <div className="auth-body">
