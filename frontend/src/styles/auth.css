@@ -1135,8 +1135,9 @@
 }
 
 [data-theme="dark"] .cp-nav {
-  background: rgba(11, 15, 25, 0.88) !important;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important;
+  background: transparent !important;
+  border-bottom: none !important;
+  box-shadow: none !important;
 }
 
 [data-theme="dark"] .cp-logo {
