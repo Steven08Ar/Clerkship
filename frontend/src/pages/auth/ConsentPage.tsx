@@ -8,7 +8,9 @@ import {
 } from 'lucide-react';
 import logoUrl from '../../assets/Logo Clerkship.svg';
 import DashboardPage from '../dashboard/DashboardPage';
+import InteractiveBackgroundCanvas from '../../components/shared/InteractiveBackgroundCanvas';
 import ThemeToggleFloating from '../../components/shared/ThemeToggleFloating';
+import '../../styles/landing.css';
 
 /* ── Datos ─────────────────────────────────────────────── */
 interface ConsentSection {
@@ -56,7 +58,7 @@ const sections: ConsentSection[] = [
     Icon: Scale,
     title: 'Marco normativo aplicable',
     content:
-      '• Ley 1581 de 2012 — Protección de datos personales en Colombia\n• Decreto 1377 de 2013 — Consentimiento informado para tratamiento de datos\n• Resolución 8430 de 1993 del Min. Salud — Investigación sin riesgo (sin datos clínicos reales)\n• Política de propiedad intelectual de la institución educativa participante en el proyecto',
+      '• Ley 1581 de 2012 - Protección de datos personales en Colombia\n• Decreto 1377 de 2013 - Consentimiento informado para tratamiento de datos\n• Resolución 8430 de 1993 del Min. Salud - Investigación sin riesgo (sin datos clínicos reales)\n• Política de propiedad intelectual de la institución educativa participante en el proyecto',
   },
 ];
 
@@ -133,8 +135,9 @@ export default function ConsentPage() {
   }
 
   return (
-    <div className="cp-shell">
+    <div className="lp-root proy-web-root cp-shell">
       <ThemeToggleFloating />
+      <InteractiveBackgroundCanvas />
 
       {/* ── Capa Inferior: Dashboard (Pre-cargado 100% en el DOM a opacity: 0 → 1) ── */}
       <div className={`crossfade-dashboard-layer${transitionPhase === 'crossfade' || transitionPhase === 'done' ? ' is-visible' : ''}`}>
