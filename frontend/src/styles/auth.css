@@ -552,7 +552,7 @@
 ══════════════════════════════════════════════════════════ */
 .cp-shell {
   min-height: 100vh;
-  background: transparent;
+  background: var(--bg);
   display: flex;
   flex-direction: column;
   position: relative;
@@ -852,13 +852,14 @@
 
 /* ── Responsive consent ────────────────────────────────── */
 @media (max-width: 640px) {
-  .cp-nav { padding: 0 20px; height: 60px; }
-  .cp-body { padding: 16px 12px 40px; }
-  .cp-header { padding: 24px 20px 20px; }
-  .cp-sections { padding: 0; }
-  .cp-content { padding: 4px 16px 16px 50px; }
-  .cp-accept { margin: 0 0 10px; }
-  .cp-actions { flex-direction: column-reverse; padding: 8px 0 20px; }
+  .cp-nav { padding: 0 16px; height: 56px; }
+  .cp-body { padding: 68px 12px 32px; min-height: 100vh; align-items: flex-start; }
+  .cp-header { padding: 24px 18px 18px; }
+  .cp-sections { padding: 0 12px 12px; }
+  .cp-content { padding: 4px 14px 16px 20px; }
+  .cp-sec-btn { padding: 12px 14px; }
+  .cp-accept { margin: 0 12px 12px; padding: 16px 14px; }
+  .cp-actions { flex-direction: column-reverse; padding: 8px 12px 20px; gap: 8px; }
   .cp-btn-reject, .cp-btn-accept { width: 100%; justify-content: center; }
 }
 

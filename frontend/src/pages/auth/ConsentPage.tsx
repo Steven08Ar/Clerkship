@@ -8,9 +8,7 @@ import {
 } from 'lucide-react';
 import logoUrl from '../../assets/Logo Clerkship.svg';
 import DashboardPage from '../dashboard/DashboardPage';
-import InteractiveBackgroundCanvas from '../../components/shared/InteractiveBackgroundCanvas';
 import ThemeToggleFloating from '../../components/shared/ThemeToggleFloating';
-import '../../styles/landing.css';
 
 /* ── Datos ─────────────────────────────────────────────── */
 interface ConsentSection {
@@ -135,9 +133,8 @@ export default function ConsentPage() {
   }
 
   return (
-    <div className="lp-root proy-web-root cp-shell">
+    <div className="cp-shell">
       <ThemeToggleFloating />
-      <InteractiveBackgroundCanvas />
 
       {/* ── Capa Inferior: Dashboard (Pre-cargado 100% en el DOM a opacity: 0 → 1) ── */}
       <div className={`crossfade-dashboard-layer${transitionPhase === 'crossfade' || transitionPhase === 'done' ? ' is-visible' : ''}`}>
