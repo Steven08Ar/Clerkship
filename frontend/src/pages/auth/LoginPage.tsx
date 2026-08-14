@@ -6,7 +6,7 @@ import {
   AlertCircle, ArrowLeft, ArrowRight,
 } from 'lucide-react';
 import logoUrl from '../../assets/Logo Clerkship.svg';
-import SplineBackground from '../../components/three/SplineBackground';
+import InteractiveBackgroundCanvas from '../../components/shared/InteractiveBackgroundCanvas';
 import ThemeToggleFloating from '../../components/shared/ThemeToggleFloating';
 
 /* ── Tipos ─────────────────────────────────────────────── */
@@ -47,7 +47,6 @@ export default function LoginPage() {
   const [showPass, setShowPass] = useState(false);
   const [loading, setLoading]   = useState(false);
   const [success, setSuccess]   = useState(false);
-  const [isLogged, setIsLogged] = useState(false);
 
   function patch<K extends keyof FormState>(key: K, value: FormState[K]) {
     setForm(prev => ({ ...prev, [key]: value }));
@@ -68,7 +67,6 @@ export default function LoginPage() {
     /* 1. Pass isLogged=true → GSAP particles assemble
        2. Card fades out via AnimatePresence
        3. onExitComplete waits then navigates                */
-    setIsLogged(true);
     setSuccess(true);
     localStorage.setItem('clerkship_auth', 'true');
   }
@@ -85,8 +83,8 @@ export default function LoginPage() {
     <div className="auth-shell auth-shell-spline">
       <ThemeToggleFloating />
 
-      {/* ── Spline animated background — receives isLogged to trigger assembly ── */}
-      <SplineBackground isLogged={isLogged} />
+      {/* ── Fondo interactivo animado identico al Home ── */}
+      <InteractiveBackgroundCanvas />
 
       {/* ── Card (animates out on success) ── */}
       <div className="auth-body">
