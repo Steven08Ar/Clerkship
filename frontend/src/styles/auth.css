@@ -985,3 +985,208 @@
   color: #059669;
   font-size: 1rem;
 }
+
+/* ══════════════════════════════════════════════════════════════
+   MODO OSCURO ([data-theme="dark"]) — AUTH (LOGIN, REGISTER & CONSENT)
+   ══════════════════════════════════════════════════════════════ */
+
+[data-theme="dark"] .auth-shell {
+  background: #0B0F19 !important;
+  color: #E2E8F0 !important;
+}
+
+[data-theme="dark"] .auth-shell-spline {
+  background: transparent !important;
+}
+
+/* Glass Card en Modo Oscuro */
+[data-theme="dark"] .auth-card-glass {
+  background: rgba(15, 23, 42, 0.78) !important;
+  border: 1px solid rgba(255, 255, 255, 0.14) !important;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6), 0 1px 0 rgba(255, 255, 255, 0.08) inset !important;
+  backdrop-filter: blur(28px) !important;
+  -webkit-backdrop-filter: blur(28px) !important;
+}
+
+[data-theme="dark"] .auth-logo-center {
+  color: #F8FAFC !important;
+}
+
+[data-theme="dark"] .auth-title {
+  color: #F8FAFC !important;
+}
+
+[data-theme="dark"] .auth-subtitle {
+  color: #94A3B8 !important;
+}
+
+[data-theme="dark"] .auth-label {
+  color: #CBD5E1 !important;
+}
+
+/* Input Wrapper en Modo Oscuro */
+[data-theme="dark"] .auth-input-wrap {
+  background: rgba(30, 41, 59, 0.7) !important;
+  border-color: rgba(255, 255, 255, 0.14) !important;
+}
+
+[data-theme="dark"] .auth-input-wrap:focus-within {
+  background: rgba(30, 41, 59, 0.95) !important;
+  border-color: #3B82F6 !important;
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.25) !important;
+}
+
+[data-theme="dark"] .auth-input-icon {
+  color: #94A3B8 !important;
+}
+
+[data-theme="dark"] .auth-input-wrap:focus-within .auth-input-icon {
+  color: #60A5FA !important;
+}
+
+[data-theme="dark"] .auth-input {
+  color: #F8FAFC !important;
+}
+
+[data-theme="dark"] .auth-input::placeholder {
+  color: #64748B !important;
+}
+
+[data-theme="dark"] .auth-eye-btn {
+  color: #94A3B8 !important;
+}
+
+[data-theme="dark"] .auth-eye-btn:hover {
+  color: #F8FAFC !important;
+}
+
+[data-theme="dark"] .auth-check-label {
+  color: #CBD5E1 !important;
+}
+
+[data-theme="dark"] .auth-forgot {
+  color: #60A5FA !important;
+}
+
+[data-theme="dark"] .auth-forgot:hover {
+  color: #93C5FD !important;
+}
+
+[data-theme="dark"] .auth-submit {
+  background: #2563EB !important;
+  color: #FFFFFF !important;
+  box-shadow: 0 4px 20px rgba(37, 99, 235, 0.35) !important;
+}
+
+[data-theme="dark"] .auth-submit:hover {
+  background: #1D4ED8 !important;
+}
+
+[data-theme="dark"] .auth-general-error {
+  background: rgba(127, 29, 29, 0.3) !important;
+  border-color: rgba(239, 68, 68, 0.4) !important;
+  color: #FCA5A5 !important;
+}
+
+[data-theme="dark"] .auth-ai-notice {
+  border-color: rgba(255, 255, 255, 0.1) !important;
+  background: rgba(30, 41, 59, 0.4) !important;
+  color: #94A3B8 !important;
+}
+
+[data-theme="dark"] .auth-ai-notice strong {
+  color: #E2E8F0 !important;
+}
+
+[data-theme="dark"] .auth-back-link {
+  color: #94A3B8 !important;
+}
+
+[data-theme="dark"] .auth-back-link:hover {
+  color: #F8FAFC !important;
+}
+
+/* Consent Page Overrides */
+[data-theme="dark"] .cp-shell {
+  background: #0B0F19 !important;
+  color: #E2E8F0 !important;
+}
+
+[data-theme="dark"] .cp-nav {
+  background: rgba(11, 15, 25, 0.88) !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important;
+}
+
+[data-theme="dark"] .cp-logo {
+  color: #F8FAFC !important;
+}
+
+[data-theme="dark"] .cp-pill {
+  background: rgba(30, 41, 59, 0.8) !important;
+  color: #94A3B8 !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+}
+
+[data-theme="dark"] .cp-wrap {
+  background: rgba(15, 23, 42, 0.8) !important;
+  border: 1px solid rgba(255, 255, 255, 0.12) !important;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5) !important;
+}
+
+[data-theme="dark"] .cp-title {
+  color: #F8FAFC !important;
+}
+
+[data-theme="dark"] .cp-sec-btn {
+  background: rgba(30, 41, 59, 0.6) !important;
+}
+
+[data-theme="dark"] .cp-sec-btn:hover {
+  background: rgba(51, 65, 85, 0.7) !important;
+}
+
+[data-theme="dark"] .cp-sec-body {
+  background: rgba(30, 41, 59, 0.6) !important;
+}
+
+[data-theme="dark"] .cp-sec-icon {
+  background: rgba(15, 23, 42, 0.8) !important;
+  color: #60A5FA !important;
+}
+
+[data-theme="dark"] .cp-sec-label {
+  color: #F8FAFC !important;
+}
+
+[data-theme="dark"] .cp-text,
+[data-theme="dark"] .cp-list-item {
+  color: #CBD5E1 !important;
+}
+
+[data-theme="dark"] .cp-accept {
+  background: rgba(30, 41, 59, 0.6) !important;
+}
+
+[data-theme="dark"] .cp-check-text {
+  color: #E2E8F0 !important;
+}
+
+[data-theme="dark"] .cp-btn-reject {
+  background: rgba(30, 41, 59, 0.8) !important;
+  color: #CBD5E1 !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+}
+
+[data-theme="dark"] .cp-btn-reject:hover {
+  background: rgba(127, 29, 29, 0.4) !important;
+  color: #FCA5A5 !important;
+}
+
+[data-theme="dark"] .cp-btn-accept {
+  background: #2563EB !important;
+  color: #FFFFFF !important;
+}
+
+[data-theme="dark"] .cp-btn-accept:not(.disabled):hover {
+  background: #1D4ED8 !important;
+}
