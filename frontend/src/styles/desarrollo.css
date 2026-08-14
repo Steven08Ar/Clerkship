@@ -1011,14 +1011,26 @@
 
 .crono-dd-menu {
   position: absolute;
-  top: calc(100% + 8px);
-  width: 320px;
+  top: calc(100% + 6px);
+  left: 0;
+  width: 100%;
+  max-height: 280px;
+  overflow-y: auto;
   background: #FFFFFF;
   border: 1px solid #E2E8F0;
-  border-radius: 16px;
-  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.12);
-  padding: 8px;
-  z-index: 50;
+  border-radius: 14px;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.22);
+  padding: 6px;
+  z-index: 9999;
+}
+
+.crono-commit-msg-text {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-weight: 500;
+  flex: 1;
+  min-width: 0;
 }
 
 .crono-dd-menu.left {
@@ -2665,19 +2677,21 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 20px;
+  padding: 24px 16px;
+  overflow-y: auto;
 }
 
 .crono-verify-modal {
+  position: relative;
   width: 100%;
-  max-width: 460px;
-  max-height: 90vh;
-  overflow-y: auto;
+  max-width: 480px;
   background: #FFFFFF;
   border-radius: 20px;
   box-shadow: 0 24px 60px rgba(0, 0, 0, 0.3);
   padding: 24px;
   box-sizing: border-box;
+  overflow: visible !important;
+  margin: auto;
 }
 
 [data-theme="dark"] .crono-verify-modal {

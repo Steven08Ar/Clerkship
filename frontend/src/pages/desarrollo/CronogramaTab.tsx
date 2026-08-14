@@ -554,7 +554,7 @@ export default function CronogramaTab() {
     // eslint-disable-next-line react-hooks/set-state-in-effect -- fetch-on-branch-change loading flag, guarded by `cancelled`
     setVerifyCommitsStatus('loading');
     setVerifyCommitSha('');
-    fetchCommits(repo, verifyBranch, 30)
+    fetchCommits(repo, verifyBranch, 100)
       .then((data) => {
         if (cancelled) return;
         setVerifyCommits(data);
@@ -598,7 +598,7 @@ export default function CronogramaTab() {
 
     let cancelled = false;
     setEditCommitsStatus('loading');
-    fetchCommits(repo, editBranch, 30)
+    fetchCommits(repo, editBranch, 100)
       .then((data) => {
         if (cancelled) return;
         setEditCommits(data);
@@ -1994,7 +1994,7 @@ export default function CronogramaTab() {
                                     >
                                       <span className="crono-dd-item-label">
                                         <span className="crono-verify-commit-sha">{c.sha.slice(0, 7)}</span>
-                                        {c.commit.message.split('\n')[0].slice(0, 50)}
+                                        <span className="crono-commit-msg-text">{c.commit.message.split('\n')[0]}</span>
                                       </span>
                                       {c.sha === verifyCommitSha && <Check size={14} className="crono-dd-check" />}
                                     </button>
@@ -2508,7 +2508,7 @@ export default function CronogramaTab() {
                                 >
                                   <span className="crono-dd-item-label">
                                     <span className="crono-verify-commit-sha">{c.sha.slice(0, 7)}</span>
-                                    {c.commit.message.split('\n')[0].slice(0, 50)}
+                                    <span className="crono-commit-msg-text">{c.commit.message.split('\n')[0]}</span>
                                   </span>
                                   {c.sha === editCommitSha && <Check size={14} className="crono-dd-check" />}
                                 </button>
