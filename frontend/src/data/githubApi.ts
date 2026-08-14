@@ -25,7 +25,7 @@ export function fetchBranches(repo: RepoConfig): Promise<GitHubBranch[]> {
   return githubGet<GitHubBranch[]>(repo, '/branches?per_page=100');
 }
 
-export function fetchCommits(repo: RepoConfig, branch: string, perPage = 40): Promise<GitHubCommit[]> {
+export function fetchCommits(repo: RepoConfig, branch: string, perPage = 100): Promise<GitHubCommit[]> {
   return githubGet<GitHubCommit[]>(repo, `/commits?sha=${encodeURIComponent(branch)}&per_page=${perPage}`);
 }
 
