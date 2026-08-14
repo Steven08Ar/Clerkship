@@ -8,6 +8,8 @@ import {
 import logoUrl from '../../assets/Logo Clerkship.svg';
 import InteractiveBackgroundCanvas from '../../components/shared/InteractiveBackgroundCanvas';
 import ThemeToggleFloating from '../../components/shared/ThemeToggleFloating';
+import { loginWithEmailPassword } from '../../data/mainAuth';
+import { authErrorMessage, isFirstLogin, setNewPassword, validateNewPassword } from '../../data/devAuth';
 import '../../styles/landing.css';
 import '../../styles/auth.css';
 
@@ -50,10 +52,24 @@ export default function LoginPage() {
   const [loading, setLoading]   = useState(false);
   const [success, setSuccess]   = useState(false);
 
+  // Si la cuenta nunca ha iniciado sesión, se exige cambiar la contraseña
+  // temporal antes de dejar entrar (mismo mecanismo que el Módulo de Desarrollo).
+  const [step, setStep] = useState<'login' | 'newPassword'>('login');
+  const [newPassword1, setNewPassword1] = useState('');
+  const [newPassword2, setNewPassword2] = useState('');
+
   function patch<K extends keyof FormState>(key: K, value: FormState[K]) {
     setForm(prev => ({ ...prev, [key]: value }));
     if (errors[key as keyof FormErrors])
       setErrors(prev => ({ ...prev, [key]: undefined }));
+  }
+
+  function finishLogin() {
+    /* 1. Pass isLogged=true → GSAP particles assemble
+       2. Card fades out via AnimatePresence
+       3. onExitComplete waits then navigates                */
+    setSuccess(true);
+    localStorage.setItem('clerkship_auth', 'true');
   }
 
   async function handleSubmit(e: React.FormEvent) {
@@ -63,14 +79,37 @@ export default function LoginPage() {
     setLoading(true);
     setErrors({});
 
-    await new Promise(r => setTimeout(r, 900));
-    setLoading(false);
+    try {
+      const user = await loginWithEmailPassword(form.email, form.password);
+      if (isFirstLogin(user)) {
+        // Cuenta de prueba recién creada: la contraseña era temporal.
+        setStep('newPassword');
+        setLoading(false);
+        return;
+      }
+      finishLogin();
+    } catch (err) {
+      setErrors({ general: authErrorMessage(err) });
+    } finally {
+      setLoading(false);
+    }
+  }
 
-    /* 1. Pass isLogged=true → GSAP particles assemble
-       2. Card fades out via AnimatePresence
-       3. onExitComplete waits then navigates                */
-    setSuccess(true);
-    localStorage.setItem('clerkship_auth', 'true');
+  async function handleNewPasswordSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    const validationError = validateNewPassword(newPassword1, newPassword2);
+    if (validationError) { setErrors({ general: validationError }); return; }
+
+    setLoading(true);
+    setErrors({});
+    try {
+      await setNewPassword(newPassword1);
+      finishLogin();
+    } catch (err) {
+      setErrors({ general: authErrorMessage(err) });
+    } finally {
+      setLoading(false);
+    }
   }
 
   function handleExitComplete() {
@@ -113,13 +152,83 @@ export default function LoginPage() {
 
               {/* Cabecera */}
               <div className="auth-card-head">
-                <h1 className="auth-title">Bienvenido</h1>
+                <h1 className="auth-title">{step === 'newPassword' ? 'Crea tu propia contraseña' : 'Bienvenido'}</h1>
                 <p className="auth-subtitle">
-                  Accede con tu correo institucional para explorar el prototipo.
+                  {step === 'newPassword'
+                    ? 'Es tu primer ingreso: la contraseña que usaste era temporal. Crea una propia (mínimo 6 caracteres) para seguir usándola de aquí en adelante.'
+                    : 'Accede con tu correo institucional para explorar el prototipo.'}
                 </p>
               </div>
 
-              {/* Formulario */}
+              {/* Formulario: cambio de contraseña obligatorio en el primer ingreso */}
+              {step === 'newPassword' && (
+                <form onSubmit={handleNewPasswordSubmit} className="auth-form" noValidate>
+                  <div className="auth-field">
+                    <label className="auth-label" htmlFor="new-password-1">Nueva contraseña</label>
+                    <div className="auth-input-wrap">
+                      <Lock size={18} className="auth-input-icon" />
+                      <input
+                        id="new-password-1"
+                        type={showPass ? 'text' : 'password'}
+                        className="auth-input"
+                        placeholder="••••••••"
+                        value={newPassword1}
+                        onChange={e => setNewPassword1(e.target.value)}
+                        autoComplete="new-password"
+                        autoFocus
+                      />
+                      <button type="button" className="auth-eye-btn"
+                        onClick={() => setShowPass(v => !v)}
+                        aria-label={showPass ? 'Ocultar' : 'Mostrar'}
+                      >
+                        {showPass ? <EyeOff size={18} /> : <Eye size={18} />}
+                      </button>
+                    </div>
+                  </div>
+
+                  <div className="auth-field">
+                    <label className="auth-label" htmlFor="new-password-2">Confirmar contraseña</label>
+                    <div className="auth-input-wrap">
+                      <Lock size={18} className="auth-input-icon" />
+                      <input
+                        id="new-password-2"
+                        type={showPass ? 'text' : 'password'}
+                        className="auth-input"
+                        placeholder="••••••••"
+                        value={newPassword2}
+                        onChange={e => setNewPassword2(e.target.value)}
+                        autoComplete="new-password"
+                      />
+                    </div>
+                  </div>
+
+                  <AnimatePresence>
+                    {errors.general && (
+                      <motion.div className="auth-general-error"
+                        initial={{ opacity: 0, height: 0 }}
+                        animate={{ opacity: 1, height: 'auto' }}
+                        exit={{ opacity: 0, height: 0 }}
+                      >
+                        <AlertCircle size={18} />{errors.general}
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+
+                  <motion.button type="submit" className="auth-submit"
+                    disabled={loading}
+                    whileTap={loading ? {} : { scale: 0.98 }}
+                  >
+                    {loading ? (
+                      <span className="auth-spinner" />
+                    ) : (
+                      <>Guardar contraseña y continuar <ArrowRight size={18} /></>
+                    )}
+                  </motion.button>
+                </form>
+              )}
+
+              {/* Formulario de login */}
+              {step === 'login' && (
               <form onSubmit={handleSubmit} className="auth-form" noValidate>
 
                 {/* Email */}
@@ -224,6 +333,7 @@ export default function LoginPage() {
                   )}
                 </motion.button>
               </form>
+              )}
 
               {/* Link registro */}
               <div style={{ marginBottom: 24, textAlign: 'center', fontSize: '0.9rem' }}>

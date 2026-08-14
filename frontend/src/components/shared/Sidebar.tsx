@@ -1,8 +1,11 @@
 import { useState, useRef, useEffect } from 'react';
 import { useNavigate, useLocation, useSearchParams } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ChevronLeft, ChevronDown, Settings, LogOut, User } from 'lucide-react';
+import { signOut } from 'firebase/auth';
+import { ChevronLeft, ChevronDown, Settings, LogOut, User, Sun, Moon } from 'lucide-react';
 import { DASH_NAV } from '../../data/dashNav';
+import { auth } from '../../data/firebase';
+import { getInitialTheme, triggerThemeToggle, type ThemeMode } from '../../utils/themeHelper';
 import logoUrl from '../../assets/Logo Clerkship.svg';
 
 /* ── Panel content per section ─────────────────────────────── */
@@ -97,6 +100,24 @@ export default function Sidebar() {
   const [profileOpen, setProfileOpen] = useState(false);
   const profileRef = useRef<HTMLDivElement>(null);
 
+  const [settingsOpen, setSettingsOpen] = useState(false);
+  const settingsRef = useRef<HTMLDivElement>(null);
+  const [theme, setTheme] = useState<ThemeMode>(getInitialTheme);
+
+  useEffect(() => {
+    const handleThemeChange = (e: Event) => {
+      const customEv = e as CustomEvent<ThemeMode>;
+      if (customEv.detail) setTheme(customEv.detail);
+    };
+    window.addEventListener('clerkship-theme-change', handleThemeChange);
+    return () => window.removeEventListener('clerkship-theme-change', handleThemeChange);
+  }, []);
+
+  function handleToggleTheme() {
+    const next = triggerThemeToggle(theme);
+    setTheme(next);
+  }
+
   const initialId = DASH_NAV.find(t => t.route === pathname)?.id ?? 'overview';
   const [activeId, setActiveId] = useState(initialId);
 
@@ -159,10 +180,13 @@ export default function Sidebar() {
       if (profileRef.current && !profileRef.current.contains(e.target as Node)) {
         setProfileOpen(false);
       }
+      if (settingsRef.current && !settingsRef.current.contains(e.target as Node)) {
+        setSettingsOpen(false);
+      }
     };
-    if (profileOpen) document.addEventListener('mousedown', handler);
+    if (profileOpen || settingsOpen) document.addEventListener('mousedown', handler);
     return () => document.removeEventListener('mousedown', handler);
-  }, [profileOpen]);
+  }, [profileOpen, settingsOpen]);
 
   function handleNavClick(id: string, route: string | null) {
     if (activeId === id) {
@@ -212,11 +236,74 @@ export default function Sidebar() {
           })}
         </nav>
 
-        {/* Bottom: Settings + Profile */}
+        {/* Bottom: Settings + Theme Toggle + Profile */}
         <div className="sb-rail-bottom">
-          <button className="sb-icon-btn" title="Configuración">
-            <Settings size={19} strokeWidth={1.65} />
+          {/* Botón directo de alternancia de tema */}
+          <button
+            className="sb-icon-btn"
+            title={theme === 'dark' ? 'Cambiar a Modo Claro' : 'Cambiar a Modo Oscuro'}
+            onClick={handleToggleTheme}
+          >
+            {theme === 'dark' ? (
+              <Sun size={19} strokeWidth={1.8} className="sb-sun-icon" />
+            ) : (
+              <Moon size={19} strokeWidth={1.8} className="sb-moon-icon" />
+            )}
           </button>
+
+          {/* Configuración Popover */}
+          <div className="sb-settings-wrap" ref={settingsRef}>
+            <button
+              className={`sb-icon-btn${settingsOpen ? ' sb-icon-btn-on' : ''}`}
+              title="Configuración"
+              onClick={() => setSettingsOpen(v => !v)}
+            >
+              <Settings size={19} strokeWidth={1.65} />
+            </button>
+
+            <AnimatePresence>
+              {settingsOpen && (
+                <motion.div
+                  className="sb-profile-menu sb-settings-popover"
+                  initial={{ opacity: 0, x: -8, scale: 0.96 }}
+                  animate={{ opacity: 1, x: 0,  scale: 1    }}
+                  exit={{    opacity: 0, x: -8, scale: 0.96 }}
+                  transition={{ duration: 0.15 }}
+                >
+                  <div className="sb-profile-head">
+                    <div className="sb-profile-avatar" style={{ background: 'var(--p)', color: '#fff' }}>
+                      <Settings size={15} strokeWidth={2} />
+                    </div>
+                    <div>
+                      <p className="sb-profile-name">Configuración</p>
+                      <p className="sb-profile-role">Preferencias del sistema</p>
+                    </div>
+                  </div>
+
+                  <div className="sb-profile-divider" />
+
+                  {/* Selector de Modo Claro / Oscuro */}
+                  <div className="sb-theme-section">
+                    <span className="sb-theme-label">Modo de pantalla</span>
+                    <div className="sb-theme-pill-group">
+                      <button
+                        className={`sb-theme-pill ${theme === 'light' ? 'is-active' : ''}`}
+                        onClick={() => { if (theme !== 'light') handleToggleTheme(); }}
+                      >
+                        <Sun size={14} /> Claro
+                      </button>
+                      <button
+                        className={`sb-theme-pill ${theme === 'dark' ? 'is-active' : ''}`}
+                        onClick={() => { if (theme !== 'dark') handleToggleTheme(); }}
+                      >
+                        <Moon size={14} /> Oscuro
+                      </button>
+                    </div>
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
 
           <div className="sb-profile-wrap" ref={profileRef}>
             <button
@@ -247,15 +334,32 @@ export default function Sidebar() {
                   <button className="sb-profile-item">
                     <User size={14} strokeWidth={1.8} /> Mi perfil
                   </button>
-                  <button className="sb-profile-item">
+                  <button
+                    className="sb-profile-item"
+                    onClick={() => {
+                      setProfileOpen(false);
+                      setSettingsOpen(true);
+                    }}
+                  >
                     <Settings size={14} strokeWidth={1.8} /> Configuración
+                  </button>
+                  <button className="sb-profile-item" onClick={handleToggleTheme}>
+                    {theme === 'dark' ? <Sun size={14} strokeWidth={1.8} /> : <Moon size={14} strokeWidth={1.8} />}
+                    Modo {theme === 'dark' ? 'Claro' : 'Oscuro'}
                   </button>
                   <div className="sb-profile-divider" />
                   <button
                     className="sb-profile-item sb-profile-item-danger"
-                    onClick={() => {
+                    onClick={async () => {
+                      localStorage.removeItem('clerkship_auth');
                       localStorage.removeItem('clerkship_consent');
-                      navigate('/');
+                      try {
+                        await signOut(auth);
+                      } catch {
+                        // Sin sesión de Firebase activa (ej. el consentimiento clínico
+                        // sin login real) — no bloquea el cierre de sesión local.
+                      }
+                      navigate('/', { replace: true });
                     }}
                   >
                     <LogOut size={14} strokeWidth={1.8} /> Cerrar sesión
