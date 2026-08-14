@@ -51,13 +51,13 @@ export default function InteractiveBackgroundCanvas() {
 
     // Color palette for interactive clinical particles
     const colors = [
-      'rgba(25, 118, 210, ',   // Azul Principal
-      'rgba(3, 169, 244, ',    // Azul Claro
-      'rgba(0, 151, 167, ',    // Teal Principal
-      'rgba(13, 71, 161, ',    // Azul Profundo
+      'rgba(56, 189, 248, ',   // Sky Blue
+      'rgba(59, 130, 246, ',   // Royal Blue
+      'rgba(147, 197, 253, ',  // Soft Blue
+      'rgba(16, 185, 129, ',   // Emerald Accent
     ];
 
-    const particleCount = Math.min(Math.floor((width * height) / 32000), 35);
+    const particleCount = Math.min(Math.floor((width * height) / 18000), 65);
     const particles: Particle[] = [];
 
     for (let i = 0; i < particleCount; i++) {
@@ -66,9 +66,9 @@ export default function InteractiveBackgroundCanvas() {
         y: Math.random() * height,
         vx: (Math.random() - 0.5) * 0.5,
         vy: (Math.random() - 0.5) * 0.5,
-        radius: Math.random() * 2 + 1,
+        radius: Math.random() * 2.5 + 1.5,
         color: colors[Math.floor(Math.random() * colors.length)],
-        baseAlpha: Math.random() * 0.3 + 0.2,
+        baseAlpha: Math.random() * 0.4 + 0.45,
       });
     }
 
@@ -79,7 +79,7 @@ export default function InteractiveBackgroundCanvas() {
     let orb2Y = height * 0.7;
     let orbAngle = 0;
 
-    const maxDist = 130;
+    const maxDist = 150;
     const maxDistSq = maxDist * maxDist;
     const mouseRadiusSq = mouse.radius * mouse.radius;
 
@@ -94,18 +94,18 @@ export default function InteractiveBackgroundCanvas() {
       const o2y = orb2Y + Math.sin(orbAngle * 0.9) * 40;
 
       const grad1 = ctx.createRadialGradient(o1x, o1y, 10, o1x, o1y, 400);
-      grad1.addColorStop(0, 'rgba(3, 169, 244, 0.06)');
-      grad1.addColorStop(0.5, 'rgba(25, 118, 210, 0.02)');
-      grad1.addColorStop(1, 'rgba(255, 255, 255, 0)');
+      grad1.addColorStop(0, 'rgba(56, 189, 248, 0.08)');
+      grad1.addColorStop(0.5, 'rgba(37, 99, 235, 0.03)');
+      grad1.addColorStop(1, 'rgba(0, 0, 0, 0)');
       ctx.fillStyle = grad1;
       ctx.beginPath();
       ctx.arc(o1x, o1y, 400, 0, Math.PI * 2);
       ctx.fill();
 
       const grad2 = ctx.createRadialGradient(o2x, o2y, 10, o2x, o2y, 450);
-      grad2.addColorStop(0, 'rgba(25, 118, 210, 0.05)');
-      grad2.addColorStop(0.5, 'rgba(0, 151, 167, 0.015)');
-      grad2.addColorStop(1, 'rgba(255, 255, 255, 0)');
+      grad2.addColorStop(0, 'rgba(37, 99, 235, 0.07)');
+      grad2.addColorStop(0.5, 'rgba(16, 185, 129, 0.02)');
+      grad2.addColorStop(1, 'rgba(0, 0, 0, 0)');
       ctx.fillStyle = grad2;
       ctx.beginPath();
       ctx.arc(o2x, o2y, 450, 0, Math.PI * 2);
@@ -120,7 +120,7 @@ export default function InteractiveBackgroundCanvas() {
         if (p.x < 0 || p.x > width) p.vx *= -1;
         if (p.y < 0 || p.y > height) p.vy *= -1;
 
-        // Mouse attraction / interaction (using squared distances to avoid Math.sqrt)
+        // Mouse attraction / interaction
         const dxMouse = mouse.x - p.x;
         const dyMouse = mouse.y - p.y;
         const distSqMouse = dxMouse * dxMouse + dyMouse * dyMouse;
@@ -134,8 +134,8 @@ export default function InteractiveBackgroundCanvas() {
           ctx.beginPath();
           ctx.moveTo(p.x, p.y);
           ctx.lineTo(mouse.x, mouse.y);
-          ctx.strokeStyle = `${p.color}${(0.4 * force).toFixed(2)})`;
-          ctx.lineWidth = 1.1;
+          ctx.strokeStyle = `${p.color}${(0.6 * force).toFixed(2)})`;
+          ctx.lineWidth = 1.2;
           ctx.stroke();
         }
 
@@ -145,7 +145,7 @@ export default function InteractiveBackgroundCanvas() {
         ctx.fillStyle = `${p.color}${p.baseAlpha})`;
         ctx.fill();
 
-        // Connect nearby particles (using squared distances)
+        // Connect nearby particles
         for (let j = i + 1; j < particles.length; j++) {
           const p2 = particles[j];
           const dx = p.x - p2.x;
@@ -154,12 +154,12 @@ export default function InteractiveBackgroundCanvas() {
 
           if (distSq < maxDistSq) {
             const dist = Math.sqrt(distSq);
-            const alpha = (1 - dist / maxDist) * 0.16;
+            const alpha = (1 - dist / maxDist) * 0.32;
             ctx.beginPath();
             ctx.moveTo(p.x, p.y);
             ctx.lineTo(p2.x, p2.y);
-            ctx.strokeStyle = `rgba(25, 118, 210, ${alpha.toFixed(2)})`;
-            ctx.lineWidth = 0.8;
+            ctx.strokeStyle = `rgba(56, 189, 248, ${alpha.toFixed(2)})`;
+            ctx.lineWidth = 1.0;
             ctx.stroke();
           }
         }
