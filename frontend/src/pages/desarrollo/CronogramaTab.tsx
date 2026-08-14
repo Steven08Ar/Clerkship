@@ -291,6 +291,29 @@ export default function CronogramaTab() {
   // Estados para vista por semana y vista por mes (Google Calendar Style)
   const [activeWeekNum, setActiveWeekNum] = useState<number>(1);
   const [activeMonthIdx, setActiveMonthIdx] = useState<number>(0);
+
+  // Estado para la expansión interactiva de avatares en responsables generales (duración 3s)
+  const [activeAvatarId, setActiveAvatarId] = useState<string | null>(null);
+  const [avatarTimeoutId, setAvatarTimeoutId] = useState<any>(null);
+
+  const handleAvatarClick = (memberId: string) => {
+    if (avatarTimeoutId) {
+      clearTimeout(avatarTimeoutId);
+    }
+
+    if (activeAvatarId === memberId) {
+      setActiveAvatarId(null);
+      setAvatarTimeoutId(null);
+      return;
+    }
+
+    setActiveAvatarId(memberId);
+    const timer = setTimeout(() => {
+      setActiveAvatarId(null);
+      setAvatarTimeoutId(null);
+    }, 5000);
+    setAvatarTimeoutId(timer);
+  };
   const [popover, setPopover] = useState<{
     act: ActivityItem;
     x: number;
@@ -805,7 +828,7 @@ export default function CronogramaTab() {
       {/* ── Toolbar Superior con Filtros Izquierda & Derecha ── */}
       <div className="crono-top-toolbar">
         {/* Filtro Izquierdo: Módulo / Categoría */}
-        <div className="crono-dd-wrap">
+        <div className={`crono-dd-wrap ${catOpen ? 'dd-open' : ''}`}>
           <button
             className="crono-dd-trigger"
             onClick={() => { setCatOpen(!catOpen); setViewOpen(false); }}
@@ -844,21 +867,72 @@ export default function CronogramaTab() {
         {/* Sección Central: Responsable(s) del Módulo o Equipo General */}
         <div className="crono-responsible-badge">
           {selectedCat === 'general' ? (
-            <div className="crono-responsible-group">
-              <span className="crono-responsible-label">RESPONSABLES:</span>
-              <div className="crono-responsible-avatars">
-                {TEAM_MEMBERS.map((member) => (
-                  <div
-                    key={member.id}
-                    className="crono-avatar-circle"
-                    title={`${member.name} (${member.role})`}
-                    style={{ borderColor: member.color, boxShadow: `0 0 10px ${member.color}33` }}
+            (() => {
+              const activeMember = TEAM_MEMBERS.find(m => m.id === activeAvatarId);
+              return (
+                <div
+                  className={`crono-responsible-group ${activeMember ? 'has-active' : ''}`}
+                  style={
+                    activeMember
+                      ? {
+                          borderColor: activeMember.color,
+                          backgroundColor: `${activeMember.color}1E`,
+                          boxShadow: `0 4px 20px ${activeMember.color}45`,
+                        }
+                      : undefined
+                  }
+                >
+                  <span
+                    className="crono-responsible-label"
+                    style={activeMember ? { color: activeMember.color } : undefined}
                   >
-                    <img src={member.avatarUrl} alt={member.name} />
+                    RESPONSABLES:
+                  </span>
+                  <div className="crono-responsible-avatars">
+                    {TEAM_MEMBERS.map((member) => {
+                      const isSelected = activeAvatarId === member.id;
+                      return (
+                        <div key={member.id} className={`crono-avatar-item-wrap ${isSelected ? 'is-active' : ''}`}>
+                          <button
+                            type="button"
+                            className={`crono-avatar-circle ${isSelected ? 'active-pulse' : ''}`}
+                            title={`${member.name} (${member.role})`}
+                            style={{
+                              borderColor: member.color,
+                              boxShadow: isSelected ? `0 0 16px ${member.color}99` : `0 0 8px ${member.color}33`,
+                              transform: isSelected ? 'scale(1.15)' : undefined,
+                            }}
+                            onClick={() => handleAvatarClick(member.id)}
+                          >
+                            <img src={member.avatarUrl} alt={member.name} />
+                          </button>
+
+                          <AnimatePresence>
+                            {isSelected && (
+                              <motion.span
+                                initial={{ opacity: 0, width: 0, x: -16 }}
+                                animate={{ opacity: 1, width: 'auto', x: 0 }}
+                                exit={{ opacity: 0, width: 0, x: -16 }}
+                                transition={{
+                                  duration: 0.45,
+                                  ease: [0.25, 1, 0.5, 1],
+                                  opacity: { duration: 0.4, ease: 'easeOut' },
+                                  width: { duration: 0.45, ease: [0.25, 1, 0.5, 1] },
+                                }}
+                                className="crono-avatar-expanded-name"
+                                style={{ color: member.color }}
+                              >
+                                {member.name}
+                              </motion.span>
+                            )}
+                          </AnimatePresence>
+                        </div>
+                      );
+                    })}
                   </div>
-                ))}
-              </div>
-            </div>
+                </div>
+              );
+            })()
           ) : (
             (() => {
               const respMember =
@@ -891,7 +965,7 @@ export default function CronogramaTab() {
         </div>
 
         {/* Filtro Derecho: Visualización del Cronograma */}
-        <div className="crono-dd-wrap">
+        <div className={`crono-dd-wrap ${viewOpen ? 'dd-open' : ''}`}>
           <button
             className="crono-dd-trigger"
             onClick={() => { setViewOpen(!viewOpen); setCatOpen(false); }}
