@@ -1109,3 +1109,138 @@ html.theme-animating .crono-gantt-card {
   background: rgba(30, 41, 59, 0.8) !important;
   color: #F8FAFC !important;
 }
+
+/* ── ESTILOS EXHAUSTIVOS DE MODO CLARO/OSCURO PARA BOTONES, TARJETAS, DROPDOWNS Y TABLAS EN TODAS LAS PESTAÑAS ── */
+
+/* Botones e Inputs de Navegación / Biblioteca */
+[data-theme="dark"] .bib2-btn-outline {
+  background: rgba(30, 41, 59, 0.8) !important;
+  border-color: rgba(255, 255, 255, 0.14) !important;
+  color: #CBD5E1 !important;
+}
+[data-theme="dark"] .bib2-btn-outline:hover {
+  background: rgba(51, 65, 85, 0.9) !important;
+  color: #FFFFFF !important;
+  border-color: rgba(255, 255, 255, 0.3) !important;
+}
+[data-theme="dark"] .bib2-sort-dropdown {
+  background: #0F172A !important;
+  border-color: rgba(255, 255, 255, 0.14) !important;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.6) !important;
+}
+[data-theme="dark"] .bib2-sort-item {
+  color: #CBD5E1 !important;
+}
+[data-theme="dark"] .bib2-sort-item:hover {
+  background: rgba(30, 41, 59, 0.8) !important;
+  color: #F8FAFC !important;
+}
+[data-theme="dark"] .bib2-sort-item.active {
+  background: rgba(37, 99, 235, 0.3) !important;
+  color: #60A5FA !important;
+}
+[data-theme="dark"] .bib2-divider {
+  background: rgba(255, 255, 255, 0.08) !important;
+}
+[data-theme="dark"] .bib2-section-title {
+  color: #F8FAFC !important;
+}
+[data-theme="dark"] .bib2-folder-card,
+[data-theme="dark"] .bib2-file-card {
+  background: rgba(15, 23, 42, 0.85) !important;
+  border-color: rgba(255, 255, 255, 0.1) !important;
+}
+[data-theme="dark"] .bib2-folder-card:hover,
+[data-theme="dark"] .bib2-file-card:hover {
+  background: rgba(30, 41, 59, 0.9) !important;
+  border-color: rgba(255, 255, 255, 0.22) !important;
+}
+[data-theme="dark"] .bib2-file-icon {
+  background: rgba(30, 41, 59, 0.8) !important;
+  color: #94A3B8 !important;
+}
+
+/* Pestaña de Casos Clínicos (/casos) */
+[data-theme="dark"] .casos-pg-rec-card,
+[data-theme="dark"] .casos-mod-hero,
+[data-theme="dark"] .casos-mod-search,
+[data-theme="dark"] .casos-mod-card {
+  background: rgba(15, 23, 42, 0.85) !important;
+  border-color: rgba(255, 255, 255, 0.12) !important;
+  color: #E2E8F0 !important;
+}
+[data-theme="dark"] .casos-pg-rec-card:hover,
+[data-theme="dark"] .casos-mod-card:hover {
+  background: rgba(30, 41, 59, 0.9) !important;
+  border-color: rgba(255, 255, 255, 0.24) !important;
+}
+[data-theme="dark"] .casos-pg-footer-banner {
+  background: rgba(30, 41, 59, 0.6) !important;
+  border-color: rgba(255, 255, 255, 0.1) !important;
+  color: #94A3B8 !important;
+}
+[data-theme="dark"] .casos-mod-back-btn {
+  color: #94A3B8 !important;
+}
+[data-theme="dark"] .casos-mod-back-btn:hover {
+  background: rgba(30, 41, 59, 0.8) !important;
+  color: #F8FAFC !important;
+}
+[data-theme="dark"] .casos-mod-stat-divider {
+  background: rgba(255, 255, 255, 0.12) !important;
+}
+[data-theme="dark"] .casos-mod-search-input {
+  color: #F8FAFC !important;
+}
+[data-theme="dark"] .casos-mod-card-tag {
+  background: rgba(30, 58, 138, 0.5) !important;
+  color: #93C5FD !important;
+}
+[data-theme="dark"] .casos-mod-start-btn.done {
+  background: rgba(20, 83, 45, 0.6) !important;
+  color: #4ADE80 !important;
+}
+[data-theme="dark"] .casos-mod-start-btn.locked {
+  background: rgba(30, 41, 59, 0.6) !important;
+  color: #64748B !important;
+}
+
+/* Pestaña de Historial (/historial) */
+[data-theme="dark"] .hist-page-wrapper {
+  background: #0B0F19 !important;
+  color: #E2E8F0 !important;
+}
+[data-theme="dark"] .hist-pg-stat-card,
+[data-theme="dark"] .hist-pg-filters,
+[data-theme="dark"] .hist-table-container {
+  background: rgba(15, 23, 42, 0.85) !important;
+  border-color: rgba(255, 255, 255, 0.12) !important;
+  color: #E2E8F0 !important;
+}
+[data-theme="dark"] .hist-table-header {
+  background: rgba(30, 41, 59, 0.6) !important;
+  border-bottom-color: rgba(255, 255, 255, 0.1) !important;
+}
+[data-theme="dark"] .hist-table-row {
+  border-bottom-color: rgba(255, 255, 255, 0.08) !important;
+}
+[data-theme="dark"] .hist-table-row:hover {
+  background: rgba(30, 41, 59, 0.6) !important;
+}
+[data-theme="dark"] .hist-select-input {
+  color: #F8FAFC !important;
+}
+[data-theme="dark"] .hist-search-box {
+  background: rgba(30, 41, 59, 0.6) !important;
+  border-color: rgba(255, 255, 255, 0.14) !important;
+  color: #F8FAFC !important;
+}
+[data-theme="dark"] .hist-export-btn {
+  background: rgba(30, 41, 59, 0.8) !important;
+  border-color: rgba(255, 255, 255, 0.14) !important;
+  color: #CBD5E1 !important;
+}
+[data-theme="dark"] .hist-export-btn:hover {
+  background: rgba(51, 65, 85, 0.9) !important;
+  color: #FFFFFF !important;
+}
