@@ -931,3 +931,181 @@ html.theme-animating .crono-gantt-card {
   margin-left: 0 !important;
   margin-right: 0 !important;
 }
+
+/* ══════════════════════════════════════════════════════════════
+   DASHBOARD Y COMPONENTES CLINICOS — 100% MODO CLARO Y OSCURO
+   ══════════════════════════════════════════════════════════════ */
+
+/* --- MODO CLARO (DASHBOARD COMPLETO) --- */
+[data-theme="light"] .dash-root,
+[data-theme="light"] .bib2-body,
+[data-theme="light"] .casos-page-container,
+[data-theme="light"] .hist-page-container,
+[data-theme="light"] .bib-page-container,
+[data-theme="light"] .anat-page-container,
+[data-theme="light"] .sim-page-container,
+[data-theme="light"] .explorar-page-container {
+  background: #F8FAFC !important;
+  color: #0F172A !important;
+}
+
+[data-theme="light"] .bib2-title,
+[data-theme="light"] .bib2-folder-name,
+[data-theme="light"] .bib2-file-name,
+[data-theme="light"] .casos-title,
+[data-theme="light"] .hist-title,
+[data-theme="light"] .anat-title,
+[data-theme="light"] .sim-title {
+  color: #0F172A !important;
+}
+
+[data-theme="light"] .bib2-folder-card,
+[data-theme="light"] .bib2-file-row,
+[data-theme="light"] .bib2-recent-wrap,
+[data-theme="light"] .casos-card,
+[data-theme="light"] .hist-card,
+[data-theme="light"] .anat-card {
+  background: #FFFFFF !important;
+  border: 1px solid #E2E8F0 !important;
+  color: #0F172A !important;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.04) !important;
+}
+
+[data-theme="light"] .sb-rail {
+  background: #FFFFFF !important;
+  border-right-color: #E2E8F0 !important;
+}
+
+[data-theme="light"] .sb-panel {
+  background: #FAFAFA !important;
+  border-right-color: #E2E8F0 !important;
+}
+
+[data-theme="light"] .sb-icon-btn,
+[data-theme="light"] .sb-avatar-btn {
+  background: #F1F5F9 !important;
+  color: #64748B !important;
+}
+
+[data-theme="light"] .sb-icon-btn:hover,
+[data-theme="light"] .sb-avatar-btn:hover,
+[data-theme="light"] .sb-icon-btn-on {
+  background: #E2E8F0 !important;
+  color: #0F172A !important;
+}
+
+[data-theme="light"] .sb-profile-menu,
+[data-theme="light"] .sb-settings-popover {
+  background: #FFFFFF !important;
+  border-color: #E2E8F0 !important;
+  box-shadow: 0 12px 32px rgba(15, 23, 42, 0.12) !important;
+}
+
+[data-theme="light"] .sb-profile-name {
+  color: #0F172A !important;
+}
+
+[data-theme="light"] .sb-profile-role,
+[data-theme="light"] .sb-theme-label {
+  color: #64748B !important;
+}
+
+[data-theme="light"] .sb-profile-divider {
+  background: #E2E8F0 !important;
+}
+
+[data-theme="light"] .sb-profile-item {
+  color: #334155 !important;
+}
+
+[data-theme="light"] .sb-profile-item:hover {
+  background: #F1F5F9 !important;
+  color: #0F172A !important;
+}
+
+
+/* --- MODO OSCURO (DASHBOARD COMPLETO) --- */
+[data-theme="dark"] .dash-root,
+[data-theme="dark"] .bib2-body,
+[data-theme="dark"] .casos-page-container,
+[data-theme="dark"] .hist-page-container,
+[data-theme="dark"] .bib-page-container,
+[data-theme="dark"] .anat-page-container,
+[data-theme="dark"] .sim-page-container,
+[data-theme="dark"] .explorar-page-container {
+  background: #0B0F19 !important;
+  color: #E2E8F0 !important;
+}
+
+[data-theme="dark"] .bib2-title,
+[data-theme="dark"] .bib2-folder-name,
+[data-theme="dark"] .bib2-file-name,
+[data-theme="dark"] .casos-title,
+[data-theme="dark"] .hist-title,
+[data-theme="dark"] .anat-title,
+[data-theme="dark"] .sim-title {
+  color: #F8FAFC !important;
+}
+
+[data-theme="dark"] .bib2-folder-card,
+[data-theme="dark"] .bib2-file-row,
+[data-theme="dark"] .bib2-recent-wrap,
+[data-theme="dark"] .casos-card,
+[data-theme="dark"] .hist-card,
+[data-theme="dark"] .anat-card {
+  background: rgba(15, 23, 42, 0.85) !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  color: #E2E8F0 !important;
+}
+
+[data-theme="dark"] .sb-rail {
+  background: #0F172A !important;
+  border-right-color: rgba(255, 255, 255, 0.08) !important;
+}
+
+[data-theme="dark"] .sb-panel {
+  background: #0F172A !important;
+  border-right-color: rgba(255, 255, 255, 0.08) !important;
+}
+
+[data-theme="dark"] .sb-icon-btn,
+[data-theme="dark"] .sb-avatar-btn {
+  background: rgba(30, 41, 59, 0.8) !important;
+  color: #94A3B8 !important;
+}
+
+[data-theme="dark"] .sb-icon-btn:hover,
+[data-theme="dark"] .sb-avatar-btn:hover,
+[data-theme="dark"] .sb-icon-btn-on {
+  background: rgba(51, 65, 85, 0.9) !important;
+  color: #F8FAFC !important;
+}
+
+[data-theme="dark"] .sb-profile-menu,
+[data-theme="dark"] .sb-settings-popover {
+  background: #0F172A !important;
+  border-color: rgba(255, 255, 255, 0.12) !important;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.6) !important;
+}
+
+[data-theme="dark"] .sb-profile-name {
+  color: #F8FAFC !important;
+}
+
+[data-theme="dark"] .sb-profile-role,
+[data-theme="dark"] .sb-theme-label {
+  color: #94A3B8 !important;
+}
+
+[data-theme="dark"] .sb-profile-divider {
+  background: rgba(255, 255, 255, 0.08) !important;
+}
+
+[data-theme="dark"] .sb-profile-item {
+  color: #CBD5E1 !important;
+}
+
+[data-theme="dark"] .sb-profile-item:hover {
+  background: rgba(30, 41, 59, 0.8) !important;
+  color: #F8FAFC !important;
+}
