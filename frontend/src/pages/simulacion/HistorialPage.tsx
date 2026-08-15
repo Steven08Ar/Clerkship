@@ -185,13 +185,13 @@ function SessionRow({ s, delay }: { s: Session; delay: number }) {
       </div>
       
       <div className="hist-td hist-td-mod">
-        <span className="hist-td-tag" style={{ color: spC.color, background: spC.bg }}>
+        <span className="hist-td-tag" data-spec={s.specialty} style={{ color: spC.color, background: spC.bg }}>
           {s.specialty}
         </span>
       </div>
       
       <div className="hist-td hist-td-diff">
-        <span className="hist-td-tag" style={{ color: dc.color, background: dc.bg }}>
+        <span className="hist-td-tag" data-diff={s.difficulty} style={{ color: dc.color, background: dc.bg }}>
           {DIFFICULTY_LABEL[s.difficulty]}
         </span>
       </div>

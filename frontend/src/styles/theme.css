@@ -1317,8 +1317,9 @@ html.theme-animating .crono-gantt-card {
   color: #F8FAFC !important;
 }
 [data-theme="dark"] .casos-mod-card-tag {
-  background: rgba(30, 58, 138, 0.5) !important;
-  color: #93C5FD !important;
+  background: rgba(225, 29, 72, 0.16) !important;
+  color: #FB7185 !important;
+  border: 1px solid rgba(225, 29, 72, 0.25) !important;
 }
 [data-theme="dark"] .casos-mod-start-btn.done {
   background: rgba(20, 83, 45, 0.6) !important;
@@ -1327,6 +1328,72 @@ html.theme-animating .crono-gantt-card {
 [data-theme="dark"] .casos-mod-start-btn.locked {
   background: rgba(30, 41, 59, 0.6) !important;
   color: #64748B !important;
+}
+
+/* ── NUBES DE COLORES / BADGES Y CÁPSULAS DE ESTADO Y DIFICULTAD (MODO OSCURO 100%) ── */
+/* Badges de Estado */
+[data-theme="dark"] .casos-mod-card-status[data-status="completado"] {
+  background: rgba(16, 185, 129, 0.16) !important;
+  color: #34D399 !important;
+  border: 1px solid rgba(16, 185, 129, 0.3) !important;
+}
+[data-theme="dark"] .casos-mod-card-status[data-status="en_progreso"] {
+  background: rgba(245, 158, 11, 0.16) !important;
+  color: #FBBF24 !important;
+  border: 1px solid rgba(245, 158, 11, 0.3) !important;
+}
+[data-theme="dark"] .casos-mod-card-status[data-status="disponible"] {
+  background: rgba(2, 132, 199, 0.16) !important;
+  color: #38BDF8 !important;
+  border: 1px solid rgba(2, 132, 199, 0.3) !important;
+}
+[data-theme="dark"] .casos-mod-card-status[data-status="bloqueado"] {
+  background: rgba(148, 163, 184, 0.12) !important;
+  color: #94A3B8 !important;
+  border: 1px solid rgba(148, 163, 184, 0.25) !important;
+}
+
+/* Badges de Dificultad */
+[data-theme="dark"] .casos-mod-card-diff[data-diff="1"],
+[data-theme="dark"] .casos-pg-rec-diff[data-diff="1"],
+[data-theme="dark"] .hist-td-tag[data-diff="1"] {
+  background: rgba(16, 185, 129, 0.16) !important;
+  color: #34D399 !important;
+  border: 1px solid rgba(16, 185, 129, 0.25) !important;
+}
+[data-theme="dark"] .casos-mod-card-diff[data-diff="2"],
+[data-theme="dark"] .casos-pg-rec-diff[data-diff="2"],
+[data-theme="dark"] .hist-td-tag[data-diff="2"] {
+  background: rgba(245, 158, 11, 0.16) !important;
+  color: #FBBF24 !important;
+  border: 1px solid rgba(245, 158, 11, 0.25) !important;
+}
+[data-theme="dark"] .casos-mod-card-diff[data-diff="3"],
+[data-theme="dark"] .casos-pg-rec-diff[data-diff="3"],
+[data-theme="dark"] .hist-td-tag[data-diff="3"] {
+  background: rgba(239, 68, 68, 0.16) !important;
+  color: #F87171 !important;
+  border: 1px solid rgba(239, 68, 68, 0.25) !important;
+}
+
+/* Badges e Iconos de Especialidad / Módulo */
+[data-theme="dark"] .hist-td-tag[data-spec="Gastroenterología"] {
+  background: rgba(225, 29, 72, 0.16) !important;
+  color: #FB7185 !important;
+  border: 1px solid rgba(225, 29, 72, 0.25) !important;
+}
+[data-theme="dark"] .casos-mod-hero-icon,
+[data-theme="dark"] .casos-pg-mod-icon,
+[data-theme="dark"] .casos-pg-rec-icon,
+[data-theme="dark"] .hist-td-icon {
+  background: rgba(225, 29, 72, 0.16) !important;
+  color: #FB7185 !important;
+  border: 1px solid rgba(225, 29, 72, 0.25) !important;
+}
+[data-theme="dark"] .casos-pg-type-icon {
+  background: rgba(30, 41, 59, 0.8) !important;
+  color: #38BDF8 !important;
+  border: 1px solid rgba(255, 255, 255, 0.12) !important;
 }
 
 /* Pestaña de Historial (/historial) */

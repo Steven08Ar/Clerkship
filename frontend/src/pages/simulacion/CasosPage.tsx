@@ -248,7 +248,7 @@ function ModuleView({ module, onBack }: { module: ModuleInfo; onBack: () => void
           return (
             <div key={c.id} className={`casos-mod-card${locked ? ' locked' : ''}`}>
               <div className="casos-mod-card-top">
-                <div className="casos-mod-card-status" style={{ background: sc.bg, color: sc.color }}>
+                <div className="casos-mod-card-status" data-status={c.status} style={{ background: sc.bg, color: sc.color }}>
                   <StatusIcon size={12} />
                   {sc.label}
                 </div>
@@ -268,7 +268,7 @@ function ModuleView({ module, onBack }: { module: ModuleInfo; onBack: () => void
 
               <div className="casos-mod-card-foot">
                 <div className="casos-mod-card-meta">
-                  <span className="casos-mod-card-diff" style={{ background: dc.bg, color: dc.color }}>
+                  <span className="casos-mod-card-diff" data-diff={c.difficulty} style={{ background: dc.bg, color: dc.color }}>
                     {DIFFICULTY_LABEL[c.difficulty]}
                   </span>
                   <span className="casos-mod-card-time">
@@ -412,7 +412,7 @@ export default function CasosPage() {
                         <h3 className="casos-pg-rec-title">{c.title}</h3>
                       </div>
                       <div className="casos-pg-rec-foot">
-                        <span className="casos-pg-rec-diff" style={{ background: dc.bg, color: dc.color }}>
+                        <span className="casos-pg-rec-diff" data-diff={c.difficulty} style={{ background: dc.bg, color: dc.color }}>
                           {DIFFICULTY_LABEL[c.difficulty]}
                         </span>
                         <span className="casos-pg-rec-time"><Clock size={12}/> {c.time}</span>
