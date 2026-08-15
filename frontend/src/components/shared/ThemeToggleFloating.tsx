@@ -1,11 +1,29 @@
 import { useState, useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Sun, Moon } from 'lucide-react';
 import { getInitialTheme, setInstantTheme, triggerThemeToggle, type ThemeMode } from '../../utils/themeHelper';
 import '../../styles/theme.css';
 
+const DASHBOARD_ROUTES = [
+  '/dashboard',
+  '/casos',
+  '/biblioteca',
+  '/anatomia',
+  '/simulacion',
+  '/historial',
+  '/explorar',
+  '/documentacion'
+];
+
 export default function ThemeToggleFloating() {
+  const { pathname } = useLocation();
   const [theme, setTheme] = useState<ThemeMode>(getInitialTheme);
+
+  // Ocultar botón flotante si estamos en cualquier vista interna del Dashboard
+  const isDashboardView = DASHBOARD_ROUTES.some(
+    route => pathname === route || pathname.startsWith(route + '/')
+  );
 
   useEffect(() => {
     // Aplicación instantánea inicial sin clase de animación
@@ -26,6 +44,10 @@ export default function ThemeToggleFloating() {
     const next = triggerThemeToggle(theme);
     setTheme(next);
   };
+
+  if (isDashboardView) {
+    return null;
+  }
 
   return (
     <button
