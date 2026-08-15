@@ -10,6 +10,7 @@ import logoUrl from '../../assets/Logo Clerkship.svg';
 import DashboardPage from '../dashboard/DashboardPage';
 import InteractiveBackgroundCanvas from '../../components/shared/InteractiveBackgroundCanvas';
 import ThemeToggleFloating from '../../components/shared/ThemeToggleFloating';
+import { recordUserConsent } from '../../utils/authConsent';
 import '../../styles/landing.css';
 
 /* ── Datos ─────────────────────────────────────────────── */
@@ -96,8 +97,7 @@ export default function ConsentPage() {
 
   function handleAccept() {
     if (!accepted) { setShowError(true); return; }
-    localStorage.setItem('clerkship_consent', 'accepted');
-    localStorage.setItem('clerkship_auth', 'true');
+    recordUserConsent();
 
     // 1. Fase de Carga (Dashboard pre-cargado 100% en el DOM)
     setTransitionPhase('loading');

@@ -8,6 +8,7 @@ import {
 import logoUrl from '../../assets/Logo Clerkship.svg';
 import InteractiveBackgroundCanvas from '../../components/shared/InteractiveBackgroundCanvas';
 import ThemeToggleFloating from '../../components/shared/ThemeToggleFloating';
+import { setActiveUser, hasUserAcceptedConsent } from '../../utils/authConsent';
 import { loginWithEmailPassword } from '../../data/mainAuth';
 import { authErrorMessage, isFirstLogin, setNewPassword, validateNewPassword } from '../../data/devAuth';
 import '../../styles/landing.css';
@@ -65,11 +66,11 @@ export default function LoginPage() {
   }
 
   function finishLogin() {
-    /* 1. Pass isLogged=true → GSAP particles assemble
+    /* 1. Registrar usuario activo por su correo de cuenta
        2. Card fades out via AnimatePresence
        3. onExitComplete waits then navigates                */
+    setActiveUser(form.email);
     setSuccess(true);
-    localStorage.setItem('clerkship_auth', 'true');
   }
 
   async function handleSubmit(e: React.FormEvent) {
@@ -113,8 +114,8 @@ export default function LoginPage() {
   }
 
   function handleExitComplete() {
-    const hasConsent = localStorage.getItem('clerkship_consent') === 'accepted';
-    /* Wait for GSAP assembly animation (~2.5s) before navigating */
+    const hasConsent = hasUserAcceptedConsent(form.email);
+    /* Wait for assembly animation (~2.5s) before navigating */
     setTimeout(() => {
       navigate(hasConsent ? '/dashboard' : '/consent', { replace: true });
     }, 2600);
