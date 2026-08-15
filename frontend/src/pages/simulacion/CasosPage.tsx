@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import {
   Search, Play, Lock, CheckCircle, Clock,
-  ChevronRight, ArrowLeft, Info, Heart, Wind, Stethoscope, Brain, Target, Briefcase, Calendar, PlusCircle
+  ArrowLeft, Info, Target, Briefcase, Calendar, PlusCircle
 } from 'lucide-react';
 import Sidebar from '../../components/shared/Sidebar';
 
@@ -129,58 +129,16 @@ interface ModuleInfo {
   cases: Case[];
 }
 
-const MODULES: ModuleInfo[] = [
-  {
-    title: 'Gastroenterología',
-    desc: 'Trastornos digestivos, hepáticos, biliares y pancreáticos.',
-    count: '10 casos disponibles',
-    icon: <StomachIcon />,
-    colorBg: '#FFE4E6',
-    colorFg: '#E11D48',
-    active: true,
-    cases: GASTRO_CASES,
-  },
-  {
-    title: 'Neumología',
-    desc: 'Enfermedades respiratorias agudas y crónicas.',
-    count: 'Próximamente',
-    icon: <Wind size={28} />,
-    colorBg: '#E0F2FE',
-    colorFg: '#0284C7',
-    active: false,
-    cases: [],
-  },
-  {
-    title: 'Cardiología',
-    desc: 'Urgencias cardiovasculares y enfermedades prevalentes.',
-    count: 'Próximamente',
-    icon: <Heart size={28} />,
-    colorBg: '#FFEDD5',
-    colorFg: '#EA580C',
-    active: false,
-    cases: [],
-  },
-  {
-    title: 'Neurología',
-    desc: 'Alteraciones neurológicas agudas y crónicas.',
-    count: 'Próximamente',
-    icon: <Brain size={28} />,
-    colorBg: '#F3E8FF',
-    colorFg: '#9333EA',
-    active: false,
-    cases: [],
-  },
-  {
-    title: 'Nefrología',
-    desc: 'Trastornos renales y electrolíticos.',
-    count: 'Próximamente',
-    icon: <Stethoscope size={28} />,
-    colorBg: '#DCFCE7',
-    colorFg: '#16A34A',
-    active: false,
-    cases: [],
-  },
-];
+const GASTRO_MODULE: ModuleInfo = {
+  title: 'Gastroenterología',
+  desc: 'Trastornos digestivos, hepáticos, biliares y pancreáticos.',
+  count: '10 casos disponibles',
+  icon: <StomachIcon />,
+  colorBg: '#FFE4E6',
+  colorFg: '#E11D48',
+  active: true,
+  cases: GASTRO_CASES,
+};
 
 const TYPES = [
   {
@@ -250,120 +208,105 @@ function ModuleView({ module, onBack }: { module: ModuleInfo; onBack: () => void
             <p className="casos-mod-hero-desc">{module.desc}</p>
           </div>
         </div>
-        {module.cases.length > 0 && (
-          <div className="casos-mod-stats">
-            <div className="casos-mod-stat">
-              <span className="casos-mod-stat-value" style={{ color: '#10B981' }}>{completedCount}</span>
-              <span className="casos-mod-stat-label">Completados</span>
+        <div className="casos-mod-stats">
+          <div className="casos-mod-stat">
+            <span className="casos-mod-stat-value" style={{ color: '#10B981' }}>{completedCount}</span>
+            <span className="casos-mod-stat-label">Completados</span>
+          </div>
+          <div className="casos-mod-stat-divider" />
+          <div className="casos-mod-stat">
+            <span className="casos-mod-stat-value" style={{ color: '#F59E0B' }}>{inProgressCount}</span>
+            <span className="casos-mod-stat-label">En progreso</span>
+          </div>
+          <div className="casos-mod-stat-divider" />
+          <div className="casos-mod-stat">
+            <span className="casos-mod-stat-value" style={{ color: '#0284C7' }}>{availableCount}</span>
+            <span className="casos-mod-stat-label">Disponibles</span>
+          </div>
+        </div>
+      </div>
+
+      {/* Search bar */}
+      <div className="casos-mod-search">
+        <Search size={16} className="casos-mod-search-icon" />
+        <input
+          className="casos-mod-search-input"
+          placeholder="Buscar caso por nombre o patología digestiva..."
+          value={search}
+          onChange={e => setSearch(e.target.value)}
+        />
+      </div>
+
+      {/* Case grid */}
+      <div className="casos-mod-grid">
+        {filtered.map(c => {
+          const dc = DIFFICULTY_COLOR[c.difficulty];
+          const sc = STATUS_CONFIG[c.status];
+          const StatusIcon = sc.icon;
+          const locked = c.status === 'bloqueado';
+
+          return (
+            <div key={c.id} className={`casos-mod-card${locked ? ' locked' : ''}`}>
+              <div className="casos-mod-card-top">
+                <div className="casos-mod-card-status" style={{ background: sc.bg, color: sc.color }}>
+                  <StatusIcon size={12} />
+                  {sc.label}
+                </div>
+                {c.score !== null && (
+                  <div className="casos-mod-card-score">{c.score} pts</div>
+                )}
+              </div>
+
+              <h3 className="casos-mod-card-title">{c.title}</h3>
+              <p className="casos-mod-card-scenario">{c.scenario}</p>
+
+              <div className="casos-mod-card-tags">
+                {c.tags.slice(0, 3).map(tag => (
+                  <span key={tag} className="casos-mod-card-tag">{tag}</span>
+                ))}
+              </div>
+
+              <div className="casos-mod-card-foot">
+                <div className="casos-mod-card-meta">
+                  <span className="casos-mod-card-diff" style={{ background: dc.bg, color: dc.color }}>
+                    {DIFFICULTY_LABEL[c.difficulty]}
+                  </span>
+                  <span className="casos-mod-card-time">
+                    <Clock size={12} /> {c.time}
+                  </span>
+                </div>
+
+                {locked ? (
+                  <button className="casos-mod-start-btn locked" disabled>
+                    <Lock size={14} /> Bloqueado
+                  </button>
+                ) : c.status === 'completado' ? (
+                  <button
+                    className="casos-mod-start-btn done"
+                    onClick={() => navigate('/simulacion')}
+                  >
+                    <CheckCircle size={14} /> Repetir
+                  </button>
+                ) : (
+                  <button
+                    className="casos-mod-start-btn"
+                    onClick={() => navigate('/simulacion')}
+                  >
+                    <Play size={14} /> {c.status === 'en_progreso' ? 'Continuar' : 'Iniciar'}
+                  </button>
+                )}
+              </div>
             </div>
-            <div className="casos-mod-stat-divider" />
-            <div className="casos-mod-stat">
-              <span className="casos-mod-stat-value" style={{ color: '#F59E0B' }}>{inProgressCount}</span>
-              <span className="casos-mod-stat-label">En progreso</span>
-            </div>
-            <div className="casos-mod-stat-divider" />
-            <div className="casos-mod-stat">
-              <span className="casos-mod-stat-value" style={{ color: '#0284C7' }}>{availableCount}</span>
-              <span className="casos-mod-stat-label">Disponibles</span>
-            </div>
+          );
+        })}
+
+        {filtered.length === 0 && (
+          <div className="casos-mod-no-results">
+            <Search size={32} />
+            <p>No se encontraron casos para "{search}"</p>
           </div>
         )}
       </div>
-
-      {/* No cases yet */}
-      {module.cases.length === 0 ? (
-        <div className="casos-mod-soon">
-          <div className="casos-mod-soon-icon" style={{ background: module.colorBg, color: module.colorFg }}>
-            {module.icon}
-          </div>
-          <h3>Módulo en Desarrollo</h3>
-          <p>Los casos de {module.title} se integrarán en futuras versiones. Por ahora, el módulo activo disponible para simulación es <strong>Gastroenterología</strong>.</p>
-        </div>
-      ) : (
-        <>
-          {/* Search bar */}
-          <div className="casos-mod-search">
-            <Search size={16} className="casos-mod-search-icon" />
-            <input
-              className="casos-mod-search-input"
-              placeholder="Buscar caso por nombre o patología digestiva..."
-              value={search}
-              onChange={e => setSearch(e.target.value)}
-            />
-          </div>
-
-          {/* Case grid */}
-          <div className="casos-mod-grid">
-            {filtered.map(c => {
-              const dc = DIFFICULTY_COLOR[c.difficulty];
-              const sc = STATUS_CONFIG[c.status];
-              const StatusIcon = sc.icon;
-              const locked = c.status === 'bloqueado';
-
-              return (
-                <div key={c.id} className={`casos-mod-card${locked ? ' locked' : ''}`}>
-                  <div className="casos-mod-card-top">
-                    <div className="casos-mod-card-status" style={{ background: sc.bg, color: sc.color }}>
-                      <StatusIcon size={12} />
-                      {sc.label}
-                    </div>
-                    {c.score !== null && (
-                      <div className="casos-mod-card-score">{c.score} pts</div>
-                    )}
-                  </div>
-
-                  <h3 className="casos-mod-card-title">{c.title}</h3>
-                  <p className="casos-mod-card-scenario">{c.scenario}</p>
-
-                  <div className="casos-mod-card-tags">
-                    {c.tags.slice(0, 3).map(tag => (
-                      <span key={tag} className="casos-mod-card-tag">{tag}</span>
-                    ))}
-                  </div>
-
-                  <div className="casos-mod-card-foot">
-                    <div className="casos-mod-card-meta">
-                      <span className="casos-mod-card-diff" style={{ background: dc.bg, color: dc.color }}>
-                        {DIFFICULTY_LABEL[c.difficulty]}
-                      </span>
-                      <span className="casos-mod-card-time">
-                        <Clock size={12} /> {c.time}
-                      </span>
-                    </div>
-
-                    {locked ? (
-                      <button className="casos-mod-start-btn locked" disabled>
-                        <Lock size={14} /> Bloqueado
-                      </button>
-                    ) : c.status === 'completado' ? (
-                      <button
-                        className="casos-mod-start-btn done"
-                        onClick={() => navigate('/simulacion')}
-                      >
-                        <CheckCircle size={14} /> Repetir
-                      </button>
-                    ) : (
-                      <button
-                        className="casos-mod-start-btn"
-                        onClick={() => navigate('/simulacion')}
-                      >
-                        <Play size={14} /> {c.status === 'en_progreso' ? 'Continuar' : 'Iniciar'}
-                      </button>
-                    )}
-                  </div>
-                </div>
-              );
-            })}
-
-            {filtered.length === 0 && (
-              <div className="casos-mod-no-results">
-                <Search size={32} />
-                <p>No se encontraron casos para "{search}"</p>
-              </div>
-            )}
-          </div>
-        </>
-      )}
     </div>
   );
 }
@@ -374,12 +317,11 @@ export default function CasosPage() {
   const [searchParams] = useSearchParams();
   const [selectedModule, setSelectedModule] = useState<ModuleInfo | null>(null);
 
-  /* Sync with ?modulo= query param (set by Sidebar links) */
+  /* Sync with ?modulo= query param */
   useEffect(() => {
     const modulo = searchParams.get('modulo');
     if (modulo) {
-      const found = MODULES.find(m => m.title === modulo) ?? MODULES[0];
-      setSelectedModule(found);
+      setSelectedModule(GASTRO_MODULE);
     } else {
       setSelectedModule(null);
     }
@@ -399,7 +341,7 @@ export default function CasosPage() {
             <div className="casos-pg-header">
               <div className="casos-pg-title-box">
                 <h1>Módulo Clínico de Gastroenterología</h1>
-                <p>Seleccione un escenario clínico gastroenterológico para iniciar su simulación interactiva.</p>
+                <p>Escenarios de simulación clínica interactiva especializados en gastroenterología y aparato digestivo.</p>
               </div>
 
               <div className="casos-pg-banner">
@@ -411,36 +353,34 @@ export default function CasosPage() {
               </div>
             </div>
 
-            {/* Section: Explorar por módulo */}
+            {/* Módulo Principal: Gastroenterología */}
             <div className="casos-pg-section">
-              <h2 className="casos-pg-section-title">Explorar por módulo</h2>
+              <h2 className="casos-pg-section-title">Módulo Activo de Especialidad</h2>
               <div className="casos-pg-hscroll">
-                {MODULES.map(m => (
-                  <div
-                    key={m.title}
-                    className={`casos-pg-mod-card ${m.active ? 'active' : ''}`}
-                    onClick={() => setSelectedModule(m)}
-                  >
-                    <div className="casos-pg-mod-icon" style={{ background: m.colorBg, color: m.colorFg }}>
-                      {m.icon}
-                    </div>
-                    <h3 className="casos-pg-mod-title">{m.title}</h3>
-                    <p className="casos-pg-mod-desc">{m.desc}</p>
-                    <div className="casos-pg-mod-foot">
-                      <span className="casos-pg-mod-count">{m.count}</span>
-                      <div className="casos-pg-mod-arrow"><ChevronRight size={16} /></div>
-                    </div>
+                <div
+                  className="casos-pg-mod-card active"
+                  onClick={() => setSelectedModule(GASTRO_MODULE)}
+                  style={{ maxWidth: '420px' }}
+                >
+                  <div className="casos-pg-mod-icon" style={{ background: GASTRO_MODULE.colorBg, color: GASTRO_MODULE.colorFg }}>
+                    {GASTRO_MODULE.icon}
                   </div>
-                ))}
+                  <h3 className="casos-pg-mod-title">{GASTRO_MODULE.title}</h3>
+                  <p className="casos-pg-mod-desc">{GASTRO_MODULE.desc}</p>
+                  <div className="casos-pg-mod-foot">
+                    <span className="casos-pg-mod-count">{GASTRO_MODULE.count}</span>
+                    <div className="casos-pg-mod-arrow"><ArrowLeft size={16} style={{ transform: 'rotate(180deg)' }} /></div>
+                  </div>
+                </div>
               </div>
             </div>
 
-            {/* Section: Tipos de casos gastroenterológicos */}
+            {/* Categorías Gastroenterológicas */}
             <div className="casos-pg-section">
-              <h2 className="casos-pg-section-title">Categorías de Casos Gastroenterológicos</h2>
+              <h2 className="casos-pg-section-title">Categorías Gastroenterológicas</h2>
               <div className="casos-pg-hscroll">
                 {TYPES.map(t => (
-                  <div key={t.title} className="casos-pg-type-card" onClick={() => setSelectedModule(MODULES[0])} style={{ cursor: 'pointer' }}>
+                  <div key={t.title} className="casos-pg-type-card" onClick={() => setSelectedModule(GASTRO_MODULE)} style={{ cursor: 'pointer' }}>
                     <div className="casos-pg-type-head">
                       <div className="casos-pg-type-icon" style={{ background: t.colorBg, color: t.colorFg }}>
                         {t.icon}
@@ -454,11 +394,11 @@ export default function CasosPage() {
               </div>
             </div>
 
-            {/* Section: Casos de Gastroenterología recomendados */}
+            {/* Casos Gastroenterológicos */}
             <div className="casos-pg-section">
               <div className="casos-pg-section-header">
-                <h2 className="casos-pg-section-title">Casos destacados de Gastroenterología</h2>
-                <button className="casos-pg-link-btn" onClick={() => setSelectedModule(MODULES[0])}>Ver todos los 10 casos</button>
+                <h2 className="casos-pg-section-title">Casos Clínicos de Gastroenterología</h2>
+                <button className="casos-pg-link-btn" onClick={() => setSelectedModule(GASTRO_MODULE)}>Ver los 10 casos en detalle</button>
               </div>
               <div className="casos-pg-hscroll">
                 {GASTRO_CASES.slice(0, 4).map(c => {

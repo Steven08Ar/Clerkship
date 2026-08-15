@@ -42,10 +42,6 @@ const PANEL: Record<string, PanelSection> = {
         label: 'Por módulo',
         items: [
           { label: 'Gastroenterología', route: '/casos?modulo=Gastroenterología', dot: '#E11D48' },
-          { label: 'Neumología',        route: '/casos?modulo=Neumología',        dot: '#0284C7' },
-          { label: 'Cardiología',       route: '/casos?modulo=Cardiología',       dot: '#EA580C' },
-          { label: 'Neurología',        route: '/casos?modulo=Neurología',        dot: '#9333EA' },
-          { label: 'Nefrología',        route: '/casos?modulo=Nefrología',        dot: '#16A34A' },
         ],
       },
     ],
