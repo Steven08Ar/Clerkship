@@ -1205,6 +1205,85 @@ html.theme-animating .crono-gantt-card {
   color: #94A3B8 !important;
 }
 
+/* Pestaña de Biblioteca (/biblioteca) */
+[data-theme="dark"] .bib-body {
+  background: #0B0F19 !important;
+  color: #E2E8F0 !important;
+}
+[data-theme="dark"] .bib-sbar-wrap {
+  background: linear-gradient(to bottom, #0B0F19 85%, transparent) !important;
+}
+[data-theme="dark"] .bib-sbar-pill {
+  background: #0F172A !important;
+  border-color: rgba(255, 255, 255, 0.12) !important;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5) !important;
+}
+[data-theme="dark"] .bib-sbar-lead-ico {
+  background: rgba(30, 41, 59, 0.8) !important;
+  color: #38BDF8 !important;
+}
+[data-theme="dark"] .bib-sbar-input {
+  color: #F8FAFC !important;
+}
+[data-theme="dark"] .bib-sbar-filter-btn {
+  background: rgba(30, 41, 59, 0.8) !important;
+  border-color: rgba(255, 255, 255, 0.12) !important;
+  color: #CBD5E1 !important;
+}
+[data-theme="dark"] .bib-sbar-dropdown {
+  background: #0F172A !important;
+  border-color: rgba(255, 255, 255, 0.14) !important;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.6) !important;
+}
+[data-theme="dark"] .bib-sbar-dd-item {
+  color: #CBD5E1 !important;
+}
+[data-theme="dark"] .bib-sbar-dd-item:hover {
+  background: rgba(30, 41, 59, 0.8) !important;
+  color: #FFFFFF !important;
+}
+[data-theme="dark"] .bib-shelf-title {
+  color: #F8FAFC !important;
+}
+[data-theme="dark"] .bib-shelf-more {
+  color: #38BDF8 !important;
+}
+[data-theme="dark"] .bib-shelf-more:hover {
+  color: #7DD3FC !important;
+}
+[data-theme="dark"] .bib-shelf-board {
+  background: linear-gradient(180deg, #1E293B 0%, #0F172A 100%) !important;
+  border-top: 1px solid rgba(255, 255, 255, 0.15) !important;
+  border-bottom: 2px solid rgba(56, 189, 248, 0.4) !important;
+  box-shadow: 0 10px 24px rgba(0,0,0,0.5), inset 0 2px 0 rgba(255,255,255,0.1) !important;
+}
+
+[data-theme="light"] .bib-body {
+  background: #F8FAFC !important;
+  color: #0F172A !important;
+}
+[data-theme="light"] .bib-sbar-wrap {
+  background: linear-gradient(to bottom, #F8FAFC 85%, transparent) !important;
+}
+[data-theme="light"] .bib-sbar-pill {
+  background: #FFFFFF !important;
+  border: 1.5px solid #E2E8F0 !important;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05) !important;
+}
+[data-theme="light"] .bib-sbar-input {
+  color: #0F172A !important;
+}
+[data-theme="light"] .bib-shelf-title {
+  color: #0F172A !important;
+}
+[data-theme="light"] .bib-shelf-more {
+  color: #0284C7 !important;
+}
+[data-theme="light"] .bib-shelf-board {
+  background: linear-gradient(to bottom, #F5EDE3 0%, #DED0C1 100%) !important;
+  box-shadow: 0 8px 16px rgba(0,0,0,0.06), inset 0 2px 0 rgba(255,255,255,0.7) !important;
+}
+
 /* Pestaña de Casos Clínicos (/casos) */
 [data-theme="dark"] .casos-pg-rec-card,
 [data-theme="dark"] .casos-mod-hero,

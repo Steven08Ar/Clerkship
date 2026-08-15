@@ -3403,7 +3403,7 @@
   min-width: 0;
   overflow-y: auto;
   overflow-x: hidden;
-  background: #EFF3F6;
+  background: var(--bg, #F8FAFC);
   display: flex;
   flex-direction: column;
   padding-bottom: 32px;
@@ -3417,7 +3417,7 @@
   top: 0;
   z-index: 50;
   padding: 22px 48px 14px;
-  background: linear-gradient(to bottom, #EFF3F6 80%, transparent);
+  background: linear-gradient(to bottom, var(--bg, #F8FAFC) 80%, transparent);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -3438,14 +3438,14 @@
   display: flex;
   align-items: center;
   gap: 4px;
-  background: #ffffff;
+  background: var(--surface, #ffffff);
   border-radius: 14px;
   height: 48px;
   padding: 0 6px 0 16px;
   box-shadow:
-    0 2px 18px rgba(0, 0, 0, 0.07),
-    0 1px 4px rgba(0, 0, 0, 0.04);
-  border: 1px solid rgba(0, 0, 0, 0.055);
+    0 4px 20px rgba(0, 0, 0, 0.05),
+    0 1px 4px rgba(0, 0, 0, 0.03);
+  border: 1.5px solid var(--border, #E2E8F0);
 }
 
 .bib-sbar-lead-ico {
@@ -3455,8 +3455,8 @@
   width: 26px;
   height: 26px;
   border-radius: 7px;
-  background: #F1F5F9;
-  color: #94A3B8;
+  background: var(--surface2, #F1F5F9);
+  color: var(--ink3, #94A3B8);
   flex-shrink: 0;
 }
 
@@ -3466,13 +3466,13 @@
   background: transparent;
   font-family: var(--font);
   font-size: 0.91rem;
-  color: var(--ink);
+  color: var(--ink, #0F172A);
   outline: none;
   padding: 0 10px;
   min-width: 0;
 }
 
-.bib-sbar-input::placeholder { color: #A8B5C5; }
+.bib-sbar-input::placeholder { color: var(--ink3, #94A3B8); }
 
 .bib-sbar-x {
   display: flex;
@@ -3482,18 +3482,18 @@
   height: 24px;
   border-radius: 50%;
   border: none;
-  background: #F1F5F9;
-  color: #94A3B8;
+  background: var(--surface2, #F1F5F9);
+  color: var(--ink3, #94A3B8);
   cursor: pointer;
   transition: background 0.15s, color 0.15s;
   flex-shrink: 0;
 }
-.bib-sbar-x:hover { background: #E2E8F0; color: #64748B; }
+.bib-sbar-x:hover { background: var(--border, #E2E8F0); color: var(--ink, #0F172A); }
 
 .bib-sbar-divider {
   width: 1px;
   height: 22px;
-  background: #E9EEF4;
+  background: var(--border, #E2E8F0);
   margin: 0 4px;
   flex-shrink: 0;
 }
@@ -3512,25 +3512,25 @@
   padding: 0 11px;
   border-radius: 9px;
   border: 1px solid transparent;
-  background: #F8FAFC;
+  background: var(--surface2, #F8FAFC);
   font-family: var(--font);
   font-size: 0.80rem;
   font-weight: 500;
-  color: #64748B;
+  color: var(--ink2, #475569);
   cursor: pointer;
   transition: background 0.15s, color 0.15s, border-color 0.15s;
   white-space: nowrap;
 }
 
 .bib-sbar-filter-btn:hover {
-  background: #F0F4F8;
-  color: #334155;
+  background: var(--border, #E2E8F0);
+  color: var(--ink, #0F172A);
 }
 
 .bib-sbar-filter-btn-on {
-  background: #F0F4F8;
-  border-color: #D8E2EC;
-  color: #334155;
+  background: var(--surface2, #F0F4F8);
+  border-color: var(--border, #D8E2EC);
+  color: var(--ink, #334155);
 }
 
 .bib-sbar-filter-btn-active {
@@ -3548,7 +3548,7 @@
 
 .bib-sbar-chevron {
   transition: transform 0.18s;
-  color: #94A3B8;
+  color: var(--ink3, #94A3B8);
 }
 .bib-sbar-chevron-up { transform: rotate(-180deg); }
 
@@ -3558,8 +3558,8 @@
   top: calc(100% + 6px);
   left: 0;
   min-width: 160px;
-  background: #ffffff;
-  border: 1px solid rgba(0, 0, 0, 0.07);
+  background: var(--surface, #ffffff);
+  border: 1.5px solid var(--border, #E2E8F0);
   border-radius: 12px;
   box-shadow:
     0 8px 28px rgba(0, 0, 0, 0.10),
@@ -3591,14 +3591,14 @@
   font-family: var(--font);
   font-size: 0.81rem;
   font-weight: 500;
-  color: #475569;
+  color: var(--ink2, #475569);
   cursor: pointer;
   text-align: left;
   transition: background 0.12s, color 0.12s;
   white-space: nowrap;
 }
 
-.bib-sbar-dd-item:hover { background: #F8FAFC; color: #1E293B; }
+.bib-sbar-dd-item:hover { background: var(--surface2, #F8FAFC); color: var(--ink, #1E293B); }
 
 .bib-sbar-dd-item-on {
   background: #EEF2FF;
@@ -3635,7 +3635,7 @@
 .bib-sbar-meta {
   font-size: 0.74rem;
   font-weight: 600;
-  color: #94A3B8;
+  color: var(--ink3, #94A3B8);
   padding: 0 4px;
   margin: 0;
 }
@@ -3665,14 +3665,14 @@
 .bib-shelf-title {
   font-size: 1.05rem;
   font-weight: 600;
-  color: var(--ink);
+  color: var(--ink, #0F172A);
   letter-spacing: -0.01em;
 }
 
 .bib-shelf-more {
   font-size: 0.75rem;
   font-weight: 600;
-  color: var(--ink3);
+  color: var(--ink3, #64748B);
   background: none;
   border: none;
   cursor: pointer;
@@ -3681,7 +3681,7 @@
   gap: 4px;
   transition: color 0.15s;
 }
-.bib-shelf-more:hover { color: var(--ink); }
+.bib-shelf-more:hover { color: var(--ink, #0F172A); }
 
 /* ── Shelf visual ── */
 .bib-shelf-container {
