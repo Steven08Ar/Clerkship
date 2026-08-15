@@ -1518,3 +1518,157 @@ html.theme-animating .crono-gantt-card {
   background: rgba(51, 65, 85, 0.95) !important;
   color: #7DD3FC !important;
 }
+
+/* ── SOBREESCRITURAS DE BIBLIOTECA: DROPDOWNS SELECCIONADOS Y BOTÓN RESET EN MODO OSCURO ── */
+[data-theme="dark"] .bib-sbar-dd-item-on {
+  background: rgba(37, 99, 235, 0.3) !important;
+  color: #60A5FA !important;
+  border: 1px solid rgba(59, 130, 246, 0.4) !important;
+  font-weight: 600 !important;
+}
+
+[data-theme="dark"] .bib-sbar-reset {
+  background: rgba(239, 68, 68, 0.2) !important;
+  color: #F87171 !important;
+  border: 1px solid rgba(239, 68, 68, 0.3) !important;
+}
+
+/* ── SOBREESCRITURAS DE SIMULACIÓN CLÍNICA DE 6 ETAPAS (/simulacion) (MODO OSCURO Y CLARO 100%) ── */
+[data-theme="dark"] .sim-root,
+[data-theme="dark"] .sim-chat-col,
+[data-theme="dark"] .sim-stage1-wrap,
+[data-theme="dark"] .sim-body-full,
+[data-theme="dark"] .sim-center,
+[data-theme="dark"] .sim-2col {
+  background: #0B0F19 !important;
+  color: #E2E8F0 !important;
+}
+
+[data-theme="dark"] .sim-topbar,
+[data-theme="dark"] .sim-tabs-bar,
+[data-theme="dark"] .sim-agent-header,
+[data-theme="dark"] .sim-input-area,
+[data-theme="dark"] .sim-chat-footer,
+[data-theme="dark"] .sim-hc-panel,
+[data-theme="dark"] .sim-hc-header,
+[data-theme="dark"] .sim-left,
+[data-theme="dark"] .sim-vignette,
+[data-theme="dark"] .sim-stage1-card,
+[data-theme="dark"] .sim-just-modal,
+[data-theme="dark"] .sim-exam-results,
+[data-theme="dark"] .sim-test-result-card,
+[data-theme="dark"] .sim-diff-card,
+[data-theme="dark"] .sim-stepper {
+  background: #0F172A !important;
+  border-color: rgba(255, 255, 255, 0.12) !important;
+  color: #E2E8F0 !important;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4) !important;
+}
+
+[data-theme="dark"] .sim-stage1-title,
+[data-theme="dark"] .sim-stage-title,
+[data-theme="dark"] .sim-hc-title,
+[data-theme="dark"] .sim-vignette-text,
+[data-theme="dark"] .sim-agent-name,
+[data-theme="dark"] .sim-tb-case-title,
+[data-theme="dark"] .sim-diff-name,
+[data-theme="dark"] .sim-just-exam {
+  color: #F8FAFC !important;
+}
+
+[data-theme="dark"] .sim-stage1-sub,
+[data-theme="dark"] .sim-stage-desc,
+[data-theme="dark"] .sim-input-tip,
+[data-theme="dark"] .sim-vignette-label,
+[data-theme="dark"] .sim-exam-cat-label,
+[data-theme="dark"] .sim-test-cat-label,
+[data-theme="dark"] .sim-footer-hint {
+  color: #94A3B8 !important;
+}
+
+[data-theme="dark"] .sim-input-row,
+[data-theme="dark"] .sim-chat-input,
+[data-theme="dark"] .sim-case-card,
+[data-theme="dark"] .sim-just-ta,
+[data-theme="dark"] .sim-diff-arg,
+[data-theme="dark"] .sim-final-input,
+[data-theme="dark"] .sim-final-ta,
+[data-theme="dark"] .sim-info-chip {
+  background: rgba(30, 41, 59, 0.8) !important;
+  border-color: rgba(255, 255, 255, 0.14) !important;
+  color: #F8FAFC !important;
+}
+
+[data-theme="dark"] .sim-input-field {
+  color: #F8FAFC !important;
+}
+
+[data-theme="dark"] .sim-msg-patient .sim-msg-bubble {
+  background: #0F172A !important;
+  border-color: rgba(255, 255, 255, 0.12) !important;
+  color: #F8FAFC !important;
+}
+
+[data-theme="dark"] .sim-msg-student .sim-msg-bubble {
+  background: #2563EB !important;
+  color: #FFFFFF !important;
+}
+
+[data-theme="dark"] .sim-btn-next,
+[data-theme="dark"] .sim-btn-next-sm,
+[data-theme="dark"] .sim-btn-next-sm2 {
+  background: #2563EB !important;
+  color: #FFFFFF !important;
+  border: none !important;
+}
+
+[data-theme="dark"] .sim-btn-next:hover:not(:disabled),
+[data-theme="dark"] .sim-btn-next-sm:hover:not(:disabled) {
+  background: #1D4ED8 !important;
+}
+
+[data-theme="dark"] .sim-btn-submit {
+  background: linear-gradient(135deg, #2563EB 0%, #1D4ED8 100%) !important;
+  color: #FFFFFF !important;
+  box-shadow: 0 4px 16px rgba(37, 99, 235, 0.4) !important;
+}
+
+[data-theme="dark"] .sim-exam-btn,
+[data-theme="dark"] .sim-test-btn {
+  background: rgba(30, 41, 59, 0.8) !important;
+  border-color: rgba(255, 255, 255, 0.14) !important;
+  color: #CBD5E1 !important;
+}
+
+[data-theme="dark"] .sim-exam-btn-done,
+[data-theme="dark"] .sim-test-done {
+  background: rgba(16, 185, 129, 0.2) !important;
+  border-color: rgba(16, 185, 129, 0.4) !important;
+  color: #34D399 !important;
+}
+
+[data-theme="dark"] .sim-hc-sec-body {
+  color: #CBD5E1 !important;
+}
+
+[data-theme="dark"] .sim-hc-sec-body strong {
+  color: #F8FAFC !important;
+}
+
+/* Modo Claro en Simulación */
+[data-theme="light"] .sim-root,
+[data-theme="light"] .sim-chat-col,
+[data-theme="light"] .sim-stage1-wrap,
+[data-theme="light"] .sim-body-full,
+[data-theme="light"] .sim-center,
+[data-theme="light"] .sim-2col {
+  background: #F8FAFC !important;
+  color: #0F172A !important;
+}
+
+[data-theme="light"] .sim-btn-next,
+[data-theme="light"] .sim-btn-next-sm,
+[data-theme="light"] .sim-btn-next-sm2 {
+  background: #0284C7 !important;
+  color: #FFFFFF !important;
+}
