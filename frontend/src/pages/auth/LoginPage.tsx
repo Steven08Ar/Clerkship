@@ -117,7 +117,12 @@ export default function LoginPage() {
     const hasConsent = hasUserAcceptedConsent(form.email);
     /* Wait for assembly animation (~2.5s) before navigating */
     setTimeout(() => {
-      navigate(hasConsent ? '/dashboard' : '/consent', { replace: true });
+      if (hasConsent) {
+        sessionStorage.setItem('clerkship_show_welcome', 'true');
+        navigate('/dashboard', { replace: true });
+      } else {
+        navigate('/consent', { replace: true });
+      }
     }, 2600);
   }
 

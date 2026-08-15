@@ -1239,3 +1239,109 @@
 [data-theme="dark"] .cp-phrase-text.success {
   color: #34D399 !important;
 }
+
+/* ══════════════════════════════════════════════════════════
+   PANTALLA DE CARGA DE BIENVENIDA (Re-login tras tratamiento de datos)
+   ══════════════════════════════════════════════════════════ */
+.welcome-overlay-layer {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  z-index: 10000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg);
+  color: var(--ink);
+  padding: 24px;
+  opacity: 1;
+  pointer-events: auto;
+  transition: opacity 1200ms cubic-bezier(0.16, 1, 0.3, 1);
+  will-change: opacity;
+}
+
+.welcome-overlay-layer.is-fading-out {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.welcome-overlay-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  max-width: 540px;
+  width: 100%;
+  position: relative;
+  z-index: 2;
+}
+
+.welcome-logo-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.welcome-svg-logo {
+  color: var(--ink);
+  filter: drop-shadow(0 8px 24px rgba(37, 99, 235, 0.15));
+}
+
+.welcome-text-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: 8px;
+  font-family: var(--font);
+}
+
+.welcome-title {
+  font-family: var(--font);
+  font-size: clamp(1.4rem, 2.4vw, 1.85rem);
+  font-weight: 800;
+  color: var(--ink);
+  letter-spacing: -0.025em;
+  line-height: 1.25;
+  margin: 0 0 12px;
+}
+
+.welcome-name-highlight {
+  color: #2563EB;
+}
+
+.welcome-phrase-box {
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.welcome-phrase-text {
+  font-family: var(--font);
+  font-size: 0.96rem;
+  font-weight: 600;
+  color: var(--ink2);
+  margin: 0;
+}
+
+/* Modo oscuro */
+[data-theme="dark"] .welcome-overlay-layer {
+  background: #0B0F19 !important;
+  color: #F8FAFC !important;
+}
+
+[data-theme="dark"] .welcome-svg-logo {
+  color: #F8FAFC !important;
+  filter: drop-shadow(0 12px 32px rgba(96, 165, 250, 0.25));
+}
+
+[data-theme="dark"] .welcome-title {
+  color: #F8FAFC !important;
+}
+
+[data-theme="dark"] .welcome-name-highlight {
+  color: #60A5FA !important;
+}
+
+[data-theme="dark"] .welcome-phrase-text {
+  color: #94A3B8 !important;
+}
