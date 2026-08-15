@@ -1258,25 +1258,25 @@ html.theme-animating .crono-gantt-card {
   box-shadow: 0 10px 24px rgba(0,0,0,0.5), inset 0 2px 0 rgba(255,255,255,0.1) !important;
 }
 
-/* 2. Modo oscuro: Color del libro con capa opaca y letras oscuras */
+/* Modo oscuro: Capa opaca oscura sobre el color del libro y letras blancas */
 [data-theme="dark"] .bib-book-cover::after {
   display: block !important;
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.86) 0%, rgba(241, 245, 249, 0.92) 100%) !important;
+  background: linear-gradient(180deg, rgba(0, 0, 0, 0.38) 0%, rgba(0, 0, 0, 0.68) 100%) !important;
 }
 [data-theme="dark"] .bib-book-title {
-  color: #0F172A !important;
+  color: #FFFFFF !important;
   font-weight: 800 !important;
-  text-shadow: none !important;
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.8) !important;
 }
 [data-theme="dark"] .bib-book-author {
-  color: #334155 !important;
-  font-weight: 700 !important;
-  text-shadow: none !important;
+  color: rgba(255, 255, 255, 0.95) !important;
+  font-weight: 600 !important;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.6) !important;
 }
 [data-theme="dark"] .bib-book-badge {
-  color: #0F172A !important;
-  background: rgba(15, 23, 42, 0.12) !important;
-  border: 1px solid rgba(15, 23, 42, 0.2) !important;
+  color: #FFFFFF !important;
+  background: rgba(0, 0, 0, 0.45) !important;
+  border: none !important;
 }
 
 [data-theme="light"] .bib-body {
@@ -1305,7 +1305,7 @@ html.theme-animating .crono-gantt-card {
   box-shadow: 0 8px 16px rgba(0,0,0,0.06), inset 0 2px 0 rgba(255,255,255,0.7) !important;
 }
 
-/* 1. Modo claro: Color del libro normal, sin capa opaca y letras blancas */
+/* Modo claro: Color del libro normal, sin capa opaca y letras blancas (Intacto) */
 [data-theme="light"] .bib-book-cover::after {
   display: none !important;
   background: none !important;
