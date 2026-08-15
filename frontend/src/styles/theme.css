@@ -1749,3 +1749,56 @@ html.theme-animating .crono-gantt-card {
 [data-theme="dark"] .sim-evidence-list li::before {
   color: #38BDF8 !important;
 }
+
+/* ── FILTROS PERSONALIZADOS DE HISTORIAL (HIST-CUSTOM-SELECT) EN MODO OSCURO (100%) ── */
+[data-theme="dark"] .hist-custom-select-trigger {
+  color: #F8FAFC !important;
+}
+[data-theme="dark"] .hist-custom-select-trigger:hover {
+  color: #38BDF8 !important;
+}
+
+[data-theme="dark"] .hist-custom-select-menu {
+  background: #0F172A !important;
+  border-color: rgba(255, 255, 255, 0.15) !important;
+  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.6) !important;
+}
+
+[data-theme="dark"] .hist-custom-select-item {
+  color: #CBD5E1 !important;
+}
+[data-theme="dark"] .hist-custom-select-item:hover {
+  background: rgba(30, 41, 59, 0.8) !important;
+  color: #F8FAFC !important;
+}
+[data-theme="dark"] .hist-custom-select-item.active {
+  background: rgba(37, 99, 235, 0.3) !important;
+  color: #60A5FA !important;
+  border: 1px solid rgba(59, 130, 246, 0.4) !important;
+}
+
+/* ── ICONOS DE TARJETAS DE ESTADÍSTICA (STAT CARDS) EN MODO OSCURO (100%) ── */
+[data-theme="dark"] .hist-pg-stat-icon[data-stat-type="emerald"] {
+  background: rgba(16, 185, 129, 0.16) !important;
+  color: #34D399 !important;
+  border: 1px solid rgba(16, 185, 129, 0.3) !important;
+}
+
+[data-theme="dark"] .hist-pg-stat-icon[data-stat-type="sky"] {
+  background: rgba(2, 132, 199, 0.16) !important;
+  color: #38BDF8 !important;
+  border: 1px solid rgba(2, 132, 199, 0.3) !important;
+}
+
+[data-theme="dark"] .hist-pg-stat-icon[data-stat-type="indigo"] {
+  background: rgba(99, 102, 241, 0.16) !important;
+  color: #818CF8 !important;
+  border: 1px solid rgba(99, 102, 241, 0.3) !important;
+}
+
+/* ── INSIGNIAS Y CONTADORES DE CASOS ("3 CASOS") EN MODO OSCURO (100%) ── */
+[data-theme="dark"] .casos-pg-type-count {
+  background: rgba(30, 41, 59, 0.8) !important;
+  color: #38BDF8 !important;
+  border: 1px solid rgba(255, 255, 255, 0.12) !important;
+}

@@ -1,11 +1,66 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useRef, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import {
   Search, Clock, Info,
-  ChevronRight, Download, BarChart2,
+  ChevronRight, ChevronDown, Download, BarChart2,
   Check, AlertCircle, Target, Star, ClipboardCheck
 } from 'lucide-react';
 import Sidebar from '../../components/shared/Sidebar';
+
+/* ── Custom Select Component ───────────────────────────── */
+function CustomSelect({
+  value,
+  options,
+  onChange,
+}: {
+  value: string;
+  options: string[];
+  onChange: (val: string) => void;
+}) {
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (ref.current && !ref.current.contains(e.target as Node)) {
+        setOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  return (
+    <div className="hist-custom-select-wrap" ref={ref}>
+      <button
+        type="button"
+        className={`hist-custom-select-trigger${open ? ' open' : ''}`}
+        onClick={() => setOpen(!open)}
+      >
+        <span>{value}</span>
+        <ChevronDown size={14} className={`hist-select-arrow${open ? ' rotated' : ''}`} />
+      </button>
+      {open && (
+        <div className="hist-custom-select-menu">
+          {options.map((opt) => (
+            <button
+              key={opt}
+              type="button"
+              className={`hist-custom-select-item${opt === value ? ' active' : ''}`}
+              onClick={() => {
+                onChange(opt);
+                setOpen(false);
+              }}
+            >
+              <span>{opt}</span>
+              {opt === value && <Check size={14} className="hist-select-check" />}
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
 
 /* ── Types ─────────────────────────────────────────────── */
 interface Session {
@@ -135,6 +190,9 @@ const SESSIONS: Session[] = [
 ];
 
 const SPECIALTIES = ['Todos', 'Gastroenterología'];
+const STATUS_OPTIONS = ['Todos', 'Completados', 'En progreso'];
+const DIFF_OPTIONS = ['Todos', 'Básico', 'Intermedio', 'Avanzado'];
+const DATE_OPTIONS = ['Últimos 3 meses', 'Último mes', 'Este año'];
 
 function fmtDate(iso: string) {
   const d = new Date(iso);
@@ -244,14 +302,19 @@ function SessionRow({ s, delay }: { s: Session; delay: number }) {
 /* ── Page ───────────────────────────────────────────────── */
 export default function HistorialPage() {
   const [query, setQuery] = useState('');
-  const [spec, setSpec] = useState('Todos');
+  const [statusFilter, setStatusFilter] = useState('Completados');
+  const [specFilter, setSpecFilter] = useState('Todos');
+  const [diffFilter, setDiffFilter] = useState('Todos');
+  const [dateFilter, setDateFilter] = useState('Últimos 3 meses');
 
   const filtered = useMemo(() => SESSIONS.filter(s => {
     const q = query.toLowerCase();
     const matchQ    = !q || s.caseTitle.toLowerCase().includes(q) || s.specialty.toLowerCase().includes(q);
-    const matchSpec = spec === 'Todos' || s.specialty === spec;
-    return matchQ && matchSpec;
-  }), [query, spec]);
+    const matchSpec = specFilter === 'Todos' || s.specialty === specFilter;
+    const matchStatus = statusFilter === 'Todos' || (statusFilter === 'Completados' ? s.completed : !s.completed);
+    const matchDiff = diffFilter === 'Todos' || DIFFICULTY_LABEL[s.difficulty] === diffFilter;
+    return matchQ && matchSpec && matchStatus && matchDiff;
+  }), [query, specFilter, statusFilter, diffFilter]);
   
   const displayed = filtered.slice(0, 6);
 
@@ -270,7 +333,7 @@ export default function HistorialPage() {
           
           <div className="hist-pg-stats">
             <div className="hist-pg-stat-card">
-              <div className="hist-pg-stat-icon" style={{ color: '#10B981', background: '#E6F6EC' }}>
+              <div className="hist-pg-stat-icon" data-stat-type="emerald">
                 <ClipboardCheck size={20} />
               </div>
               <div className="hist-pg-stat-info">
@@ -280,7 +343,7 @@ export default function HistorialPage() {
             </div>
             
             <div className="hist-pg-stat-card">
-              <div className="hist-pg-stat-icon" style={{ color: '#0284C7', background: '#E0F2FE' }}>
+              <div className="hist-pg-stat-icon" data-stat-type="sky">
                 <Target size={20} />
               </div>
               <div className="hist-pg-stat-info">
@@ -290,7 +353,7 @@ export default function HistorialPage() {
             </div>
             
             <div className="hist-pg-stat-card">
-              <div className="hist-pg-stat-icon" style={{ color: '#4F46E5', background: '#E0E7FF' }}>
+              <div className="hist-pg-stat-icon" data-stat-type="indigo">
                 <Clock size={20} />
               </div>
               <div className="hist-pg-stat-info">
@@ -300,7 +363,7 @@ export default function HistorialPage() {
             </div>
             
             <div className="hist-pg-stat-card">
-              <div className="hist-pg-stat-icon" style={{ color: '#10B981', background: '#E6F6EC' }}>
+              <div className="hist-pg-stat-icon" data-stat-type="emerald">
                 <Star size={20} />
               </div>
               <div className="hist-pg-stat-info">
@@ -311,38 +374,40 @@ export default function HistorialPage() {
           </div>
         </div>
 
-        {/* ── Filters ── */}
+        {/* ── Custom Filters ── */}
         <div className="hist-pg-filters">
           <div className="hist-filter-group">
             <div className="hist-filter-item">
               <label>Estado</label>
-              <select className="hist-select-input">
-                <option>Completados</option>
-                <option>En progreso</option>
-              </select>
+              <CustomSelect
+                value={statusFilter}
+                options={STATUS_OPTIONS}
+                onChange={setStatusFilter}
+              />
             </div>
             <div className="hist-filter-item">
               <label>Módulo</label>
-              <select className="hist-select-input" value={spec} onChange={e => setSpec(e.target.value)}>
-                {SPECIALTIES.map(sp => <option key={sp}>{sp}</option>)}
-              </select>
+              <CustomSelect
+                value={specFilter}
+                options={SPECIALTIES}
+                onChange={setSpecFilter}
+              />
             </div>
             <div className="hist-filter-item">
               <label>Dificultad</label>
-              <select className="hist-select-input">
-                <option>Todos</option>
-                <option>Básico</option>
-                <option>Intermedio</option>
-                <option>Avanzado</option>
-              </select>
+              <CustomSelect
+                value={diffFilter}
+                options={DIFF_OPTIONS}
+                onChange={setDiffFilter}
+              />
             </div>
             <div className="hist-filter-item">
               <label>Fecha</label>
-              <select className="hist-select-input">
-                <option>Últimos 3 meses</option>
-                <option>Último mes</option>
-                <option>Este año</option>
-              </select>
+              <CustomSelect
+                value={dateFilter}
+                options={DATE_OPTIONS}
+                onChange={setDateFilter}
+              />
             </div>
           </div>
           
