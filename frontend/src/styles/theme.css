@@ -1289,3 +1289,52 @@ html.theme-animating .crono-gantt-card {
   background: rgba(51, 65, 85, 0.9) !important;
   color: #FFFFFF !important;
 }
+[data-theme="dark"] .hist-act-btn-text,
+[data-theme="dark"] .hist-act-btn-icon {
+  background: rgba(30, 41, 59, 0.8) !important;
+  border-color: rgba(255, 255, 255, 0.14) !important;
+  color: #CBD5E1 !important;
+}
+[data-theme="dark"] .hist-act-btn-text:hover,
+[data-theme="dark"] .hist-act-btn-icon:hover {
+  background: rgba(51, 65, 85, 0.9) !important;
+  color: #FFFFFF !important;
+  border-color: rgba(255, 255, 255, 0.3) !important;
+}
+[data-theme="dark"] .hist-page-btn {
+  background: rgba(30, 41, 59, 0.8) !important;
+  border-color: rgba(255, 255, 255, 0.14) !important;
+  color: #CBD5E1 !important;
+}
+[data-theme="dark"] .hist-page-btn:hover {
+  background: rgba(51, 65, 85, 0.9) !important;
+  color: #FFFFFF !important;
+}
+[data-theme="dark"] .hist-page-btn-active {
+  background: #2563EB !important;
+  border-color: #3B82F6 !important;
+  color: #FFFFFF !important;
+}
+[data-theme="dark"] .hist-footer-banner {
+  background: rgba(30, 58, 138, 0.3) !important;
+  border-color: rgba(59, 130, 246, 0.3) !important;
+}
+[data-theme="dark"] .hist-fb-icon {
+  background: rgba(30, 41, 59, 0.8) !important;
+  color: #38BDF8 !important;
+}
+[data-theme="dark"] .hist-fb-text h4 {
+  color: #38BDF8 !important;
+}
+[data-theme="dark"] .hist-fb-text p {
+  color: #94A3B8 !important;
+}
+[data-theme="dark"] .hist-fb-btn {
+  background: rgba(30, 41, 59, 0.9) !important;
+  border-color: rgba(255, 255, 255, 0.15) !important;
+  color: #38BDF8 !important;
+}
+[data-theme="dark"] .hist-fb-btn:hover {
+  background: rgba(51, 65, 85, 0.95) !important;
+  color: #7DD3FC !important;
+}

@@ -4600,8 +4600,8 @@
 }
 
 .hist-pg-stat-card {
-  background: #fff;
-  border: 1.5px solid #F0F2F6;
+  background: var(--surface, #fff);
+  border: 1.5px solid var(--border, #F0F2F6);
   border-radius: 12px;
   padding: 14px 20px;
   display: flex;
@@ -4629,14 +4629,14 @@
 .hist-pg-stat-lbl {
   font-size: 0.7rem;
   font-weight: 600;
-  color: var(--ink3);
+  color: var(--ink3, #64748B);
   margin-bottom: 2px;
 }
 
 .hist-pg-stat-val {
   font-size: 1.15rem;
   font-weight: 800;
-  color: var(--ink);
+  color: var(--ink, #0F172A);
   letter-spacing: -0.02em;
 }
 
@@ -4645,8 +4645,8 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  background: #fff;
-  border: 1.5px solid #F0F2F6;
+  background: var(--surface, #fff);
+  border: 1.5px solid var(--border, #F0F2F6);
   border-radius: 16px;
   padding: 16px 24px;
   box-shadow: 0 4px 12px rgba(0,0,0,0.02);
@@ -4669,7 +4669,7 @@
 .hist-filter-item label {
   font-size: 0.7rem;
   font-weight: 600;
-  color: var(--ink3);
+  color: var(--ink3, #64748B);
 }
 
 .hist-select-input {
@@ -4678,7 +4678,7 @@
   border: none;
   font-size: 0.85rem;
   font-weight: 700;
-  color: var(--ink);
+  color: var(--ink, #0F172A);
   font-family: var(--font);
   cursor: pointer;
   outline: none;
@@ -4698,15 +4698,15 @@
   display: flex;
   align-items: center;
   gap: 10px;
-  background: #F8FAFC;
-  border: 1px solid #E2E8F0;
+  background: var(--surface2, #F8FAFC);
+  border: 1px solid var(--border, #E2E8F0);
   border-radius: 8px;
   padding: 8px 14px;
   width: 240px;
 }
 
 .hist-search-icon {
-  color: var(--ink3);
+  color: var(--ink3, #64748B);
 }
 
 .hist-search-box input {
@@ -4715,36 +4715,36 @@
   outline: none;
   font-size: 0.85rem;
   font-family: var(--font);
-  color: var(--ink);
+  color: var(--ink, #0F172A);
   width: 100%;
 }
 .hist-search-box input::placeholder {
-  color: var(--ink3);
+  color: var(--ink3, #64748B);
 }
 
 .hist-export-btn {
   display: flex;
   align-items: center;
   gap: 8px;
-  background: #fff;
-  border: 1.5px solid #E2E8F0;
+  background: var(--surface, #fff);
+  border: 1.5px solid var(--border, #E2E8F0);
   border-radius: 8px;
   padding: 8px 16px;
   font-size: 0.85rem;
   font-weight: 600;
-  color: var(--ink2);
+  color: var(--ink2, #334155);
   cursor: pointer;
   transition: all 0.2s;
 }
 .hist-export-btn:hover {
-  background: #F8FAFC;
-  color: var(--ink);
+  background: var(--surface2, #F8FAFC);
+  color: var(--ink, #0F172A);
 }
 
 /* ── Table ── */
 .hist-table-container {
-  background: #fff;
-  border: 1.5px solid #F0F2F6;
+  background: var(--surface, #fff);
+  border: 1.5px solid var(--border, #F0F2F6);
   border-radius: 16px;
   box-shadow: 0 4px 12px rgba(0,0,0,0.02);
   overflow: hidden;
@@ -4754,28 +4754,28 @@
   display: flex;
   align-items: center;
   padding: 16px 24px;
-  border-bottom: 1.5px solid #F0F2F6;
-  background: #FAFAFA;
+  border-bottom: 1.5px solid var(--border, #F0F2F6);
+  background: var(--surface2, #FAFAFA);
 }
 
 .hist-th {
   font-size: 0.75rem;
   font-weight: 600;
-  color: var(--ink3);
+  color: var(--ink3, #64748B);
 }
 
 .hist-table-row {
   display: flex;
   align-items: center;
   padding: 20px 24px;
-  border-bottom: 1px solid #F0F2F6;
+  border-bottom: 1px solid var(--border, #F0F2F6);
   transition: background 0.15s;
 }
 .hist-table-row:last-child {
   border-bottom: none;
 }
 .hist-table-row:hover {
-  background: #F8FAFC;
+  background: var(--surface2, #F8FAFC);
 }
 
 /* Columns */
@@ -4809,7 +4809,7 @@
 .hist-td-title {
   font-size: 0.85rem;
   font-weight: 700;
-  color: var(--ink);
+  color: var(--ink, #0F172A);
   line-height: 1.4;
 }
 
@@ -4830,19 +4830,19 @@
   gap: 2px;
   font-size: 0.8rem;
   font-weight: 600;
-  color: var(--ink2);
+  color: var(--ink2, #334155);
 }
 .hist-td-time-sub {
   font-size: 0.75rem;
   font-weight: 500;
-  color: var(--ink3);
+  color: var(--ink3, #64748B);
 }
 
 /* Time cell */
 .hist-td-time {
   font-size: 0.8rem;
   font-weight: 600;
-  color: var(--ink2);
+  color: var(--ink2, #334155);
 }
 
 /* Accuracy cell */
@@ -4850,17 +4850,17 @@
   flex-direction: column;
   align-items: flex-start;
   gap: 6px;
-  width: 80px; /* inner width */
+  width: 80px;
 }
 .hist-acc-val {
   font-size: 0.85rem;
   font-weight: 700;
-  color: var(--ink);
+  color: var(--ink, #0F172A);
 }
 .hist-acc-track {
   width: 100%;
   height: 4px;
-  background: #E2E8F0;
+  background: var(--border, #E2E8F0);
   border-radius: 2px;
   overflow: hidden;
 }
@@ -4889,36 +4889,36 @@
   gap: 10px;
 }
 .hist-act-btn-text {
-  background: #fff;
-  border: 1px solid #E2E8F0;
+  background: var(--surface, #fff);
+  border: 1px solid var(--border, #E2E8F0);
   border-radius: 6px;
   padding: 6px 12px;
   font-size: 0.75rem;
   font-weight: 600;
-  color: var(--ink2);
+  color: var(--ink2, #334155);
   cursor: pointer;
   transition: all 0.2s;
 }
 .hist-act-btn-text:hover {
-  border-color: #CBD5E1;
-  color: var(--ink);
+  border-color: var(--border2, #CBD5E1);
+  color: var(--ink, #0F172A);
 }
 .hist-act-btn-icon {
-  background: #fff;
-  border: 1px solid #E2E8F0;
+  background: var(--surface, #fff);
+  border: 1px solid var(--border, #E2E8F0);
   border-radius: 6px;
   width: 32px;
   height: 32px;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: var(--ink3);
+  color: var(--ink3, #64748B);
   cursor: pointer;
   transition: all 0.2s;
 }
 .hist-act-btn-icon:hover {
-  border-color: #CBD5E1;
-  color: var(--ink);
+  border-color: var(--border2, #CBD5E1);
+  color: var(--ink, #0F172A);
 }
 
 /* ── Pagination ── */
@@ -4930,7 +4930,7 @@
 
 .hist-page-info {
   font-size: 0.8rem;
-  color: var(--ink3);
+  color: var(--ink3, #64748B);
   font-weight: 500;
 }
 
@@ -4944,33 +4944,33 @@
   min-width: 32px;
   height: 32px;
   border-radius: 8px;
-  background: #fff;
-  border: 1px solid #E2E8F0;
+  background: var(--surface, #fff);
+  border: 1px solid var(--border, #E2E8F0);
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 0.8rem;
   font-weight: 600;
-  color: var(--ink2);
+  color: var(--ink2, #334155);
   cursor: pointer;
   transition: all 0.2s;
 }
 .hist-page-btn:hover {
-  background: #F8FAFC;
+  background: var(--surface2, #F8FAFC);
 }
 .hist-page-btn-active {
-  background: #0F172A;
+  background: var(--p, #0F172A);
   color: #fff;
-  border-color: #0F172A;
+  border-color: var(--p, #0F172A);
 }
 .hist-page-btn-active:hover {
-  background: #0F172A;
+  background: var(--p, #0F172A);
 }
 
 /* ── Footer Banner ── */
 .hist-footer-banner {
-  background: #F4F8FC;
-  border: 1px solid #E6F0F9;
+  background: var(--surface2, #F4F8FC);
+  border: 1px solid var(--border2, #E6F0F9);
   border-radius: 12px;
   padding: 16px 24px;
   display: flex;
@@ -4987,7 +4987,7 @@
 .hist-fb-icon {
   width: 36px;
   height: 36px;
-  background: #fff;
+  background: var(--surface, #fff);
   border-radius: 50%;
   display: flex;
   align-items: center;
@@ -5005,15 +5005,15 @@
 
 .hist-fb-text p {
   font-size: 0.75rem;
-  color: var(--ink3);
+  color: var(--ink3, #64748B);
 }
 
 .hist-fb-btn {
   display: flex;
   align-items: center;
   gap: 6px;
-  background: #fff;
-  border: 1.5px solid #E2E8F0;
+  background: var(--surface, #fff);
+  border: 1.5px solid var(--border, #E2E8F0);
   border-radius: 8px;
   padding: 8px 16px;
   font-size: 0.8rem;
@@ -5023,8 +5023,8 @@
   transition: all 0.2s;
 }
 .hist-fb-btn:hover {
-  background: #F8FAFC;
-  border-color: #CBD5E1;
+  background: var(--surface2, #F8FAFC);
+  border-color: var(--border2, #CBD5E1);
 }
 
 .hist-empty-state {

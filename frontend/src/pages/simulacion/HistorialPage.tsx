@@ -3,8 +3,7 @@ import { motion } from 'framer-motion';
 import {
   Search, Clock, Info,
   ChevronRight, Download, BarChart2,
-  Check, AlertCircle, Target, Star, ClipboardCheck,
-  Brain, Heart, Wind, Stethoscope
+  Check, AlertCircle, Target, Star, ClipboardCheck
 } from 'lucide-react';
 import Sidebar from '../../components/shared/Sidebar';
 
@@ -14,7 +13,7 @@ interface Session {
   caseTitle: string;
   specialty: string;
   difficulty: 1 | 2 | 3;
-  date: string;        // ISO
+  date: string;
   timeStr: string;
   score: number;
   timeMin: number;
@@ -23,67 +22,65 @@ interface Session {
   completed: boolean;
 }
 
-/* ── Data ───────────────────────────────────────────────── */
-// Updated to match the design (adding difficulty and fixing specialty names)
+/* ── Data: 12 Sesiones de Gastroenterología ───────────────────── */
 const SESSIONS: Session[] = [
   {
     id: 1,
-    caseTitle: 'Dolor abdominal agudo en paciente joven',
+    caseTitle: 'Úlcera péptica por uso de AINEs',
     specialty: 'Gastroenterología',
     difficulty: 1,
     date: '2025-05-18T11:32:00',
     timeStr: '11:32 a. m.',
-    score: 80, timeMin: 16, biases: 0, stage: 6, completed: true,
+    score: 87, timeMin: 16, biases: 0, stage: 6, completed: true,
   },
   {
     id: 2,
-    caseTitle: 'Disnea progresiva en adulto mayor',
-    specialty: 'Neumología',
-    difficulty: 2,
+    caseTitle: 'Enfermedad por reflujo gastroesofágico (ERGE)',
+    specialty: 'Gastroenterología',
+    difficulty: 1,
     date: '2025-05-16T09:15:00',
     timeStr: '09:15 a. m.',
-    score: 65, timeMin: 22, biases: 1, stage: 6, completed: true,
+    score: 82, timeMin: 22, biases: 1, stage: 6, completed: true,
   },
   {
     id: 3,
-    caseTitle: 'Dolor torácico atípico en mujer de 45 años',
-    specialty: 'Cardiología',
-    difficulty: 3,
+    caseTitle: 'Apendicitis aguda típica',
+    specialty: 'Gastroenterología',
+    difficulty: 1,
     date: '2025-05-14T16:47:00',
     timeStr: '04:47 p. m.',
-    score: 70, timeMin: 28, biases: 0, stage: 6, completed: true,
+    score: 91, timeMin: 28, biases: 0, stage: 6, completed: true,
   },
   {
     id: 4,
-    caseTitle: 'Cefalea súbita y déficit neurológico',
-    specialty: 'Neurología',
-    difficulty: 3,
+    caseTitle: 'Síndrome de intestino irritable (SII)',
+    specialty: 'Gastroenterología',
+    difficulty: 2,
     date: '2025-05-12T14:03:00',
     timeStr: '02:03 p. m.',
-    score: 60, timeMin: 24, biases: 2, stage: 6, completed: true,
+    score: 65, timeMin: 24, biases: 2, stage: 6, completed: true,
   },
   {
     id: 5,
-    caseTitle: 'Hematuria indolora en paciente adulto',
-    specialty: 'Nefrología',
-    difficulty: 1,
+    caseTitle: 'Colecistitis aguda calculosa',
+    specialty: 'Gastroenterología',
+    difficulty: 2,
     date: '2025-05-10T10:11:00',
     timeStr: '10:11 a. m.',
     score: 90, timeMin: 14, biases: 0, stage: 6, completed: true,
   },
   {
     id: 6,
-    caseTitle: 'Fiebre y pérdida de peso en adulto joven',
-    specialty: 'Casos de urgencias',
+    caseTitle: 'Pancreatitis aguda leve',
+    specialty: 'Gastroenterología',
     difficulty: 2,
     date: '2025-05-08T08:50:00',
     timeStr: '08:50 a. m.',
     score: 75, timeMin: 19, biases: 1, stage: 6, completed: true,
   },
-  // Add some extra to show pagination info correctly
   {
     id: 7,
-    caseTitle: 'Hemorragia digestiva alta no variceal',
+    caseTitle: 'Hepatitis viral aguda tipo A',
     specialty: 'Gastroenterología',
     difficulty: 2,
     date: '2025-05-01T15:30:00',
@@ -92,7 +89,7 @@ const SESSIONS: Session[] = [
   },
   {
     id: 8,
-    caseTitle: 'Pancreatitis aguda leve',
+    caseTitle: 'Hemorragia digestiva alta no variceal',
     specialty: 'Gastroenterología',
     difficulty: 2,
     date: '2025-04-28T10:00:00',
@@ -101,43 +98,43 @@ const SESSIONS: Session[] = [
   },
   {
     id: 9,
-    caseTitle: 'Síndrome de intestino irritable',
+    caseTitle: 'Enfermedad de Crohn ileal',
     specialty: 'Gastroenterología',
-    difficulty: 1,
+    difficulty: 3,
     date: '2025-04-20T14:20:00',
     timeStr: '02:20 p. m.',
-    score: 100, timeMin: 15, biases: 0, stage: 6, completed: true,
+    score: 68, timeMin: 35, biases: 1, stage: 6, completed: true,
   },
   {
     id: 10,
-    caseTitle: 'Tromboembolismo pulmonar',
-    specialty: 'Neumología',
+    caseTitle: 'Adenocarcinoma gástrico avanzado',
+    specialty: 'Gastroenterología',
     difficulty: 3,
     date: '2025-04-15T09:45:00',
     timeStr: '09:45 a. m.',
-    score: 60, timeMin: 40, biases: 2, stage: 6, completed: true,
+    score: 72, timeMin: 40, biases: 2, stage: 6, completed: true,
   },
   {
     id: 11,
-    caseTitle: 'Meningitis bacteriana aguda',
-    specialty: 'Neurología',
-    difficulty: 3,
+    caseTitle: 'Diverticulitis aguda no complicada',
+    specialty: 'Gastroenterología',
+    difficulty: 2,
     date: '2025-04-10T11:15:00',
     timeStr: '11:15 a. m.',
-    score: 55, timeMin: 45, biases: 3, stage: 6, completed: true,
+    score: 80, timeMin: 25, biases: 1, stage: 6, completed: true,
   },
   {
     id: 12,
-    caseTitle: 'Úlcera péptica por uso de AINEs',
+    caseTitle: 'Cirrosis hepática descompensada',
     specialty: 'Gastroenterología',
-    difficulty: 1,
+    difficulty: 3,
     date: '2025-04-05T16:00:00',
     timeStr: '04:00 p. m.',
-    score: 88, timeMin: 22, biases: 0, stage: 6, completed: true,
+    score: 88, timeMin: 30, biases: 0, stage: 6, completed: true,
   }
 ];
 
-const SPECIALTIES = ['Todos', ...Array.from(new Set(SESSIONS.map(s => s.specialty))).sort()];
+const SPECIALTIES = ['Todos', 'Gastroenterología'];
 
 function fmtDate(iso: string) {
   const d = new Date(iso);
@@ -149,48 +146,27 @@ function fmtDate(iso: string) {
 
 const DIFFICULTY_LABEL: Record<number, string> = { 1: 'Básico', 2: 'Intermedio', 3: 'Avanzado' };
 const DIFFICULTY_COLOR: Record<number, { bg: string; color: string }> = {
-  1: { bg: '#E6F6EC', color: '#10B981' }, // Verde
-  2: { bg: '#FFF7E6', color: '#F59E0B' }, // Naranja
-  3: { bg: '#FEE2E2', color: '#EF4444' }, // Rojo
+  1: { bg: '#E6F6EC', color: '#10B981' },
+  2: { bg: '#FFF7E6', color: '#F59E0B' },
+  3: { bg: '#FEE2E2', color: '#EF4444' },
 };
 
 const SPEC_COLORS: Record<string, { bg: string; color: string }> = {
   'Gastroenterología': { bg: '#FFE4E6', color: '#E11D48' },
-  'Neumología': { bg: '#E0F2FE', color: '#0284C7' },
-  'Cardiología': { bg: '#FFEDD5', color: '#EA580C' },
-  'Neurología': { bg: '#F3E8FF', color: '#9333EA' },
-  'Nefrología': { bg: '#DCFCE7', color: '#16A34A' },
-  'Casos de urgencias': { bg: '#E0F2FE', color: '#0284C7' },
 };
 
-// SVG Icons for organs
+// SVG Icono Estómago
 const StomachIcon = () => (
   <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
     <path d="M18 6c0-2.2-1.8-4-4-4s-4 1.8-4 4c0 1.1-.9 2-2 2H6c-1.1 0-2 .9-2 2v2c0 3.3 2.7 6 6 6h4c2.2 0 4-1.8 4-4V6z"/>
     <path d="M12 18v2c0 1.1.9 2 2 2h4"/>
   </svg>
 );
-const UserIcon = () => (
-  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
-  </svg>
-);
-
-function getSpecIcon(spec: string) {
-  if (spec === 'Gastroenterología') return <StomachIcon />;
-  if (spec === 'Neumología') return <Wind size={22} />;
-  if (spec === 'Cardiología') return <Heart size={22} />;
-  if (spec === 'Neurología') return <Brain size={22} />;
-  if (spec === 'Nefrología') return <Stethoscope size={22} />;
-  if (spec === 'Casos de urgencias') return <UserIcon />;
-  return <StomachIcon />;
-}
 
 /* ── Session row ────────────────────────────────────────── */
 function SessionRow({ s, delay }: { s: Session; delay: number }) {
   const dc = DIFFICULTY_COLOR[s.difficulty];
   const spC = SPEC_COLORS[s.specialty] || SPEC_COLORS['Gastroenterología'];
-  const icon = getSpecIcon(s.specialty);
   
   const isCorrect = s.score >= 70;
 
@@ -203,7 +179,7 @@ function SessionRow({ s, delay }: { s: Session; delay: number }) {
     >
       <div className="hist-td hist-td-caso">
         <div className="hist-td-icon" style={{ background: spC.bg, color: spC.color }}>
-          {icon}
+          <StomachIcon />
         </div>
         <span className="hist-td-title">{s.caseTitle}</span>
       </div>
@@ -277,7 +253,7 @@ export default function HistorialPage() {
     return matchQ && matchSpec;
   }), [query, spec]);
   
-  const displayed = filtered.slice(0, 6); // Mock pagination to match design (showing 6 items)
+  const displayed = filtered.slice(0, 6);
 
   return (
     <div className="dash-root">
@@ -289,7 +265,7 @@ export default function HistorialPage() {
         <div className="hist-pg-header">
           <div className="hist-pg-title-box">
             <h1>Historial de casos clínicos</h1>
-            <p>Revisa tu desempeño en los casos que has completado.</p>
+            <p>Revisa tu desempeño y métricas de simulación en los casos gastroenterológicos completados.</p>
           </div>
           
           <div className="hist-pg-stats">
@@ -309,7 +285,7 @@ export default function HistorialPage() {
               </div>
               <div className="hist-pg-stat-info">
                 <span className="hist-pg-stat-lbl">Accuracy diagnóstica</span>
-                <span className="hist-pg-stat-val">73%</span>
+                <span className="hist-pg-stat-val">82%</span>
               </div>
             </div>
             
@@ -319,7 +295,7 @@ export default function HistorialPage() {
               </div>
               <div className="hist-pg-stat-info">
                 <span className="hist-pg-stat-lbl">Tiempo promedio</span>
-                <span className="hist-pg-stat-val">18 min</span>
+                <span className="hist-pg-stat-val">24 min</span>
               </div>
             </div>
             
@@ -427,7 +403,7 @@ export default function HistorialPage() {
             <div className="hist-fb-icon"><Info size={20} /></div>
             <div className="hist-fb-text">
               <h4>¿Quieres mejorar tu desempeño?</h4>
-              <p>Revisa los casos con resultado parcial para identificar oportunidades de mejora.</p>
+              <p>Revisa los casos gastroenterológicos con resultado parcial para identificar oportunidades de mejora.</p>
             </div>
           </div>
           <button className="hist-fb-btn">
