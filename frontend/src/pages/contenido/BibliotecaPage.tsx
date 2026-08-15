@@ -17,7 +17,7 @@ const TYPES = [
   { id: 'caso',      label: 'Casos clínicos',  Icon: Steth       },
 ];
 
-/* ── Mock resources ──────────────────────────────────────── */
+/* ── Mock resources: Gastroenterología y Medicina Digestiva ── */
 interface Resource {
   id: number; type: string; title: string; author: string;
   source: string; year: number; specialty: string;
@@ -26,18 +26,18 @@ interface Resource {
 }
 
 const RESOURCES: Resource[] = [
-  { id:1,  type:'libro',     title:'Harrison — Principios de Medicina Interna',                               author:'Kasper, Fauci, Hauser et al.',    source:'McGraw-Hill',                            year:2022, specialty:'Gastrointestinal', tags:['medicina interna','diagnóstico','referencia'],           pages:3900, abstract:'Obra de referencia mundial en medicina interna. Cubre fisiopatología, diagnóstico y tratamiento de enfermedades de todos los sistemas.', shelf:'reading'  },
-  { id:2,  type:'guia',      title:'Guía de práctica clínica: Diagnóstico y manejo del dolor abdominal agudo', author:'Sociedad Colombiana de Cirugía',   source:'Minsalud Colombia',                      year:2023, specialty:'Gastrointestinal', tags:['dolor abdominal','urgencias','apendicitis'],             abstract:'Lineamientos para el abordaje diagnóstico y terapéutico del dolor abdominal agudo en adultos en el contexto colombiano.', shelf:'next'     },
-  { id:3,  type:'ensayo',    title:'Sesgo de anclaje en el razonamiento diagnóstico de estudiantes de medicina',author:'Croskerry P, Singhal G, Mamede S.',source:'BMJ Quality & Safety',                  year:2021, specialty:'Neurología',       tags:['sesgos cognitivos','diagnóstico','educación médica'],   abstract:'Revisión sistemática sobre los principales sesgos que afectan el razonamiento clínico en contextos de urgencia y su impacto en la seguridad del paciente.', shelf:'finished' },
-  { id:4,  type:'protocolo', title:'Protocolo institucional: Manejo de la hemorragia digestiva alta no variceal',author:'Gastroenterología UNAB',          source:'Universidad Autónoma de Bucaramanga',     year:2024, specialty:'Gastrointestinal', tags:['hemorragia','endoscopía','úlcera péptica'],              abstract:'Protocolo paso a paso para el abordaje inicial, estratificación de riesgo y tratamiento endoscópico de la HDA no variceal.', shelf:'reading'  },
-  { id:5,  type:'caso',      title:'Caso clínico: Apendicitis aguda atípica en adulto mayor con presentación subaguda', author:'Ramírez J, Torres M, Gómez L.', source:'Revista Colombiana de Gastroenterología', year:2023, specialty:'Gastrointestinal', tags:['apendicitis','adulto mayor','presentación atípica'],    abstract:'Reporte de caso de paciente de 72 años con diagnóstico tardío de apendicitis aguda, cuya presentación clínica atípica retrasó el abordaje quirúrgico.', shelf:'finished' },
-  { id:6,  type:'libro',     title:'Semiología Médica — Argente & Álvarez',                                   author:'Argente H, Álvarez M.',           source:'Editorial Médica Panamericana',           year:2021, specialty:'Gastrointestinal', tags:['semiología','exploración física','historia clínica'],   pages:1650, abstract:'Texto fundamental de semiología en habla hispana. Cubre desde la anamnesis hasta los signos y síntomas de cada aparato y sistema.', shelf:'next' },
-  { id:7,  type:'guia',      title:'Guía ESC 2023: Manejo de síndromes coronarios agudos',                    author:'European Society of Cardiology',  source:'European Heart Journal',                 year:2023, specialty:'Cardiovascular',   tags:['SCA','infarto','angina','angioplastia'],                 abstract:'Actualización completa de las guías europeas para el diagnóstico y manejo de los síndromes coronarios agudos con y sin elevación del ST.', shelf:'reading'  },
-  { id:8,  type:'ensayo',    title:'Impacto del aprendizaje basado en simulación en la competencia clínica',   author:'Cook DA, Hatala R, Brydges R et al.', source:'JAMA',                                year:2020, specialty:'Neurología',       tags:['simulación','educación médica','competencias'],         abstract:'Meta-análisis de 609 estudios que evalúa la efectividad del aprendizaje por simulación clínica comparado con métodos tradicionales.', shelf:'finished' },
-  { id:9,  type:'protocolo', title:'Protocolo de manejo de la sepsis — Surviving Sepsis Campaign 2021',       author:'Evans L, Rhodes A, Alhazzani W et al.', source:'Critical Care Medicine',             year:2021, specialty:'Infectología',     tags:['sepsis','antibióticos','UCI','resucitación'],           abstract:'Guía internacional basada en evidencia para el reconocimiento temprano y tratamiento de la sepsis y el choque séptico en adultos.', shelf:'next' },
-  { id:10, type:'caso',      title:'Caso clínico: Diagnóstico diferencial de ictericia obstructiva en paciente joven', author:'Herrera A, Castillo P.', source:'Acta Médica Colombiana',              year:2022, specialty:'Gastrointestinal', tags:['ictericia','colestasis','diagnóstico diferencial'],     abstract:'Presentación de caso de paciente de 28 años con ictericia progresiva cuyo diagnóstico diferencial incluyó litiasis coledociana, colangitis esclerosante y tumor de Klatskin.', shelf:'finished' },
-  { id:11, type:'libro',     title:'Fisiología Médica — Guyton & Hall',                                       author:'Hall J.',                         source:'Elsevier',                               year:2021, specialty:'Gastrointestinal', tags:['fisiología','bases científicas','referencia'],          pages:1152, abstract:'Texto clásico de fisiología médica. Explica los mecanismos normales del organismo como base para entender la fisiopatología de la enfermedad.', shelf:'next' },
-  { id:12, type:'guia',      title:'Guía GINA 2023: Diagnóstico y manejo del asma',                           author:'Global Initiative for Asthma',    source:'GINA',                                   year:2023, specialty:'Respiratorio',    tags:['asma','broncoespasmo','inhaladores','espirometría'],    abstract:'Actualización anual de las guías internacionales para el diagnóstico, clasificación y tratamiento escalonado del asma en adultos y niños.', shelf:'reading' },
+  { id:1,  type:'libro',     title:'Harrison — Gastroenterología y Hepatología',                             author:'Fauci, Kasper, Longo et al.',     source:'McGraw-Hill',                            year:2023, specialty:'Gastroenterología', tags:['medicina interna','digestivo','referencia'],            pages:1450, abstract:'Sección especializada en patología digestiva del clásico tratado de Medicina Interna. Cubre esófago, estómago, hígado, páncreas y colon.', shelf:'reading'  },
+  { id:2,  type:'guia',      title:'Guía de práctica clínica: Diagnóstico y manejo de la ERGE',             author:'Sociedad Colombiana de Gastroenterología', source:'Rev. Col. Gastroenterol.',               year:2024, specialty:'Gastroenterología', tags:['ERGE','pirosis','esofagitis','inhibidores bomba'],       abstract:'Lineamientos y consenso colombiano para el manejo farmacológico y quirúrgico de la enfermedad por reflujo gastroesofágico.', shelf:'reading'  },
+  { id:3,  type:'protocolo', title:'Protocolo institucional: Manejo de la Hemorragia Digestiva Alta',       author:'Servicio de Gastroenterología HIC',source:'Hospital Internacional de Colombia',   year:2024, specialty:'Gastroenterología', tags:['HDA','endoscopia','úlcera péptica','varices'],          abstract:'Protocolo asistencial para estratificación de riesgo con Glasgow-Blatchford y algoritmo terapéutico en sangrado digestivo alto.', shelf:'reading'  },
+  { id:4,  type:'guia',      title:'Guía WGO 2023: Diagnóstico y tratamiento de la pancreatitis aguda',     author:'World Gastroenterology Organisation', source:'WGO Clinical Guidelines',               year:2023, specialty:'Gastroenterología', tags:['pancreatitis','criterios Atlanta','amilasa','lipasa'],   abstract:'Recomendaciones internacionales para el manejo de pancreatitis aguda gallstone y alcohólica, clasificación de gravedad y nutrición temprana.', shelf:'reading'  },
+  { id:5,  type:'guia',      title:'Guía de práctica clínica: Manejo de la Úlcera Péptica e infección por H. pylori', author:'Asociación Española de Gastroenterología', source:'AEG Guidelines', year:2023, specialty:'Gastroenterología', tags:['úlcera péptica','H. pylori','terapia cuádruple'],         abstract:'Abordaje de la úlcera gástrica y duodenal, esquemas erradicadores de primera y segunda línea contra Helicobacter pylori.', shelf:'next'     },
+  { id:6,  type:'libro',     title:'Semiología Médica del Aparato Digestivo — Argente & Álvarez',           author:'Argente H, Álvarez M.',           source:'Editorial Médica Panamericana',           year:2022, specialty:'Gastroenterología', tags:['semiología','examen físico','abomen agudo'],          pages:850,  abstract:'Guía completa de inspección, auscultación, palpación y percusión abdominal, signos apendiculares y maniobras biliares.', shelf:'next'     },
+  { id:7,  type:'protocolo', title:'Protocolo de urgencias: Abordaje del Dolor Abdominal Agudo y Apendicitis', author:'Sociedad de Cirugía General y Gastroenterología', source:'Minsalud Colombia', year:2023, specialty:'Gastroenterología', tags:['apendicitis','dolor abdominal','ecografía abdominal'],  abstract:'Ruta de atención rápida para la sospecha de apendicitis aguda, escala de Alvarado y criterios de laparoscopia.', shelf:'next'     },
+  { id:8,  type:'libro',     title:'Fisiología Gastrointestinal — Guyton & Hall',                           author:'Hall J, Hall M.',                 source:'Elsevier',                               year:2021, specialty:'Gastroenterología', tags:['fisiología','motilidad','secreción gástrica'],          pages:480,  abstract:'Bases fisiológicas de la digestión, secreción biliar y pancreática, motilidad intestinal y absorción de nutrientes.', shelf:'next'     },
+  { id:9,  type:'ensayo',    title:'Sesgos cognitivos en el razonamiento diagnóstico del abdomen agudo',     author:'Croskerry P, Singhal G, Mamede S.',source:'BMJ Quality & Safety',                  year:2022, specialty:'Gastroenterología', tags:['sesgos cognitivos','razonamiento clínico','diagnóstico'], abstract:'Estudio sobre los sesgos de anclaje y disponibilidad al evaluar pacientes con dolor en fosa ilíaca derecha y epigastralgias.', shelf:'finished' },
+  { id:10, type:'caso',      title:'Caso clínico: Apendicitis aguda atípica en paciente joven',               author:'Ramírez J, Torres M, Gómez L.',   source:'Revista Colombiana de Gastroenterología', year:2023, specialty:'Gastroenterología', tags:['apendicitis','caso clínico','retrocecal'],            abstract:'Discusión interactiva de un caso con apendicitis retrocecal subserosa y su correlación histopatológica post-quirúrgica.', shelf:'finished' },
+  { id:11, type:'ensayo',    title:'Evaluación del aprendizaje basado en simulación clínica digestiva',    author:'Cook DA, Hatala R, Brydges R et al.', source:'JAMA Medical Education',             year:2021, specialty:'Gastroenterología', tags:['simulación','educación médica','competencias'],         abstract:'Meta-análisis sobre el impacto de pacientes virtuales en la adquisición de competencias en gastroenterología y cirugía.', shelf:'finished' },
+  { id:12, type:'caso',      title:'Caso clínico: Diagnóstico diferencial de Ictericia Obstructiva',         author:'Herrera A, Castillo P.',         source:'Acta Médica Colombiana',              year:2023, specialty:'Gastroenterología', tags:['ictericia','colestasis','coledocolitiasis'],          abstract:'Abordaje diagnóstico en un paciente de 45 años con síndrome colestásico, perfil hepático y colangiorresonancia.', shelf:'finished' }
 ];
 
 const YEARS = [...new Set(RESOURCES.map(r => r.year))].sort((a, b) => b - a);
@@ -138,7 +138,7 @@ export default function BibliotecaPage() {
 
             <input
               className="bib-sbar-input"
-              placeholder="Busca libros, guías y referencias…"
+              placeholder="Busca libros, guías y referencias gastroenterológicas…"
               value={query}
               onChange={e => setQuery(e.target.value)}
             />
@@ -218,7 +218,7 @@ export default function BibliotecaPage() {
           </div>
 
           <p className="bib-sbar-meta">
-            {filtered.length} recurso{filtered.length !== 1 ? 's' : ''}
+            {filtered.length} recurso{filtered.length !== 1 ? 's' : ''} gastroenterológicos
           </p>
         </div>
 
@@ -273,7 +273,7 @@ export default function BibliotecaPage() {
           {filtered.length === 0 && (
             <motion.div className="bib-empty" initial={{ opacity:0 }} animate={{ opacity:1 }}>
               <BookOpen size={40} strokeWidth={1.2} />
-              <p>No se encontraron recursos con esos criterios.</p>
+              <p>No se encontraron recursos gastroenterológicos con esos criterios.</p>
               <button
                 className="bib-chip bib-chip-on"
                 style={{ marginTop:8 }}
