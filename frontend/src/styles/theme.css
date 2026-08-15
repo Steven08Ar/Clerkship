@@ -1258,6 +1258,23 @@ html.theme-animating .crono-gantt-card {
   box-shadow: 0 10px 24px rgba(0,0,0,0.5), inset 0 2px 0 rgba(255,255,255,0.1) !important;
 }
 
+/* Capa opaca sutil en modo oscuro para las portadas de libros */
+[data-theme="dark"] .bib-book-cover::after {
+  background: linear-gradient(180deg, rgba(0, 0, 0, 0.28) 0%, rgba(0, 0, 0, 0.55) 100%) !important;
+}
+[data-theme="dark"] .bib-book-title {
+  color: #FFFFFF !important;
+  text-shadow: 0 1px 5px rgba(0, 0, 0, 0.8) !important;
+}
+[data-theme="dark"] .bib-book-author {
+  color: rgba(255, 255, 255, 0.95) !important;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.7) !important;
+}
+[data-theme="dark"] .bib-book-badge {
+  color: #FFFFFF !important;
+  background: rgba(0, 0, 0, 0.45) !important;
+}
+
 [data-theme="light"] .bib-body {
   background: #F8FAFC !important;
   color: #0F172A !important;
@@ -1282,6 +1299,23 @@ html.theme-animating .crono-gantt-card {
 [data-theme="light"] .bib-shelf-board {
   background: linear-gradient(to bottom, #F5EDE3 0%, #DED0C1 100%) !important;
   box-shadow: 0 8px 16px rgba(0,0,0,0.06), inset 0 2px 0 rgba(255,255,255,0.7) !important;
+}
+
+/* Portadas de libros en Modo Claro: Letras 100% Blancas y legibles */
+[data-theme="light"] .bib-book-cover::after {
+  background: linear-gradient(180deg, rgba(0, 0, 0, 0.08) 0%, rgba(0, 0, 0, 0.32) 100%) !important;
+}
+[data-theme="light"] .bib-book-title {
+  color: #FFFFFF !important;
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.65) !important;
+}
+[data-theme="light"] .bib-book-author {
+  color: rgba(255, 255, 255, 0.92) !important;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5) !important;
+}
+[data-theme="light"] .bib-book-badge {
+  color: #FFFFFF !important;
+  background: rgba(0, 0, 0, 0.3) !important;
 }
 
 /* Pestaña de Casos Clínicos (/casos) */
