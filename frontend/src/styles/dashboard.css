@@ -4637,6 +4637,21 @@
   flex-shrink: 0;
 }
 
+.hist-pg-stat-icon[data-stat-type="emerald"] {
+  background: #E6F6EC;
+  color: #10B981;
+}
+
+.hist-pg-stat-icon[data-stat-type="sky"] {
+  background: #E0F2FE;
+  color: #0284C7;
+}
+
+.hist-pg-stat-icon[data-stat-type="indigo"] {
+  background: #E0E7FF;
+  color: #4F46E5;
+}
+
 .hist-pg-stat-info {
   display: flex;
   flex-direction: column;
