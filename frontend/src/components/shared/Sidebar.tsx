@@ -358,7 +358,7 @@ export default function Sidebar() {
                       } catch {
                         // Sin sesión de Firebase activa
                       }
-                      navigate('/login');
+                      navigate('/', { replace: true });
                     }}
                   >
                     <LogOut size={14} strokeWidth={1.8} /> Cerrar sesión
