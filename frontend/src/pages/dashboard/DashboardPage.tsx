@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Plus, SlidersHorizontal, ArrowUpDown, Folder, FileText } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import Sidebar from '../../components/shared/Sidebar';
+import WelcomeOverlay from '../../components/shared/WelcomeOverlay';
 
 /* ── Data ───────────────────────────────────────────────── */
 interface FolderItem {
@@ -39,9 +40,18 @@ export default function DashboardPage() {
   const navigate = useNavigate();
   const [sortOpen,  setSortOpen]  = useState(false);
   const [sortLabel, setSortLabel] = useState('Más reciente');
+  const [showWelcome, setShowWelcome] = useState(() => {
+    return sessionStorage.getItem('clerkship_show_welcome') === 'true';
+  });
+
+  function handleWelcomeComplete() {
+    sessionStorage.removeItem('clerkship_show_welcome');
+    setShowWelcome(false);
+  }
 
   return (
     <div className="dash-root">
+      {showWelcome && <WelcomeOverlay onComplete={handleWelcomeComplete} />}
       <Sidebar />
 
       <div className="bib2-body">
