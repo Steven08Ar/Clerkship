@@ -1050,7 +1050,9 @@ html.theme-animating .crono-gantt-card {
 [data-theme="dark"] .dash-root,
 [data-theme="dark"] .bib2-body,
 [data-theme="dark"] .casos-page-container,
+[data-theme="dark"] .casos-page-wrapper,
 [data-theme="dark"] .hist-page-container,
+[data-theme="dark"] .hist-page-wrapper,
 [data-theme="dark"] .bib-page-container,
 [data-theme="dark"] .anat-page-container,
 [data-theme="dark"] .sim-page-container,
@@ -1063,21 +1065,42 @@ html.theme-animating .crono-gantt-card {
 [data-theme="dark"] .bib2-folder-name,
 [data-theme="dark"] .bib2-file-name,
 [data-theme="dark"] .casos-title,
+[data-theme="dark"] .casos-pg-title-box h1,
+[data-theme="dark"] .casos-pg-section-title,
+[data-theme="dark"] .casos-pg-mod-title,
+[data-theme="dark"] .casos-pg-type-title,
+[data-theme="dark"] .casos-pg-rec-title,
+[data-theme="dark"] .casos-mod-hero-title,
+[data-theme="dark"] .casos-mod-card-title,
 [data-theme="dark"] .hist-title,
 [data-theme="dark"] .anat-title,
 [data-theme="dark"] .sim-title {
   color: #F8FAFC !important;
 }
 
+[data-theme="dark"] .casos-pg-title-box p,
+[data-theme="dark"] .casos-pg-mod-desc,
+[data-theme="dark"] .casos-pg-type-desc,
+[data-theme="dark"] .casos-mod-hero-desc,
+[data-theme="dark"] .casos-mod-card-scenario {
+  color: #94A3B8 !important;
+}
+
 [data-theme="dark"] .bib2-folder-card,
 [data-theme="dark"] .bib2-file-row,
 [data-theme="dark"] .bib2-recent-wrap,
 [data-theme="dark"] .casos-card,
+[data-theme="dark"] .casos-pg-mod-card,
+[data-theme="dark"] .casos-pg-type-card,
+[data-theme="dark"] .casos-pg-rec-card,
+[data-theme="dark"] .casos-mod-hero,
+[data-theme="dark"] .casos-mod-card,
 [data-theme="dark"] .hist-card,
 [data-theme="dark"] .anat-card {
-  background: rgba(15, 23, 42, 0.85) !important;
-  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  background: #0F172A !important;
+  border: 1.5px solid rgba(255, 255, 255, 0.12) !important;
   color: #E2E8F0 !important;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4) !important;
 }
 
 [data-theme="dark"] .sb-rail {
