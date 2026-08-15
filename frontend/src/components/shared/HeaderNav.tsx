@@ -5,6 +5,7 @@ import { Menu, X, ArrowRight, Calendar, FileText, Sparkles, Sun, Moon } from 'lu
 import logoUrl from '../../assets/Logo Clerkship.svg';
 
 import { getInitialTheme, setInstantTheme, triggerThemeToggle, type ThemeMode } from '../../utils/themeHelper';
+import { isAuthenticated as checkAuth } from '../../utils/authConsent';
 
 interface HeaderNavProps {
   activeTab?: 'inicio' | 'como-funciona' | 'cronograma';
@@ -39,9 +40,7 @@ export default function HeaderNav({ activeTab }: HeaderNavProps) {
     return pathname === route;
   };
 
-  const isAuthenticated =
-    localStorage.getItem('clerkship_auth') === 'true' ||
-    localStorage.getItem('clerkship_consent') === 'accepted';
+  const isUserLoggedIn = checkAuth();
 
   return (
     <>
@@ -85,7 +84,7 @@ export default function HeaderNav({ activeTab }: HeaderNavProps) {
             <div className="lp-lang-switch"></div>
           </div>
 
-          {isAuthenticated ? (
+          {isUserLoggedIn ? (
             <Link to="/dashboard" className="lp-btn-solid">Ir al Dashboard</Link>
           ) : (
             <>
@@ -188,7 +187,7 @@ export default function HeaderNav({ activeTab }: HeaderNavProps) {
               </div>
 
               <div className="lp-mobile-drawer-footer">
-                {isAuthenticated ? (
+                {isUserLoggedIn ? (
                   <Link
                     to="/dashboard"
                     className="lp-mobile-btn-solid"
