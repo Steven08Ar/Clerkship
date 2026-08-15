@@ -25,33 +25,39 @@ export default function WelcomeOverlay({ onComplete }: WelcomeOverlayProps) {
   ];
 
   useEffect(() => {
-    // 1. A los 750ms los vectores del logo han aparecido: el logo sube y muestra texto
+    // 1. Duración del logo: 3.0s exactos de animación vectorial.
+    // 2. A los 3.3s el logo se eleva suavemente hacia arriba.
+    // 3. En el segundo 4 (4000ms exactos) aparece el título de ¡Bienvenido! y los textos inferiores.
     const t1 = setTimeout(() => {
       setPhase('text');
-    }, 750);
+    }, 4000);
 
-    // 2. Transición progresiva de mensajes cada 1200ms
-    const t2 = setInterval(() => {
-      setMsgIdx(prev => {
-        if (prev < WELCOME_PHRASES.length - 1) return prev + 1;
-        return prev;
-      });
-    }, 1200);
+    // 4. Transición progresiva de las frases inferiores cada 1500ms tras aparecer el bienvenido
+    let t2: ReturnType<typeof setInterval>;
+    const tPhraseDelay = setTimeout(() => {
+      t2 = setInterval(() => {
+        setMsgIdx(prev => {
+          if (prev < WELCOME_PHRASES.length - 1) return prev + 1;
+          return prev;
+        });
+      }, 1500);
+    }, 4000);
 
-    // 3. A los 3400ms se activa el desvanecimiento suave crossfade
+    // 5. A los 8.5s inicia el desvanecimiento suave crossfade
     const t3 = setTimeout(() => {
       setPhase('fadeout');
-    }, 3400);
+    }, 8500);
 
-    // 4. A los 4600ms concluye la desintegración y se entrega el control al Dashboard
+    // 6. A los 9.7s concluye el desvanecimiento y entra 100% al Dashboard
     const t4 = setTimeout(() => {
-      clearInterval(t2);
+      if (t2) clearInterval(t2);
       onComplete();
-    }, 4600);
+    }, 9700);
 
     return () => {
       clearTimeout(t1);
-      clearInterval(t2);
+      clearTimeout(tPhraseDelay);
+      if (t2) clearInterval(t2);
       clearTimeout(t3);
       clearTimeout(t4);
     };
@@ -61,15 +67,15 @@ export default function WelcomeOverlay({ onComplete }: WelcomeOverlayProps) {
     <div className={`welcome-overlay-layer${phase === 'fadeout' ? ' is-fading-out' : ''}`}>
       <div className="welcome-overlay-content">
 
-        {/* ── Logo Vectorial Clerkship (Animación suave vector por vector) ── */}
+        {/* ── Logo Vectorial Clerkship (Animación suave de 3 segundos vector por vector) ── */}
         <motion.div
           className="welcome-logo-container"
-          animate={phase !== 'logo' ? { y: -22 } : { y: 0 }}
-          transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+          animate={phase !== 'logo' ? { y: -24 } : { y: 0 }}
+          transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
         >
           <svg
-            width="96"
-            height="96"
+            width="100"
+            height="100"
             viewBox="0 0 600 600"
             fill="none"
             xmlns="http://www.w3.org/2000/svg"
@@ -79,25 +85,25 @@ export default function WelcomeOverlay({ onComplete }: WelcomeOverlayProps) {
             <motion.path
               d="M281 162.706C213.776 171.963 162 229.639 162 299.408C162 369.177 213.776 426.852 281 436.109V395.565C235.97 386.718 202 347.031 202 299.408C202 251.785 235.97 212.097 281 203.25V162.706Z"
               fill="currentColor"
-              initial={{ opacity: 0, scale: 0.7, y: 18 }}
+              initial={{ opacity: 0, scale: 0.65, y: 22 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
-              transition={{ duration: 0.45, delay: 0.05, ease: 'easeOut' }}
+              transition={{ duration: 1.1, delay: 0.1, ease: [0.16, 1, 0.3, 1] }}
             />
             {/* Vector 2 — Arco Externo */}
             <motion.path
               d="M281 0C124.167 9.80161 0 140.105 0 299.408C0 458.712 124.167 589.014 281 598.815V558.723C146.277 548.992 40 436.612 40 299.408C40 162.204 146.277 49.8229 281 40.0928V0Z"
               fill="currentColor"
-              initial={{ opacity: 0, scale: 0.7, y: 18 }}
+              initial={{ opacity: 0, scale: 0.65, y: 22 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
-              transition={{ duration: 0.45, delay: 0.15, ease: 'easeOut' }}
+              transition={{ duration: 1.1, delay: 0.5, ease: [0.16, 1, 0.3, 1] }}
             />
             {/* Vector 3 — Arco Intermedio */}
             <motion.path
               d="M281 81.7217C168.946 91.3515 81 185.359 81 299.908C81 414.457 168.946 508.464 281 518.094V477.908C191.074 468.42 121 392.349 121 299.908C121 207.467 191.074 131.395 281 121.907V81.7217Z"
               fill="currentColor"
-              initial={{ opacity: 0, scale: 0.7, y: 18 }}
+              initial={{ opacity: 0, scale: 0.65, y: 22 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
-              transition={{ duration: 0.45, delay: 0.25, ease: 'easeOut' }}
+              transition={{ duration: 1.1, delay: 0.9, ease: [0.16, 1, 0.3, 1] }}
             />
             {/* Vector 4 — Barra Vertical 1 */}
             <motion.path
@@ -105,7 +111,7 @@ export default function WelcomeOverlay({ onComplete }: WelcomeOverlayProps) {
               fill="currentColor"
               initial={{ opacity: 0, scaleY: 0 }}
               animate={{ opacity: 1, scaleY: 1 }}
-              transition={{ duration: 0.45, delay: 0.35, ease: 'easeOut' }}
+              transition={{ duration: 1.0, delay: 1.3, ease: [0.16, 1, 0.3, 1] }}
             />
             {/* Vector 5 — Barra Vertical 2 */}
             <motion.path
@@ -113,7 +119,7 @@ export default function WelcomeOverlay({ onComplete }: WelcomeOverlayProps) {
               fill="currentColor"
               initial={{ opacity: 0, scaleY: 0 }}
               animate={{ opacity: 1, scaleY: 1 }}
-              transition={{ duration: 0.45, delay: 0.45, ease: 'easeOut' }}
+              transition={{ duration: 1.0, delay: 1.7, ease: [0.16, 1, 0.3, 1] }}
             />
             {/* Vector 6 — Barra Vertical 3 */}
             <motion.path
@@ -121,19 +127,19 @@ export default function WelcomeOverlay({ onComplete }: WelcomeOverlayProps) {
               fill="currentColor"
               initial={{ opacity: 0, scaleY: 0 }}
               animate={{ opacity: 1, scaleY: 1 }}
-              transition={{ duration: 0.45, delay: 0.55, ease: 'easeOut' }}
+              transition={{ duration: 1.0, delay: 2.1, ease: [0.16, 1, 0.3, 1] }}
             />
           </svg>
         </motion.div>
 
-        {/* ── Mensajes de Bienvenida Personalizados (Fuente Inter) ── */}
+        {/* ── Mensajes de Bienvenida Personalizados (Aparecen exactamente en el segundo 4) ── */}
         <AnimatePresence>
           {phase !== 'logo' && (
             <motion.div
               className="welcome-text-container"
-              initial={{ opacity: 0, y: 16 }}
+              initial={{ opacity: 0, y: 18 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, ease: 'easeOut' }}
+              transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
             >
               <h2 className="welcome-title">
                 ¡Bienvenido de nuevo, <span className="welcome-name-highlight">{formattedName}</span>!
@@ -143,10 +149,10 @@ export default function WelcomeOverlay({ onComplete }: WelcomeOverlayProps) {
                 <AnimatePresence mode="wait">
                   <motion.p
                     key={msgIdx}
-                    initial={{ opacity: 0, y: 6 }}
+                    initial={{ opacity: 0, y: 8 }}
                     animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -6 }}
-                    transition={{ duration: 0.3 }}
+                    exit={{ opacity: 0, y: -8 }}
+                    transition={{ duration: 0.35, ease: 'easeOut' }}
                     className="welcome-phrase-text"
                   >
                     {WELCOME_PHRASES[msgIdx]}
