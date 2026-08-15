@@ -1,10 +1,9 @@
 import { useState, useEffect } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { useSearchParams, useNavigate } from 'react-router-dom';
 import {
   Search, Play, Lock, CheckCircle, Clock,
-  ChevronRight, ArrowLeft, Info, Brain, Heart, Wind, Stethoscope, Target, Briefcase, Calendar, User, UserPlus, PlusCircle
+  ChevronRight, ArrowLeft, Info, Heart, Wind, Stethoscope, Brain, Target, Briefcase, Calendar, PlusCircle
 } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
 import Sidebar from '../../components/shared/Sidebar';
 
 /* ── Types ─────────────────────────────────────────────── */
@@ -22,77 +21,77 @@ interface Case {
   tags: string[];
 }
 
-/* ── Data ───────────────────────────────────────────────── */
-const CASES: Case[] = [
+/* ── Data: 10 Casos de Gastroenterología y Aparato Digestivo ───── */
+const GASTRO_CASES: Case[] = [
   {
     id: 1,
     title: 'Úlcera péptica por uso de AINEs',
     scenario: 'Paciente masculino de 42 años, contador, con dolor epigástrico urente de 3 semanas y uso crónico de ibuprofeno.',
     difficulty: 1, time: '25–35 min', status: 'completado', score: 87, biases: 0,
-    tags: ['Úlcera péptica', 'AINEs', 'H. pylori'],
+    tags: ['Gastroenterología', 'Úlcera péptica', 'AINEs', 'H. pylori'],
   },
   {
     id: 2,
-    title: 'Enfermedad por reflujo gastroesofágico',
+    title: 'Enfermedad por reflujo gastroesofágico (ERGE)',
     scenario: 'Paciente femenina de 38 años con pirosis nocturna, regurgitación ácida y tos crónica de 2 meses.',
     difficulty: 1, time: '20–30 min', status: 'completado', score: 82, biases: 1,
-    tags: ['ERGE', 'Pirosis', 'Esofagitis'],
+    tags: ['Gastroenterología', 'ERGE', 'Pirosis', 'Esofagitis'],
   },
   {
     id: 3,
     title: 'Apendicitis aguda típica',
     scenario: 'Paciente masculino de 22 años con dolor migratorio en fosa ilíaca derecha, fiebre de 38.2 °C y náuseas.',
     difficulty: 1, time: '20–28 min', status: 'completado', score: 91, biases: 0,
-    tags: ['Apendicitis', 'Urgencia quirúrgica', 'McBurney'],
+    tags: ['Gastroenterología', 'Apendicitis', 'Urgencia quirúrgica'],
   },
   {
     id: 4,
-    title: 'Síndrome de intestino irritable',
+    title: 'Síndrome de intestino irritable (SII)',
     scenario: 'Paciente femenina de 29 años con dolor abdominal recurrente, distensión y alternancia entre estreñimiento y diarrea.',
     difficulty: 2, time: '30–40 min', status: 'disponible', score: null, biases: null,
-    tags: ['SII', 'Dolor funcional', 'Criterios Roma'],
+    tags: ['Gastroenterología', 'SII', 'Dolor funcional', 'Criterios Roma'],
   },
   {
     id: 5,
     title: 'Colecistitis aguda calculosa',
     scenario: 'Paciente femenina de 45 años con dolor en hipocondrio derecho post-ingesta de comida grasa, irradiado al hombro derecho.',
     difficulty: 2, time: '28–38 min', status: 'disponible', score: null, biases: null,
-    tags: ['Colecistitis', 'Colelitiasis', 'Murphy'],
+    tags: ['Gastroenterología', 'Colecistitis', 'Colelitiasis', 'Murphy'],
   },
   {
     id: 6,
     title: 'Pancreatitis aguda leve',
     scenario: 'Paciente masculino de 51 años con dolor epigástrico irradiado en cinturón, vómito persistente y amilasas elevadas.',
     difficulty: 2, time: '30–40 min', status: 'en_progreso', score: null, biases: null,
-    tags: ['Pancreatitis', 'Amilasa', 'Lipasa'],
+    tags: ['Gastroenterología', 'Pancreatitis', 'Amilasa', 'Lipasa'],
   },
   {
     id: 7,
     title: 'Hepatitis viral aguda tipo A',
     scenario: 'Paciente masculino de 19 años con ictericia, coluria, acolia y artralgias de aparición reciente tras viaje reciente.',
     difficulty: 2, time: '25–35 min', status: 'disponible', score: null, biases: null,
-    tags: ['Hepatitis A', 'Ictericia', 'Transaminasas'],
+    tags: ['Gastroenterología', 'Hepatitis A', 'Ictericia', 'Transaminasas'],
   },
   {
     id: 8,
     title: 'Hemorragia digestiva alta no variceal',
     scenario: 'Paciente masculino de 60 años con hematemesis, melenas y síncope. Usuario de anticoagulantes orales.',
     difficulty: 2, time: '32–42 min', status: 'disponible', score: null, biases: null,
-    tags: ['Hematemesis', 'Melenas', 'EVDA', 'Forrest'],
+    tags: ['Gastroenterología', 'Hematemesis', 'Melenas', 'EVDA'],
   },
   {
     id: 9,
     title: 'Enfermedad de Crohn ileal',
     scenario: 'Paciente de 26 años con diarrea crónica no sanguinolenta, pérdida de peso, fiebre y lesiones perianales.',
     difficulty: 3, time: '40–55 min', status: 'bloqueado', score: null, biases: null,
-    tags: ['Crohn', 'EII', 'Fístula', 'Colonoscopia'],
+    tags: ['Gastroenterología', 'Crohn', 'EII', 'Colonoscopia'],
   },
   {
     id: 10,
     title: 'Adenocarcinoma gástrico avanzado',
     scenario: 'Paciente masculino de 65 años con pérdida de peso severa, disfagia progresiva y masa palpable en epigastrio.',
     difficulty: 3, time: '45–60 min', status: 'bloqueado', score: null, biases: null,
-    tags: ['Cáncer gástrico', 'Disfagia', 'Linitis plástica'],
+    tags: ['Gastroenterología', 'Cáncer gástrico', 'Disfagia'],
   },
 ];
 
@@ -111,7 +110,7 @@ const STATUS_CONFIG: Record<Status, { label: string; bg: string; color: string; 
   bloqueado:   { label: 'Bloqueado',    bg: '#F1F5F9', color: '#94A3B8', icon: Lock },
 };
 
-// SVG Icons for organs
+// SVG Icono Estómago
 const StomachIcon = () => (
   <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
     <path d="M18 6c0-2.2-1.8-4-4-4s-4 1.8-4 4c0 1.1-.9 2-2 2H6c-1.1 0-2 .9-2 2v2c0 3.3 2.7 6 6 6h4c2.2 0 4-1.8 4-4V6z"/>
@@ -133,18 +132,18 @@ interface ModuleInfo {
 const MODULES: ModuleInfo[] = [
   {
     title: 'Gastroenterología',
-    desc: 'Trastornos digestivos, hepáticos y pancreáticos.',
+    desc: 'Trastornos digestivos, hepáticos, biliares y pancreáticos.',
     count: '10 casos disponibles',
     icon: <StomachIcon />,
     colorBg: '#FFE4E6',
     colorFg: '#E11D48',
     active: true,
-    cases: CASES,
+    cases: GASTRO_CASES,
   },
   {
     title: 'Neumología',
     desc: 'Enfermedades respiratorias agudas y crónicas.',
-    count: '10 casos disponibles',
+    count: 'Próximamente',
     icon: <Wind size={28} />,
     colorBg: '#E0F2FE',
     colorFg: '#0284C7',
@@ -154,7 +153,7 @@ const MODULES: ModuleInfo[] = [
   {
     title: 'Cardiología',
     desc: 'Urgencias cardiovasculares y enfermedades prevalentes.',
-    count: '9 casos disponibles',
+    count: 'Próximamente',
     icon: <Heart size={28} />,
     colorBg: '#FFEDD5',
     colorFg: '#EA580C',
@@ -164,7 +163,7 @@ const MODULES: ModuleInfo[] = [
   {
     title: 'Neurología',
     desc: 'Alteraciones neurológicas agudas y crónicas.',
-    count: '8 casos disponibles',
+    count: 'Próximamente',
     icon: <Brain size={28} />,
     colorBg: '#F3E8FF',
     colorFg: '#9333EA',
@@ -174,7 +173,7 @@ const MODULES: ModuleInfo[] = [
   {
     title: 'Nefrología',
     desc: 'Trastornos renales y electrolíticos.',
-    count: '7 casos disponibles',
+    count: 'Próximamente',
     icon: <Stethoscope size={28} />,
     colorBg: '#DCFCE7',
     colorFg: '#16A34A',
@@ -185,44 +184,28 @@ const MODULES: ModuleInfo[] = [
 
 const TYPES = [
   {
-    title: 'Casos de urgencias',
-    desc: 'Presentaciones agudas que requieren diagnóstico y manejo inmediato.',
-    count: '15 casos',
+    title: 'Urgencias Digestivas',
+    desc: 'Presentaciones agudas (Apendicitis, Pancreatitis, Hemorragia Digestiva) que requieren manejo inmediato.',
+    count: '3 casos',
     icon: <Briefcase size={24} />,
+    colorBg: '#FFE4E6',
+    colorFg: '#E11D48',
+  },
+  {
+    title: 'Consultas Ambulatorias',
+    desc: 'Consultas digestivas programadas con evolución crónica (ERGE, Úlcera, SII, Hepatitis).',
+    count: '5 casos',
+    icon: <Calendar size={24} />,
     colorBg: '#E0F2FE',
     colorFg: '#0284C7',
   },
   {
-    title: 'Casos ambulatorios',
-    desc: 'Consultas programadas con evolución crónica o síntomas persistentes.',
-    count: '18 casos',
-    icon: <Calendar size={24} />,
-    colorBg: '#DCFCE7',
-    colorFg: '#16A34A',
-  },
-  {
-    title: 'Casos pediátricos',
-    desc: 'Pacientes pediátricos con patologías frecuentes y desafíos diagnósticos.',
-    count: '10 casos',
-    icon: <User size={24} />,
+    title: 'Casos Complejos',
+    desc: 'Escenarios diagnósticos de alta dificultad (Enfermedad de Crohn, Cáncer Gástrico).',
+    count: '2 casos',
+    icon: <PlusCircle size={24} />,
     colorBg: '#F3E8FF',
     colorFg: '#9333EA',
-  },
-  {
-    title: 'Casos geriátricos',
-    desc: 'Pacientes mayores con múltiples comorbilidades y síndromes geriátricos.',
-    count: '9 casos',
-    icon: <UserPlus size={24} />,
-    colorBg: '#FFEDD5',
-    colorFg: '#EA580C',
-  },
-  {
-    title: 'Casos desafiantes',
-    desc: 'Escenarios complejos con diagnósticos diferenciales de alta dificultad.',
-    count: '12 casos',
-    icon: <PlusCircle size={24} />,
-    colorBg: '#E0F2FE',
-    colorFg: '#0284C7',
   },
 ];
 
@@ -256,7 +239,7 @@ function ModuleView({ module, onBack }: { module: ModuleInfo; onBack: () => void
         <span className="casos-mod-breadcrumb">{module.title}</span>
       </div>
 
-      {/* Module header */}
+      {/* Module hero */}
       <div className="casos-mod-hero">
         <div className="casos-mod-hero-left">
           <div className="casos-mod-hero-icon" style={{ background: module.colorBg, color: module.colorFg }}>
@@ -267,22 +250,24 @@ function ModuleView({ module, onBack }: { module: ModuleInfo; onBack: () => void
             <p className="casos-mod-hero-desc">{module.desc}</p>
           </div>
         </div>
-        <div className="casos-mod-stats">
-          <div className="casos-mod-stat">
-            <span className="casos-mod-stat-value" style={{ color: '#10B981' }}>{completedCount}</span>
-            <span className="casos-mod-stat-label">Completados</span>
+        {module.cases.length > 0 && (
+          <div className="casos-mod-stats">
+            <div className="casos-mod-stat">
+              <span className="casos-mod-stat-value" style={{ color: '#10B981' }}>{completedCount}</span>
+              <span className="casos-mod-stat-label">Completados</span>
+            </div>
+            <div className="casos-mod-stat-divider" />
+            <div className="casos-mod-stat">
+              <span className="casos-mod-stat-value" style={{ color: '#F59E0B' }}>{inProgressCount}</span>
+              <span className="casos-mod-stat-label">En progreso</span>
+            </div>
+            <div className="casos-mod-stat-divider" />
+            <div className="casos-mod-stat">
+              <span className="casos-mod-stat-value" style={{ color: '#0284C7' }}>{availableCount}</span>
+              <span className="casos-mod-stat-label">Disponibles</span>
+            </div>
           </div>
-          <div className="casos-mod-stat-divider" />
-          <div className="casos-mod-stat">
-            <span className="casos-mod-stat-value" style={{ color: '#F59E0B' }}>{inProgressCount}</span>
-            <span className="casos-mod-stat-label">En progreso</span>
-          </div>
-          <div className="casos-mod-stat-divider" />
-          <div className="casos-mod-stat">
-            <span className="casos-mod-stat-value" style={{ color: '#0284C7' }}>{availableCount}</span>
-            <span className="casos-mod-stat-label">Disponibles</span>
-          </div>
-        </div>
+        )}
       </div>
 
       {/* No cases yet */}
@@ -291,8 +276,8 @@ function ModuleView({ module, onBack }: { module: ModuleInfo; onBack: () => void
           <div className="casos-mod-soon-icon" style={{ background: module.colorBg, color: module.colorFg }}>
             {module.icon}
           </div>
-          <h3>Próximamente</h3>
-          <p>Los casos de {module.title} estarán disponibles en la siguiente actualización.</p>
+          <h3>Módulo en Desarrollo</h3>
+          <p>Los casos de {module.title} se integrarán en futuras versiones. Por ahora, el módulo activo disponible para simulación es <strong>Gastroenterología</strong>.</p>
         </div>
       ) : (
         <>
@@ -301,7 +286,7 @@ function ModuleView({ module, onBack }: { module: ModuleInfo; onBack: () => void
             <Search size={16} className="casos-mod-search-icon" />
             <input
               className="casos-mod-search-input"
-              placeholder="Buscar caso por nombre o etiqueta..."
+              placeholder="Buscar caso por nombre o patología digestiva..."
               value={search}
               onChange={e => setSearch(e.target.value)}
             />
@@ -393,7 +378,7 @@ export default function CasosPage() {
   useEffect(() => {
     const modulo = searchParams.get('modulo');
     if (modulo) {
-      const found = MODULES.find(m => m.title === modulo) ?? null;
+      const found = MODULES.find(m => m.title === modulo) ?? MODULES[0];
       setSelectedModule(found);
     } else {
       setSelectedModule(null);
@@ -413,15 +398,15 @@ export default function CasosPage() {
             {/* Header Title & Banner */}
             <div className="casos-pg-header">
               <div className="casos-pg-title-box">
-                <h1>Elige un caso para comenzar</h1>
-                <p>Seleccione un módulo o tipo de caso para iniciar una simulación clínica.</p>
+                <h1>Módulo Clínico de Gastroenterología</h1>
+                <p>Seleccione un escenario clínico gastroenterológico para iniciar su simulación interactiva.</p>
               </div>
 
               <div className="casos-pg-banner">
                 <div className="casos-pg-banner-icon"><Target size={24} /></div>
                 <div className="casos-pg-banner-text">
-                  <h4>Entrena tu razonamiento clínico</h4>
-                  <p>Cada caso simula una experiencia real con pacientes virtuales.</p>
+                  <h4>Entrena tu razonamiento clínico digestivo</h4>
+                  <p>10 casos simulados de patología gastrointestinal y hepática con pacientes virtuales.</p>
                 </div>
               </div>
             </div>
@@ -450,12 +435,12 @@ export default function CasosPage() {
               </div>
             </div>
 
-            {/* Section: Tipos de casos */}
+            {/* Section: Tipos de casos gastroenterológicos */}
             <div className="casos-pg-section">
-              <h2 className="casos-pg-section-title">Tipos de casos</h2>
+              <h2 className="casos-pg-section-title">Categorías de Casos Gastroenterológicos</h2>
               <div className="casos-pg-hscroll">
                 {TYPES.map(t => (
-                  <div key={t.title} className="casos-pg-type-card">
+                  <div key={t.title} className="casos-pg-type-card" onClick={() => setSelectedModule(MODULES[0])} style={{ cursor: 'pointer' }}>
                     <div className="casos-pg-type-head">
                       <div className="casos-pg-type-icon" style={{ background: t.colorBg, color: t.colorFg }}>
                         {t.icon}
@@ -469,21 +454,20 @@ export default function CasosPage() {
               </div>
             </div>
 
-            {/* Section: Casos recomendados para ti */}
+            {/* Section: Casos de Gastroenterología recomendados */}
             <div className="casos-pg-section">
               <div className="casos-pg-section-header">
-                <h2 className="casos-pg-section-title">Casos recomendados para ti</h2>
-                <button className="casos-pg-link-btn" onClick={() => setSelectedModule(MODULES[0])}>Ver todos</button>
+                <h2 className="casos-pg-section-title">Casos destacados de Gastroenterología</h2>
+                <button className="casos-pg-link-btn" onClick={() => setSelectedModule(MODULES[0])}>Ver todos los 10 casos</button>
               </div>
               <div className="casos-pg-hscroll">
-                {CASES.slice(0, 4).map((c, i) => {
-                  const iconData = MODULES[i] || MODULES[0];
+                {GASTRO_CASES.slice(0, 4).map(c => {
                   const dc = DIFFICULTY_COLOR[c.difficulty];
                   return (
                     <div key={c.id} className="casos-pg-rec-card" onClick={() => navigate('/simulacion')}>
                       <div className="casos-pg-rec-head">
-                        <div className="casos-pg-rec-icon" style={{ background: iconData.colorBg, color: iconData.colorFg }}>
-                          {iconData.icon}
+                        <div className="casos-pg-rec-icon" style={{ background: '#FFE4E6', color: '#E11D48' }}>
+                          <StomachIcon />
                         </div>
                         <h3 className="casos-pg-rec-title">{c.title}</h3>
                       </div>
@@ -502,7 +486,7 @@ export default function CasosPage() {
             {/* Footer info */}
             <div className="casos-pg-footer-banner">
               <Info size={18} className="casos-pg-footer-icon" />
-              <p>Todos los casos son simulaciones educativas basadas en guías clínicas y evidencia actualizada.</p>
+              <p>Todos los casos gastroenterológicos son simulaciones educativas basadas en guías clínicas y evidencia médica actualizada.</p>
             </div>
           </>
         )}
