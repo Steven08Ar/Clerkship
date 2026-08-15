@@ -1672,3 +1672,80 @@ html.theme-animating .crono-gantt-card {
   background: #0284C7 !important;
   color: #FFFFFF !important;
 }
+
+/* ── LOGO CLERKSHIP Y AVATARES BLANCOS EN MODO OSCURO (100%) ── */
+[data-theme="dark"] .sim-tb-logo,
+[data-theme="dark"] .sim-agent-logo-wrap img,
+[data-theme="dark"] .sim-bubble-avatar img,
+[data-theme="dark"] .sidebar-logo img,
+[data-theme="dark"] .auth-logo img,
+[data-theme="dark"] .dash-logo img {
+  filter: brightness(0) invert(1) !important;
+}
+
+/* ── PANEL LATERAL DERECHO Y TARJETAS DE HIPÓTESIS EN MODO OSCURO (100%) ── */
+[data-theme="dark"] .sim-right {
+  background: #0B0F19 !important;
+  border-left: 1px solid rgba(255, 255, 255, 0.12) !important;
+}
+
+[data-theme="dark"] .sim-right-title {
+  color: #F8FAFC !important;
+}
+
+[data-theme="dark"] .sim-hyp-item {
+  background: rgba(30, 41, 59, 0.85) !important;
+  border: 1px solid rgba(255, 255, 255, 0.14) !important;
+  color: #F8FAFC !important;
+}
+
+[data-theme="dark"] .sim-hyp-text {
+  color: #F8FAFC !important;
+}
+
+[data-theme="dark"] .sim-hyp-toggle {
+  color: #38BDF8 !important;
+}
+[data-theme="dark"] .sim-hyp-toggle:hover {
+  color: #7DD3FC !important;
+}
+
+[data-theme="dark"] .sim-hyp-empty {
+  background: rgba(30, 41, 59, 0.4) !important;
+  border-color: rgba(255, 255, 255, 0.12) !important;
+  color: #94A3B8 !important;
+}
+
+[data-theme="dark"] .sim-hyp-input {
+  background: rgba(30, 41, 59, 0.85) !important;
+  border: 1px solid rgba(255, 255, 255, 0.14) !important;
+  color: #F8FAFC !important;
+}
+[data-theme="dark"] .sim-hyp-input::placeholder {
+  color: #94A3B8 !important;
+}
+
+[data-theme="dark"] .sim-hyp-add-btn {
+  background: #2563EB !important;
+  color: #FFFFFF !important;
+}
+
+[data-theme="dark"] .sim-evidence-box {
+  background: rgba(15, 23, 42, 0.9) !important;
+  border: 1px solid rgba(59, 130, 246, 0.3) !important;
+  color: #F8FAFC !important;
+}
+
+[data-theme="dark"] .sim-evidence-title {
+  color: #38BDF8 !important;
+}
+
+[data-theme="dark"] .sim-evidence-list {
+  color: #CBD5E1 !important;
+}
+[data-theme="dark"] .sim-evidence-list li {
+  color: #93C5FD !important;
+}
+[data-theme="dark"] .sim-evidence-list li::before {
+  color: #38BDF8 !important;
+}
