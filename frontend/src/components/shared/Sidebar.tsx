@@ -6,6 +6,7 @@ import { ChevronLeft, ChevronDown, Settings, LogOut, User, Sun, Moon } from 'luc
 import { DASH_NAV } from '../../data/dashNav';
 import { auth } from '../../data/firebase';
 import { getInitialTheme, triggerThemeToggle, type ThemeMode } from '../../utils/themeHelper';
+import { logoutUserSession } from '../../utils/authConsent';
 import logoUrl from '../../assets/Logo Clerkship.svg';
 
 /* ── Panel content per section ─────────────────────────────── */
@@ -351,15 +352,13 @@ export default function Sidebar() {
                   <button
                     className="sb-profile-item sb-profile-item-danger"
                     onClick={async () => {
-                      localStorage.removeItem('clerkship_auth');
-                      localStorage.removeItem('clerkship_consent');
+                      logoutUserSession();
                       try {
                         await signOut(auth);
                       } catch {
-                        // Sin sesión de Firebase activa (ej. el consentimiento clínico
-                        // sin login real) — no bloquea el cierre de sesión local.
+                        // Sin sesión de Firebase activa
                       }
-                      navigate('/', { replace: true });
+                      navigate('/login');
                     }}
                   >
                     <LogOut size={14} strokeWidth={1.8} /> Cerrar sesión

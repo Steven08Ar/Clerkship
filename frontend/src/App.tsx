@@ -29,14 +29,55 @@ import CuestionarioPage from './pages/cuestionario/CuestionarioPage';
 import CronogramaPage from './pages/cronograma/CronogramaPage';
 import DesarrolloPage from './pages/desarrollo/DesarrolloPage';
 import ThemeToggleFloating from './components/shared/ThemeToggleFloating';
+import { isAuthenticated, hasUserAcceptedConsent } from './utils/authConsent';
 
+/**
+ * 🔒 Guard para Rutas Protegidas del Dashboard
+ * 1. Exige haber iniciado sesión en una cuenta válida.
+ * 2. Exige haber realizado la autorización de consentimiento en esa cuenta.
+ */
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
-  const isAuthenticated =
-    localStorage.getItem('clerkship_auth') === 'true' ||
-    localStorage.getItem('clerkship_consent') === 'accepted';
-
-  if (!isAuthenticated) {
+  if (!isAuthenticated()) {
     return <Navigate to="/login" replace />;
+  }
+
+  if (!hasUserAcceptedConsent()) {
+    return <Navigate to="/consent" replace />;
+  }
+
+  return <>{children}</>;
+}
+
+/**
+ * 🔒 Guard Exclusivo para la Pestaña de Consentimiento (/consent)
+ * 1. Exige haber iniciado sesión (un usuario anónimo NO puede entrar).
+ * 2. Si el usuario YA completó la autorización de tratamiento de datos de su cuenta,
+ *    se bloquea el acceso y se redirige directamente a /dashboard (1 sola vez por cuenta).
+ */
+function ConsentRoute({ children }: { children: React.ReactNode }) {
+  if (!isAuthenticated()) {
+    return <Navigate to="/login" replace />;
+  }
+
+  if (hasUserAcceptedConsent()) {
+    return <Navigate to="/dashboard" replace />;
+  }
+
+  return <>{children}</>;
+}
+
+/**
+ * 🔒 Guard para Páginas Públicas de Autenticación (/login, /register)
+ * Si el usuario ya está autenticado, no lo deja volver a login/register:
+ * lo envía a /dashboard si ya dió consentimiento, o a /consent si aún falta.
+ */
+function PublicAuthRoute({ children }: { children: React.ReactNode }) {
+  if (isAuthenticated()) {
+    if (hasUserAcceptedConsent()) {
+      return <Navigate to="/dashboard" replace />;
+    } else {
+      return <Navigate to="/consent" replace />;
+    }
   }
 
   return <>{children}</>;
@@ -58,10 +99,12 @@ export default function App() {
         <Route path="/cuestionario"           element={<CuestionarioPage />} />
         <Route path="/desarrollo"             element={<DesarrolloPage />} />
 
-        {/* Auth */}
-        <Route path="/login"                  element={<LoginPage />} />
-        <Route path="/register"               element={<RegisterPage />} />
-        <Route path="/consent"                element={<ConsentPage />} />
+        {/* Auth (Protegidas contra re-login si ya inició sesión) */}
+        <Route path="/login"                  element={<PublicAuthRoute><LoginPage /></PublicAuthRoute>} />
+        <Route path="/register"               element={<PublicAuthRoute><RegisterPage /></PublicAuthRoute>} />
+
+        {/* Consentimiento Informado (Sólo usuarios logueados sin consentimiento) */}
+        <Route path="/consent"                element={<ConsentRoute><ConsentPage /></ConsentRoute>} />
 
         {/* Protected Dashboard & Clinical App Routes */}
         <Route path="/dashboard"              element={<ProtectedRoute><DashboardPage /></ProtectedRoute>} />
