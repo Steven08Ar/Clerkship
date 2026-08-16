@@ -56,6 +56,21 @@ const PANEL: Record<string, PanelSection> = {
       { label: 'Todos los recursos', route: '/biblioteca' },
     ],
   },
+  chats: {
+    flat: [
+      { label: 'Todos los chats', route: '/chats' },
+    ],
+    groups: [
+      {
+        label: 'Conversaciones',
+        items: [
+          { label: 'Preceptores', route: '/chats?tipo=direct', dot: '#00B3F8' },
+          { label: 'Casos Clínicos', route: '/chats?tipo=group', dot: '#6366F1' },
+          { label: 'Comunidad', route: '/chats?tipo=public', dot: '#10B981' },
+        ],
+      },
+    ],
+  },
   anatomia: {
     flat: [
       { label: 'Visor anatómico', route: '/anatomia' },

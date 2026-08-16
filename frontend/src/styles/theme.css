@@ -1003,15 +1003,22 @@ html.theme-animating .crono-gantt-card {
   border-right-color: #E2E8F0 !important;
 }
 
-[data-theme="light"] .sb-icon-btn,
-[data-theme="light"] .sb-avatar-btn {
-  background: #F1F5F9 !important;
+[data-theme="light"] .sb-icon-btn {
+  background: transparent !important;
   color: #64748B !important;
 }
 
-[data-theme="light"] .sb-icon-btn:hover,
-[data-theme="light"] .sb-avatar-btn:hover,
+[data-theme="light"] .sb-icon-btn:hover {
+  background: rgba(226, 232, 240, 0.7) !important;
+  color: #0F172A !important;
+}
+
 [data-theme="light"] .sb-icon-btn-on {
+  background: rgba(2, 132, 199, 0.14) !important;
+  color: #0284C7 !important;
+}
+
+[data-theme="light"] .sb-avatar-btn {
   background: #E2E8F0 !important;
   color: #0F172A !important;
 }
@@ -1113,16 +1120,23 @@ html.theme-animating .crono-gantt-card {
   border-right-color: rgba(255, 255, 255, 0.08) !important;
 }
 
-[data-theme="dark"] .sb-icon-btn,
-[data-theme="dark"] .sb-avatar-btn {
-  background: rgba(30, 41, 59, 0.8) !important;
+[data-theme="dark"] .sb-icon-btn {
+  background: transparent !important;
   color: #94A3B8 !important;
 }
 
-[data-theme="dark"] .sb-icon-btn:hover,
-[data-theme="dark"] .sb-avatar-btn:hover,
+[data-theme="dark"] .sb-icon-btn:hover {
+  background: rgba(51, 65, 85, 0.5) !important;
+  color: #F8FAFC !important;
+}
+
 [data-theme="dark"] .sb-icon-btn-on {
-  background: rgba(51, 65, 85, 0.9) !important;
+  background: rgba(56, 189, 248, 0.18) !important;
+  color: #38BDF8 !important;
+}
+
+[data-theme="dark"] .sb-avatar-btn {
+  background: rgba(30, 41, 59, 0.8) !important;
   color: #F8FAFC !important;
 }
 
@@ -1806,4 +1820,80 @@ html.theme-animating .crono-gantt-card {
   background: rgba(30, 41, 59, 0.8) !important;
   color: #38BDF8 !important;
   border: 1px solid rgba(255, 255, 255, 0.12) !important;
+}
+
+/* ── PESTAÑA DE CHATS EN MODO OSCURO (100%) ── */
+[data-theme="dark"] .chats-page-wrapper {
+  background: #0B0F19 !important;
+}
+
+[data-theme="dark"] .chats-sidebar-panel,
+[data-theme="dark"] .chats-main-header,
+[data-theme="dark"] .chats-input-footer,
+[data-theme="dark"] .chats-right-panel {
+  background: #0F172A !important;
+  border-color: rgba(255, 255, 255, 0.08) !important;
+}
+
+[data-theme="dark"] .chats-sb-header {
+  border-color: rgba(255, 255, 255, 0.08) !important;
+}
+
+[data-theme="dark"] .chats-sb-title,
+[data-theme="dark"] .chats-mh-name,
+[data-theme="dark"] .chats-item-name,
+[data-theme="dark"] .chats-rp-head h3,
+[data-theme="dark"] .chats-rp-item-text,
+[data-theme="dark"] .chats-rp-sug-info h4,
+[data-theme="dark"] .chats-rp-info-card h4 {
+  color: #F8FAFC !important;
+}
+
+[data-theme="dark"] .chats-tab-btn {
+  color: #94A3B8 !important;
+}
+[data-theme="dark"] .chats-tab-btn:hover {
+  color: #F8FAFC !important;
+}
+[data-theme="dark"] .chats-tab-btn.active {
+  color: #38BDF8 !important;
+  border-bottom-color: #38BDF8 !important;
+}
+
+[data-theme="dark"] .chats-search-box,
+[data-theme="dark"] .chats-input-bar,
+[data-theme="dark"] .chats-mh-btn,
+[data-theme="dark"] .chats-rp-item,
+[data-theme="dark"] .chats-rp-sug-card {
+  background: rgba(30, 41, 59, 0.7) !important;
+  border-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+[data-theme="dark"] .chats-item:hover {
+  background: rgba(30, 41, 59, 0.6) !important;
+}
+[data-theme="dark"] .chats-item.active {
+  background: rgba(30, 41, 59, 0.95) !important;
+  border-color: rgba(56, 189, 248, 0.3) !important;
+}
+
+[data-theme="dark"] .chats-bubble.contact {
+  background: rgba(30, 41, 59, 0.85) !important;
+  color: #F8FAFC !important;
+  border-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+[data-theme="dark"] .chats-bubble.user {
+  background: linear-gradient(135deg, #2563EB 0%, #1D4ED8 100%) !important;
+  color: #FFFFFF !important;
+}
+
+[data-theme="dark"] .chats-date-divider span {
+  background: rgba(30, 41, 59, 0.8) !important;
+  color: #94A3B8 !important;
+}
+
+[data-theme="dark"] .chats-rp-info-card {
+  background: rgba(2, 132, 199, 0.12) !important;
+  border-color: rgba(56, 189, 248, 0.25) !important;
 }
