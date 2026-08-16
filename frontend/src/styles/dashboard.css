@@ -5563,7 +5563,7 @@
 .chats-messages-body {
   flex: 1;
   overflow-y: auto;
-  padding: 24px;
+  padding: 24px 24px 130px 24px;
   display: flex;
   flex-direction: column;
   gap: 14px;
