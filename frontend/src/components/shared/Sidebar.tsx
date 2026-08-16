@@ -238,14 +238,22 @@ export default function Sidebar() {
           {DASH_NAV.map(({ id, label, Icon, route }) => {
             const on = activeId === id && panelOpen;
             return (
-              <button
+              <motion.button
                 key={id}
+                whileTap={{ scale: 0.82, rotate: -8 }}
+                whileHover={{ scale: 1.08 }}
+                transition={{ type: 'spring', stiffness: 450, damping: 17 }}
                 className={`sb-icon-btn${on ? ' sb-icon-btn-on' : ''}`}
                 title={label}
                 onClick={() => handleNavClick(id, route)}
               >
-                <Icon size={19} strokeWidth={on ? 2.2 : 1.65} />
-              </button>
+                <motion.div
+                  animate={on ? { scale: [1, 1.25, 0.95, 1], rotate: [0, -12, 6, 0] } : { scale: 1, rotate: 0 }}
+                  transition={{ duration: 0.3, ease: 'easeOut' }}
+                >
+                  <Icon size={19} strokeWidth={on ? 2.2 : 1.65} />
+                </motion.div>
+              </motion.button>
             );
           })}
         </nav>
@@ -253,7 +261,10 @@ export default function Sidebar() {
         {/* Bottom: Settings + Theme Toggle + Profile */}
         <div className="sb-rail-bottom">
           {/* Botón directo de alternancia de tema */}
-          <button
+          <motion.button
+            whileTap={{ scale: 0.80, rotate: 180 }}
+            whileHover={{ scale: 1.08 }}
+            transition={{ type: 'spring', stiffness: 400, damping: 15 }}
             className="sb-icon-btn"
             title={theme === 'dark' ? 'Cambiar a Modo Claro' : 'Cambiar a Modo Oscuro'}
             onClick={handleToggleTheme}
@@ -263,17 +274,20 @@ export default function Sidebar() {
             ) : (
               <Moon size={19} strokeWidth={1.8} className="sb-moon-icon" />
             )}
-          </button>
+          </motion.button>
 
           {/* Configuración Popover */}
           <div className="sb-settings-wrap" ref={settingsRef}>
-            <button
+            <motion.button
+              whileTap={{ scale: 0.82, rotate: 45 }}
+              whileHover={{ scale: 1.08 }}
+              transition={{ type: 'spring', stiffness: 400, damping: 17 }}
               className={`sb-icon-btn${settingsOpen ? ' sb-icon-btn-on' : ''}`}
               title="Configuración"
               onClick={() => setSettingsOpen(v => !v)}
             >
               <Settings size={19} strokeWidth={1.65} />
-            </button>
+            </motion.button>
 
             <AnimatePresence>
               {settingsOpen && (
@@ -320,7 +334,10 @@ export default function Sidebar() {
           </div>
 
           <div className="sb-profile-wrap" ref={profileRef}>
-            <button
+            <motion.button
+              whileTap={{ scale: 0.85 }}
+              whileHover={{ scale: 1.08 }}
+              transition={{ type: 'spring', stiffness: 400, damping: 17 }}
               className={`sb-avatar-btn${profileOpen ? ' sb-avatar-btn-open' : ''}`}
               onClick={() => setProfileOpen(v => !v)}
               title={currentUser?.name || 'Perfil'}
@@ -330,7 +347,7 @@ export default function Sidebar() {
               ) : (
                 '··'
               )}
-            </button>
+            </motion.button>
 
             <AnimatePresence>
               {profileOpen && (
@@ -420,20 +437,24 @@ export default function Sidebar() {
               {/* Flat items */}
               <div className="sb-panel-section">
                 {panelContent.flat.map(item => (
-                  <button
+                  <motion.button
                     key={item.label}
+                    whileTap={{ scale: 0.95, x: 4 }}
+                    whileHover={{ x: 4 }}
+                    transition={{ duration: 0.15 }}
                     className={`sb-panel-item${isFlatActive(item.route) ? ' sb-panel-item-active' : ''}`}
                     onClick={() => handleItemClick(item.route)}
                   >
                     {item.label}
-                  </button>
+                  </motion.button>
                 ))}
               </div>
 
               {/* Groups */}
               {panelContent.groups?.map(group => (
                 <div key={group.label} className="sb-panel-group">
-                  <button
+                  <motion.button
+                    whileTap={{ scale: 0.97 }}
                     className="sb-panel-group-head"
                     onClick={() =>
                       setOpenGroup(prev =>
@@ -448,7 +469,7 @@ export default function Sidebar() {
                       size={14}
                       className={`sb-panel-chevron${openGroup === group.label ? ' open' : ''}`}
                     />
-                  </button>
+                  </motion.button>
 
                   <AnimatePresence initial={false}>
                     {openGroup === group.label && (
@@ -460,8 +481,11 @@ export default function Sidebar() {
                         style={{ overflow: 'hidden' }}
                       >
                         {group.items.map(item => (
-                          <button
+                          <motion.button
                             key={item.label}
+                            whileTap={{ scale: 0.95, x: 4 }}
+                            whileHover={{ x: 4 }}
+                            transition={{ duration: 0.15 }}
                             className={`sb-panel-sub-item${isSubActive(item.route) ? ' sb-panel-sub-item-active' : ''}`}
                             onClick={() => handleItemClick(item.route)}
                           >
@@ -472,7 +496,7 @@ export default function Sidebar() {
                               />
                             )}
                             {item.label}
-                          </button>
+                          </motion.button>
                         ))}
                       </motion.div>
                     )}
