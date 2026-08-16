@@ -1977,6 +1977,8 @@ html.theme-animating .crono-gantt-card {
 }
 
 [data-theme="dark"] .chats-input-footer {
-  background: transparent !important;
+  background: linear-gradient(to bottom, rgba(15, 23, 42, 0) 0%, rgba(15, 23, 42, 0.75) 45%, rgba(15, 23, 42, 1) 100%) !important;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
   border: none !important;
 }
