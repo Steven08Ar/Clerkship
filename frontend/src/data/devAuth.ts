@@ -20,6 +20,11 @@ export function memberEmail(memberId: string): string {
   return email;
 }
 
+/** Lookup inverso: dado un correo de Firebase, ¿a qué integrante de TEAM_MEMBERS corresponde? */
+export function memberIdForEmail(email: string): string | undefined {
+  return Object.entries(MEMBER_EMAILS).find(([, e]) => e === email)?.[0];
+}
+
 export async function authenticateMember(memberId: string, password: string): Promise<User> {
   const credential = await signInWithEmailAndPassword(auth, memberEmail(memberId), password);
   return credential.user;

@@ -192,9 +192,20 @@
   cursor: pointer;
   transition: border-color 0.15s, transform 0.15s;
   letter-spacing: 0.02em;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
 }
 .sb-avatar-btn:hover     { border-color: var(--p);  }
 .sb-avatar-btn-open      { border-color: var(--p); transform: scale(0.95); }
+.sb-avatar-btn-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 50%;
+}
 
 /* Profile dropdown */
 .sb-profile-menu {
@@ -226,6 +237,15 @@
   font-weight: 700;
   display: flex; align-items: center; justify-content: center;
   flex-shrink: 0;
+}
+.sb-profile-avatar-img-wrap {
+  overflow: hidden;
+}
+.sb-profile-avatar-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 50%;
 }
 .sb-profile-name { font-size: 0.82rem; font-weight: 700; color: var(--ink); margin: 0; }
 .sb-profile-role { font-size: 0.72rem; color: var(--ink3); margin: 0; }
@@ -5320,6 +5340,14 @@
   justify-content: center;
   cursor: pointer;
   box-shadow: 0 3px 10px rgba(0, 0, 0, 0.12);
+  overflow: hidden;
+}
+
+.chats-nav-avatar-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 50%;
 }
 
 .chats-red-dot {
@@ -6177,26 +6205,6 @@
 .chats-dz-icon-circle:hover {
   transform: scale(1.08);
   background: #4338CA;
-}
-
-.chats-dz-floating-drag-file {
-  position: absolute;
-  bottom: 12px;
-  right: 18px;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  background: #3B82F6;
-  color: #ffffff;
-  padding: 4px 10px;
-  border-radius: 14px;
-  font-size: 0.74rem;
-  font-weight: 700;
-  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
-  font-family: 'Poppins', 'Inter', sans-serif !important;
-}
-.chats-pointer-hand {
-  font-size: 0.9rem;
 }
 
 

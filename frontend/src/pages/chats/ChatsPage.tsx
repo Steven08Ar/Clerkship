@@ -3,10 +3,11 @@ import { motion, AnimatePresence } from 'framer-motion';
 import {
   Search, Plus, Send, Paperclip, MoreHorizontal,
   CheckCheck, MessageSquare, Sparkles, Mic, Pause, Check, X,
-  UploadCloud, Link as LinkIcon, Folder, ChevronDown, ArrowUp, Wand2, FileText,
-  Mail, Users
+  UploadCloud, Link as LinkIcon, ChevronDown, ArrowUp, Wand2, FileText,
+  Mail, Users, BookOpen, FileCheck
 } from 'lucide-react';
 import Sidebar from '../../components/shared/Sidebar';
+import { useCurrentUser } from '../../utils/currentUser';
 import logoUrl from '../../assets/Logo Clerkship.svg';
 
 /* ── Interfaces ────────────────────────────────────────── */
@@ -166,6 +167,7 @@ const INITIAL_MESSAGES: Record<string, Message[]> = {
    ChatsPage Component
    ═══════════════════════════════════════════════════════════ */
 export default function ChatsPage() {
+  const currentUser = useCurrentUser();
   const [tab, setTab] = useState<'direct' | 'group' | 'public'>('direct');
   const [search, setSearch] = useState('');
   const [activeContactId, setActiveContactId] = useState<string>('c1');
@@ -376,8 +378,12 @@ export default function ChatsPage() {
                 <Users size={20} />
               </button>
 
-              <div className="chats-nav-user-avatar" title="Perfil del Estudiante">
-                <span className="chats-nav-avatar-text">SA</span>
+              <div className="chats-nav-user-avatar" title={currentUser?.name || 'Perfil'}>
+                {currentUser ? (
+                  <img src={currentUser.avatarUrl} alt={currentUser.name} className="chats-nav-avatar-img" />
+                ) : (
+                  <span className="chats-nav-avatar-text">--</span>
+                )}
               </div>
             </div>
 
@@ -633,39 +639,47 @@ export default function ChatsPage() {
                   <div className="chats-dz-buttons-row">
                     <button
                       className="chats-dz-icon-circle"
-                      title="Subir archivo"
+                      title="Subir archivo o paraclínico"
                       onClick={() => fileInputRef.current?.click()}
                     >
                       <UploadCloud size={18} />
                     </button>
                     <button
                       className="chats-dz-icon-circle"
-                      title="Grabar audio"
+                      title="Grabar nota de voz"
                       onClick={() => { setShowDropZoneModal(false); setIsRecording(true); }}
                     >
                       <Mic size={18} />
                     </button>
                     <button
                       className="chats-dz-icon-circle"
-                      title="Adjuntar enlace"
-                      onClick={() => handleSendMessage('🔗 https://clerkship.med.co/caso-gastro-1')}
+                      title="Compartir enlace o referencia"
+                      onClick={() => handleSendMessage('🔗 Referencia médica: https://clerkship.med.co/caso-gastro-1')}
                     >
                       <LinkIcon size={18} />
                     </button>
                     <button
                       className="chats-dz-icon-circle"
-                      title="Explorar repositorios"
-                      onClick={() => fileInputRef.current?.click()}
+                      title="Compartir libro de la biblioteca"
+                      onClick={() => handleSendMessage('📚 Compartido desde la Biblioteca: "Harrison - Principios de Medicina Interna (21ª ed.)"')}
                     >
-                      <Folder size={18} />
+                      <BookOpen size={18} />
+                    </button>
+                    <button
+                      className="chats-dz-icon-circle"
+                      title="Compartir caso clínico realizado"
+                      onClick={() => handleSendMessage('📋 Caso realizado compartido: "Dolor abdominal urente y sangrado digestivo alto - Puntuación: 94%"')}
+                    >
+                      <FileCheck size={18} />
                     </button>
                   </div>
 
-                  {/* Etiqueta flotante con miniatura simulada e icono de cursor */}
-                  <div className="chats-dz-floating-drag-file">
-                    <span className="chats-dz-thumb">📷 image(1).png</span>
-                    <span className="chats-pointer-hand">👆</span>
-                  </div>
+                  {attachedFile && (
+                    <div className="chats-dz-preview-tag">
+                      <span>📄 {attachedFile.name} ({attachedFile.sizeStr})</span>
+                      <button onClick={() => setAttachedFile(null)}><X size={12} /></button>
+                    </div>
+                  )}
                 </div>
               </motion.div>
             ) : activeContact.isAi ? (
