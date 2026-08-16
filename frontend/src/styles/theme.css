@@ -1878,14 +1878,35 @@ html.theme-animating .crono-gantt-card {
 }
 
 [data-theme="dark"] .chats-bubble.contact {
-  background: rgba(30, 41, 59, 0.85) !important;
+  background: rgba(30, 41, 59, 0.95) !important;
   color: #F8FAFC !important;
-  border-color: rgba(255, 255, 255, 0.1) !important;
+  border-color: rgba(255, 255, 255, 0.12) !important;
+}
+[data-theme="dark"] .chats-bubble.contact .chats-bubble-text {
+  color: #F8FAFC !important;
+  font-weight: 500 !important;
+}
+[data-theme="dark"] .chats-bubble.contact .chats-bubble-meta span {
+  color: #94A3B8 !important;
 }
 
 [data-theme="dark"] .chats-bubble.user {
   background: linear-gradient(135deg, #2563EB 0%, #1D4ED8 100%) !important;
   color: #FFFFFF !important;
+}
+[data-theme="dark"] .chats-bubble.user .chats-bubble-text {
+  color: #FFFFFF !important;
+  font-weight: 500 !important;
+}
+[data-theme="dark"] .chats-bubble.user .chats-bubble-meta span {
+  color: rgba(255, 255, 255, 0.92) !important;
+}
+
+[data-theme="dark"] .chats-text-input {
+  color: #F8FAFC !important;
+}
+[data-theme="dark"] .chats-text-input::placeholder {
+  color: #94A3B8 !important;
 }
 
 [data-theme="dark"] .chats-date-divider span {
