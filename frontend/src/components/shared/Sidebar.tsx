@@ -381,9 +381,9 @@ export default function Sidebar() {
         </div>
       </div>
 
-      {/* ── Expandable Panel ──────────────────────────────── */}
+      {/* ── Expandable Panel (Deshabilitado únicamente para Chats) ──────────────────────────────── */}
       <AnimatePresence initial={false}>
-        {panelOpen && (
+        {panelOpen && activeId !== 'chats' && pathname !== '/chats' && (
           <motion.div
             className="sb-panel"
             initial={{ width: 0, opacity: 0 }}
