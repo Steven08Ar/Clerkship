@@ -5237,7 +5237,7 @@
 
 /* ── 1. Columna Izquierda: Lista de Chats ── */
 .chats-sidebar-panel {
-  width: 320px;
+  width: 380px;
   flex-shrink: 0;
   display: flex;
   flex-direction: column;
