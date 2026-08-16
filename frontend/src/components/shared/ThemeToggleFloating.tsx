@@ -9,7 +9,6 @@ const DASHBOARD_ROUTES = [
   '/dashboard',
   '/casos',
   '/biblioteca',
-  '/anatomia',
   '/simulacion',
   '/historial',
   '/chats',

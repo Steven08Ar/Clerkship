@@ -21,7 +21,6 @@ import PrivacidadPage from './pages/legal/PrivacidadPage';
 import LicenciaPage from './pages/legal/LicenciaPage';
 import DocumentacionPage from './pages/contenido/DocumentacionPage';
 import BibliotecaPage from './pages/contenido/BibliotecaPage';
-import AnatomiaPage from './pages/anatomia/AnatomiaPage';
 import SimulacionPage from './pages/simulacion/SimulacionPage';
 import CasosPage from './pages/simulacion/CasosPage';
 import HistorialPage from './pages/simulacion/HistorialPage';
@@ -116,7 +115,6 @@ export default function App() {
         <Route path="/casos"                  element={<ProtectedRoute><CasosPage /></ProtectedRoute>} />
         <Route path="/historial"              element={<ProtectedRoute><HistorialPage /></ProtectedRoute>} />
         <Route path="/chats"                  element={<ProtectedRoute><ChatsPage /></ProtectedRoute>} />
-        <Route path="/anatomia"               element={<ProtectedRoute><AnatomiaPage /></ProtectedRoute>} />
 
         {/* Informative Pages */}
         <Route path="/equipo/desarrolladores" element={<DesarrolladoresPage />} />

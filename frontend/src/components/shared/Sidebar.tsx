@@ -31,7 +31,6 @@ const PANEL: Record<string, PanelSection> = {
       { label: 'Inicio',          route: '/dashboard'  },
       { label: 'Casos clínicos',  route: '/casos'      },
       { label: 'Biblioteca',      route: '/biblioteca' },
-      { label: 'Anatomía 3D',     route: '/anatomia'   },
     ],
   },
   casos: {
@@ -68,21 +67,6 @@ const PANEL: Record<string, PanelSection> = {
           { label: 'Preceptores', route: '/chats?tipo=direct', dot: '#00B3F8' },
           { label: 'Casos Clínicos', route: '/chats?tipo=group', dot: '#6366F1' },
           { label: 'Comunidad', route: '/chats?tipo=public', dot: '#10B981' },
-        ],
-      },
-    ],
-  },
-  anatomia: {
-    flat: [
-      { label: 'Visor anatómico', route: '/anatomia' },
-    ],
-    groups: [
-      {
-        label: 'Sistemas',
-        items: [
-          { label: 'Sistema Óseo',      route: '/anatomia', dot: '#00B3F8' },
-          { label: 'Sistema Nervioso',  route: '/anatomia', dot: '#6366F1' },
-          { label: 'Sistema Muscular',  route: '/anatomia', dot: '#10B981' },
         ],
       },
     ],
