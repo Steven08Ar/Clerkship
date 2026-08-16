@@ -5257,6 +5257,80 @@
   border-bottom: 1px solid var(--border);
 }
 
+/* Fila Superior de Iconos de Navegación Rápida (Fiel a la imagen) */
+.chats-top-nav-icons {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--border);
+}
+
+.chats-nav-icon-btn {
+  position: relative;
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  border: none;
+  background: transparent;
+  color: var(--ink2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s, transform 0.15s;
+}
+.chats-nav-icon-btn:hover {
+  background: var(--surface2);
+  color: var(--ink);
+}
+.chats-nav-icon-btn.active {
+  color: #9333EA;
+  background: rgba(147, 51, 234, 0.1);
+}
+
+.chats-nav-badge {
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  background: #EF4444;
+  color: #FFFFFF;
+  font-size: 0.65rem;
+  font-weight: 800;
+  border-radius: 10px;
+  min-width: 16px;
+  height: 16px;
+  padding: 0 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid var(--surface);
+}
+
+.chats-nav-user-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #0284C7 0%, #0369A1 100%);
+  color: #ffffff;
+  font-size: 0.76rem;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.12);
+}
+
+.chats-red-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #EF4444;
+  display: inline-block;
+  margin-left: 4px;
+}
+
 .chats-sb-title-row {
   display: flex;
   align-items: center;
@@ -5490,6 +5564,7 @@
   flex-direction: column;
   background: var(--bg);
   height: 100vh;
+  position: relative;
 }
 
 .chats-main-header {
@@ -5567,6 +5642,23 @@
   display: flex;
   flex-direction: column;
   gap: 14px;
+  /* Difuminado puro por máscara alfa (sin cajas ni recortes duros) arriba
+     y abajo del área de mensajes — las burbujas se desvanecen al entrar
+     y salir del scroll, incluida la zona detrás de la barra flotante. */
+  -webkit-mask-image: linear-gradient(
+    to bottom,
+    transparent 0,
+    black 28px,
+    black calc(100% - 110px),
+    transparent 100%
+  );
+  mask-image: linear-gradient(
+    to bottom,
+    transparent 0,
+    black 28px,
+    black calc(100% - 110px),
+    transparent 100%
+  );
 }
 
 .chats-date-divider {
@@ -5649,13 +5741,20 @@
 }
 
 .chats-input-footer {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 6;
   padding: 16px 24px 20px 24px;
   background: transparent !important;
   border-top: none !important;
-  flex-shrink: 0;
   display: flex;
   flex-direction: column;
   align-items: center;
+  /* El footer en sí es "invisible" al mouse fuera de la barra, para que
+     se pueda hacer click/scroll en las burbujas que quedan detrás de él. */
+  pointer-events: none;
 }
 
 .chats-input-bar,
@@ -5666,6 +5765,7 @@
   max-width: 840px;
   margin: 0 auto;
   font-family: 'Poppins', 'Inter', system-ui, -apple-system, sans-serif !important;
+  pointer-events: auto;
 }
 
 /* ── BARRA DE IA EXCLUSIVA (Diseño Minimalista en 2 Filas) ── */

@@ -1,9 +1,10 @@
 import { useState, useRef, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
-  Search, Plus, Send, Paperclip, Phone, Video, MoreHorizontal,
+  Search, Plus, Send, Paperclip, MoreHorizontal,
   CheckCheck, MessageSquare, Sparkles, Mic, Pause, Check, X,
-  UploadCloud, Link as LinkIcon, Folder, ChevronDown, ArrowUp, Wand2, FileText
+  UploadCloud, Link as LinkIcon, Folder, ChevronDown, ArrowUp, Wand2, FileText,
+  Mail, Users
 } from 'lucide-react';
 import Sidebar from '../../components/shared/Sidebar';
 import logoUrl from '../../assets/Logo Clerkship.svg';
@@ -355,7 +356,121 @@ export default function ChatsPage() {
 
       <div className="chats-page-wrapper">
 
-        {/* ── COLUMNA CENTRAL: CONVERSACIÓN ACTIVA ── */}
+        {/* ── COLUMNA IZQUIERDA: LISTA DE CHATS Y CONVERSACIONES ── */}
+        <aside className="chats-sidebar-panel">
+          <div className="chats-sb-header">
+            
+            {/* Fila Superior de Iconos de Navegación Rápida (Fiel a la Imagen de Referencia) */}
+            <div className="chats-top-nav-icons">
+              <button className="chats-nav-icon-btn active" title="Chats y Mensajes">
+                <MessageSquare size={20} />
+                <span className="chats-nav-badge">3</span>
+              </button>
+
+              <button className="chats-nav-icon-btn" title="Correo e Historial de Comunicados">
+                <Mail size={20} />
+                <span className="chats-nav-badge">4</span>
+              </button>
+
+              <button className="chats-nav-icon-btn" title="Comunidad Médica">
+                <Users size={20} />
+              </button>
+
+              <div className="chats-nav-user-avatar" title="Perfil del Estudiante">
+                <span className="chats-nav-avatar-text">SA</span>
+              </div>
+            </div>
+
+            {/* Título de Chats y Botón + */}
+            <div className="chats-sb-title-row">
+              <h1 className="chats-sb-title">Chats</h1>
+              <button className="chats-add-btn" title="Nuevo chat">
+                <Plus size={18} />
+              </button>
+            </div>
+
+            {/* Selector de pestañas: Directos | Grupos | Públicos */}
+            <div className="chats-tab-group">
+              <button
+                className={`chats-tab-btn ${tab === 'direct' ? 'active' : ''}`}
+                onClick={() => setTab('direct')}
+              >
+                DIRECT <span className="chats-red-dot" />
+              </button>
+              <button
+                className={`chats-tab-btn ${tab === 'group' ? 'active' : ''}`}
+                onClick={() => setTab('group')}
+              >
+                GROUPS <span className="chats-red-dot" />
+              </button>
+              <button
+                className={`chats-tab-btn ${tab === 'public' ? 'active' : ''}`}
+                onClick={() => setTab('public')}
+              >
+                PUBLIC <span className="chats-red-dot" />
+              </button>
+            </div>
+
+            {/* Barra de Búsqueda */}
+            <div className="chats-search-box">
+              <Search size={15} className="chats-search-icon" />
+              <input
+                type="text"
+                placeholder="Buscar conversación o preceptor..."
+                value={search}
+                onChange={e => setSearch(e.target.value)}
+              />
+            </div>
+          </div>
+
+          {/* Lista de Conversaciones */}
+          <div className="chats-list">
+            {filteredContacts.map(c => {
+              const active = c.id === activeContactId;
+              return (
+                <div
+                  key={c.id}
+                  className={`chats-item ${active ? 'active' : ''}`}
+                  onClick={() => setActiveContactId(c.id)}
+                >
+                  <div className="chats-item-avatar-wrap">
+                    {c.isAi ? (
+                      <div className="chats-avatar-ai">
+                        <img src={logoUrl} alt="AI" />
+                      </div>
+                    ) : (
+                      <div className="chats-avatar-text" style={{ background: c.avatarBg || '#0284C7' }}>
+                        {c.avatarText}
+                      </div>
+                    )}
+                    {c.online && <span className="chats-online-dot" />}
+                  </div>
+
+                  <div className="chats-item-body">
+                    <div className="chats-item-head">
+                      <span className="chats-item-name">{c.name}</span>
+                      <span className="chats-item-time">{c.timeStr}</span>
+                    </div>
+                    <p className="chats-item-preview">{c.lastMessage}</p>
+                  </div>
+
+                  {c.unreadCount && c.unreadCount > 0 && !active && (
+                    <span className="chats-unread-badge">{c.unreadCount}</span>
+                  )}
+                </div>
+              );
+            })}
+
+            {filteredContacts.length === 0 && (
+              <div className="chats-empty-list">
+                <MessageSquare size={32} />
+                <p>No se encontraron conversaciones.</p>
+              </div>
+            )}
+          </div>
+        </aside>
+
+        {/* ── COLUMNA DERECHA/CENTRAL: CONVERSACIÓN ACTIVA ── */}
         <main
           className={`chats-main-panel ${isDragOver ? 'drag-over' : ''}`}
           onDragOver={handleDragOver}
@@ -414,8 +529,6 @@ export default function ChatsPage() {
             </div>
 
             <div className="chats-mh-actions">
-              <button className="chats-mh-btn" title="Llamada simulada"><Phone size={18} /></button>
-              <button className="chats-mh-btn" title="Videoconferencia"><Video size={18} /></button>
               <button className="chats-mh-btn" title="Opciones"><MoreHorizontal size={18} /></button>
             </div>
           </header>
@@ -730,97 +843,6 @@ export default function ChatsPage() {
 
           </div>
         </main>
-
-        {/* ── COLUMNA DERECHA: LISTA DE CHATS Y CONVERSACIONES ── */}
-        <aside className="chats-sidebar-panel right">
-          <div className="chats-sb-header">
-            <div className="chats-sb-title-row">
-              <h1 className="chats-sb-title">Chats</h1>
-              <button className="chats-add-btn" title="Nuevo chat">
-                <Plus size={16} />
-              </button>
-            </div>
-
-            {/* Selector de pestañas: Directos | Grupos | Públicos */}
-            <div className="chats-tab-group">
-              <button
-                className={`chats-tab-btn ${tab === 'direct' ? 'active' : ''}`}
-                onClick={() => setTab('direct')}
-              >
-                DIRECTOS
-              </button>
-              <button
-                className={`chats-tab-btn ${tab === 'group' ? 'active' : ''}`}
-                onClick={() => setTab('group')}
-              >
-                GRUPOS
-              </button>
-              <button
-                className={`chats-tab-btn ${tab === 'public' ? 'active' : ''}`}
-                onClick={() => setTab('public')}
-              >
-                PÚBLICOS
-              </button>
-            </div>
-
-            {/* Barra de Búsqueda */}
-            <div className="chats-search-box">
-              <Search size={15} className="chats-search-icon" />
-              <input
-                type="text"
-                placeholder="Buscar conversación o preceptor..."
-                value={search}
-                onChange={e => setSearch(e.target.value)}
-              />
-            </div>
-          </div>
-
-          {/* Lista de Conversaciones */}
-          <div className="chats-list">
-            {filteredContacts.map(c => {
-              const active = c.id === activeContactId;
-              return (
-                <div
-                  key={c.id}
-                  className={`chats-item ${active ? 'active' : ''}`}
-                  onClick={() => setActiveContactId(c.id)}
-                >
-                  <div className="chats-item-avatar-wrap">
-                    {c.isAi ? (
-                      <div className="chats-avatar-ai">
-                        <img src={logoUrl} alt="AI" />
-                      </div>
-                    ) : (
-                      <div className="chats-avatar-text" style={{ background: c.avatarBg || '#0284C7' }}>
-                        {c.avatarText}
-                      </div>
-                    )}
-                    {c.online && <span className="chats-online-dot" />}
-                  </div>
-
-                  <div className="chats-item-body">
-                    <div className="chats-item-head">
-                      <span className="chats-item-name">{c.name}</span>
-                      <span className="chats-item-time">{c.timeStr}</span>
-                    </div>
-                    <p className="chats-item-preview">{c.lastMessage}</p>
-                  </div>
-
-                  {c.unreadCount && c.unreadCount > 0 && !active && (
-                    <span className="chats-unread-badge">{c.unreadCount}</span>
-                  )}
-                </div>
-              );
-            })}
-
-            {filteredContacts.length === 0 && (
-              <div className="chats-empty-list">
-                <MessageSquare size={32} />
-                <p>No se encontraron conversaciones.</p>
-              </div>
-            )}
-          </div>
-        </aside>
 
       </div>
     </div>
