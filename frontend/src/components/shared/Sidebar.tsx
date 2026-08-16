@@ -7,6 +7,7 @@ import { DASH_NAV } from '../../data/dashNav';
 import { auth } from '../../data/firebase';
 import { getInitialTheme, triggerThemeToggle, type ThemeMode } from '../../utils/themeHelper';
 import { logoutUserSession } from '../../utils/authConsent';
+import { useCurrentUser } from '../../utils/currentUser';
 import logoUrl from '../../assets/Logo Clerkship.svg';
 
 /* ── Panel content per section ─────────────────────────────── */
@@ -104,6 +105,7 @@ export default function Sidebar() {
   const { pathname }          = useLocation();
   const [searchParams]        = useSearchParams();
   const activeModulo          = searchParams.get('modulo');
+  const currentUser           = useCurrentUser();
 
   const [panelOpen, setPanelOpenRaw] = useState<boolean>(() => {
     const saved = localStorage.getItem(STORAGE_KEY);
@@ -321,9 +323,13 @@ export default function Sidebar() {
             <button
               className={`sb-avatar-btn${profileOpen ? ' sb-avatar-btn-open' : ''}`}
               onClick={() => setProfileOpen(v => !v)}
-              title="Perfil"
+              title={currentUser?.name || 'Perfil'}
             >
-              SA
+              {currentUser ? (
+                <img src={currentUser.avatarUrl} alt={currentUser.name} className="sb-avatar-btn-img" />
+              ) : (
+                '··'
+              )}
             </button>
 
             <AnimatePresence>
@@ -336,10 +342,16 @@ export default function Sidebar() {
                   transition={{ duration: 0.15 }}
                 >
                   <div className="sb-profile-head">
-                    <div className="sb-profile-avatar">SA</div>
+                    <div className="sb-profile-avatar sb-profile-avatar-img-wrap">
+                      {currentUser ? (
+                        <img src={currentUser.avatarUrl} alt={currentUser.name} className="sb-profile-avatar-img" />
+                      ) : (
+                        '··'
+                      )}
+                    </div>
                     <div>
-                      <p className="sb-profile-name">Santiago Arias</p>
-                      <p className="sb-profile-role">Estudiante de Medicina</p>
+                      <p className="sb-profile-name">{currentUser?.name || 'Invitado'}</p>
+                      <p className="sb-profile-role">{currentUser?.role || 'Sin sesión activa'}</p>
                     </div>
                   </div>
                   <div className="sb-profile-divider" />
