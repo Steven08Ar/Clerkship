@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import {
   Search, Plus, Send, Paperclip, Phone, Video, MoreHorizontal,
   CheckCheck, MessageSquare, Sparkles, Mic, Pause, Check, X,
-  UploadCloud, Link as LinkIcon, Folder, ChevronDown, ArrowUp, Wand2, FileText, AtSign
+  UploadCloud, Link as LinkIcon, Folder, ChevronDown, ArrowUp, Wand2, FileText
 } from 'lucide-react';
 import Sidebar from '../../components/shared/Sidebar';
 import logoUrl from '../../assets/Logo Clerkship.svg';
@@ -460,48 +460,50 @@ export default function ChatsPage() {
           {/* ── FOOTER DE ENTRADA / BARRA DE ESCRIBIR ── */}
           <div className="chats-input-footer">
 
-            {/* CASO 1: Grabación de Nota de Voz en Progreso (Para TODOS los chats) */}
+            {/* CASO 1: Grabación de Nota de Voz en Progreso (Fiel a la 4ª barra de la imagen) */}
             {isRecording ? (
               <motion.div
                 className="chats-voice-bar-active"
                 initial={{ opacity: 0, y: 8 }}
                 animate={{ opacity: 1, y: 0 }}
               >
-                <button
-                  type="button"
-                  className="chats-voice-cancel-btn"
-                  onClick={handleCancelVoiceNote}
-                >
-                  Cancelar
-                </button>
-
-                <div className="chats-voice-status-center">
-                  <span className="chats-voice-red-dot" />
-                  <span className="chats-voice-hint">Adelante, graba una nota rápida</span>
-                  <span className="chats-voice-timer">{timerDisplay}</span>
-                </div>
-
-                <div className="chats-voice-actions-right">
+                <div className="chats-voice-top-label">Go ahead, record a quick note</div>
+                <div className="chats-voice-controls-row">
                   <button
                     type="button"
-                    className="chats-voice-pause-btn"
-                    onClick={() => setIsRecordingPaused(v => !v)}
-                    title={isRecordingPaused ? 'Reanudar' : 'Pausar'}
+                    className="chats-voice-cancel-btn"
+                    onClick={handleCancelVoiceNote}
                   >
-                    <Pause size={18} />
+                    Cancel
                   </button>
-                  <button
-                    type="button"
-                    className="chats-voice-send-btn"
-                    onClick={handleSendVoiceNote}
-                    title="Enviar nota de voz"
-                  >
-                    <Check size={18} />
-                  </button>
+
+                  <div className="chats-voice-status-center">
+                    <span className="chats-voice-red-dot" />
+                    <span className="chats-voice-timer">{timerDisplay}</span>
+                  </div>
+
+                  <div className="chats-voice-actions-right">
+                    <button
+                      type="button"
+                      className="chats-voice-pause-btn"
+                      onClick={() => setIsRecordingPaused(v => !v)}
+                      title={isRecordingPaused ? 'Reanudar' : 'Pausar'}
+                    >
+                      <Pause size={18} />
+                    </button>
+                    <button
+                      type="button"
+                      className="chats-voice-send-btn"
+                      onClick={handleSendVoiceNote}
+                      title="Enviar nota de voz"
+                    >
+                      <Check size={18} />
+                    </button>
+                  </div>
                 </div>
               </motion.div>
             ) : showDropZoneModal ? (
-              /* CASO 2: Zona de Arrastrar y Soltar Archivos (Para TODOS los chats) */
+              /* CASO 2: Zona de Arrastrar y Soltar Archivos (Fiel a la 3ª barra de la imagen) */
               <motion.div
                 className="chats-dropzone-embed-box"
                 initial={{ opacity: 0, scale: 0.98 }}
@@ -513,7 +515,7 @@ export default function ChatsPage() {
 
                 <div className="chats-dz-content">
                   <p className="chats-dz-title">Drop anything here or browse</p>
-                  <p className="chats-dz-sub">Documentos, imágenes, videos, grabaciones de audio, enlaces y más</p>
+                  <p className="chats-dz-sub">Docs, images, videos, audio files, links & more</p>
 
                   <div className="chats-dz-buttons-row">
                     <button
@@ -546,30 +548,29 @@ export default function ChatsPage() {
                     </button>
                   </div>
 
-                  {attachedFile && (
-                    <div className="chats-dz-preview-tag">
-                      <span>📄 {attachedFile.name}</span>
-                      <button onClick={() => setAttachedFile(null)}><X size={12} /></button>
-                    </div>
-                  )}
+                  {/* Etiqueta flotante con miniatura simulada e icono de cursor */}
+                  <div className="chats-dz-floating-drag-file">
+                    <span className="chats-dz-thumb">📷 image(1).png</span>
+                    <span className="chats-pointer-hand">👆</span>
+                  </div>
                 </div>
               </motion.div>
             ) : activeContact.isAi ? (
-              /* CASO 3: BARRA EXCLUSIVA PARA EL CHAT DE LA IA DE CLERKSHIP */
+              /* CASO 3: BARRA EXCLUSIVA PARA EL CHAT DE LA IA DE CLERKSHIP (Fiel a la 1ª y 2ª barra) */
               <div className="chats-ai-input-wrapper">
                 
                 {/* Etiqueta de contexto superior (@ Onboarding / Historia Clínica) */}
                 <div className="chats-ai-top-chip-bar">
                   <span className="chats-ai-context-chip">
-                    <AtSign size={12} className="chats-chip-at" />
+                    <span className="chats-chip-at">@</span>
                     <span className="chats-chip-icon">📹</span>
-                    <strong>Caso Gastroenterología #12</strong>
-                    <span className="chats-chip-date">Hoy</span>
+                    <strong>Onboarding call wit...</strong>
+                    <span className="chats-chip-date">Today</span>
                   </span>
-                  <span className="chats-ai-task-hint">Analizar diagnóstico diferencial y solicitar paraclínicos</span>
+                  <span className="chats-ai-task-hint">create a summary web page</span>
                 </div>
 
-                {/* Barra Principal de la IA */}
+                {/* Fila Principal de la IA */}
                 <div className="chats-ai-main-bar">
                   {/* Botón + para agregar archivo/contexto */}
                   <button
@@ -632,28 +633,28 @@ export default function ChatsPage() {
                     <button
                       type="button"
                       className="chats-ai-tool-chip"
-                      onClick={() => handleSendMessage('✨ Sugerir hipótesis diagnósticas para este caso')}
+                      title="Sugerir hipótesis"
+                      onClick={() => handleSendMessage('✨ Sugerir hipótesis diagnósticas')}
                     >
-                      <Wand2 size={13} /> Sugerir hipótesis
+                      <Sparkles size={14} />
                     </button>
                     <button
                       type="button"
                       className="chats-ai-tool-chip"
-                      onClick={() => handleSendMessage('🔍 Buscar evidencia y guías WGO para dolor epigástrico')}
+                      title="Buscar literatura"
+                      onClick={() => handleSendMessage('🔍 Buscar evidencia y guías WGO')}
                     >
-                      <Search size={13} /> Buscar literatura
+                      <Search size={14} />
+                    </button>
+                    <button
+                      type="button"
+                      className="chats-ai-tool-chip"
+                      title="Generar resumen"
+                      onClick={() => handleSendMessage('🪄 Generar resumen clínico')}
+                    >
+                      <Wand2 size={14} />
                     </button>
                   </div>
-
-                  {/* Campo de Entrada de Texto para IA */}
-                  <input
-                    type="text"
-                    className="chats-text-input chats-ai-input"
-                    placeholder="Haz una pregunta de seguimiento. Usa @ para etiquetar documentos..."
-                    value={input}
-                    onChange={e => setInput(e.target.value)}
-                    onKeyDown={e => e.key === 'Enter' && handleSendMessage()}
-                  />
 
                   {/* Controles del Lado Derecho: Micrófono y Botón de Enviar */}
                   <div className="chats-ai-right-controls">
@@ -676,6 +677,18 @@ export default function ChatsPage() {
                       <ArrowUp size={18} />
                     </button>
                   </div>
+                </div>
+
+                {/* Fila de Input de Texto Secundario */}
+                <div className="chats-ai-input-row-second">
+                  <input
+                    type="text"
+                    className="chats-text-input chats-ai-input"
+                    placeholder="Ask a follow-up. Use @ to tag docs or files."
+                    value={input}
+                    onChange={e => setInput(e.target.value)}
+                    onKeyDown={e => e.key === 'Enter' && handleSendMessage()}
+                  />
                 </div>
 
                 {/* Previsualización de Archivo Adjunto */}
