@@ -1829,7 +1829,6 @@ html.theme-animating .crono-gantt-card {
 
 [data-theme="dark"] .chats-sidebar-panel,
 [data-theme="dark"] .chats-main-header,
-[data-theme="dark"] .chats-input-footer,
 [data-theme="dark"] .chats-right-panel {
   background: #0F172A !important;
   border-color: rgba(255, 255, 255, 0.08) !important;
@@ -1978,7 +1977,17 @@ html.theme-animating .crono-gantt-card {
 
 [data-theme="dark"] .chats-input-footer {
   background: transparent !important;
+  background-color: transparent !important;
   border: none !important;
   box-shadow: none !important;
   backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+[data-theme="dark"] .chats-nav-icon-btn {
+  color: #94A3B8 !important;
+}
+[data-theme="dark"] .chats-nav-icon-btn.active {
+  color: #C084FC !important;
+  background: rgba(192, 132, 252, 0.15) !important;
 }
