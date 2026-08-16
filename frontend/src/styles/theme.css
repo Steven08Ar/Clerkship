@@ -1975,3 +1975,8 @@ html.theme-animating .crono-gantt-card {
 [data-theme="dark"] .chats-dz-sub {
   color: #94A3B8 !important;
 }
+
+[data-theme="dark"] .chats-input-footer {
+  background: transparent !important;
+  border: none !important;
+}

@@ -5650,8 +5650,8 @@
 
 .chats-input-footer {
   padding: 16px 24px 20px 24px;
-  background: var(--surface);
-  border-top: 1px solid var(--border);
+  background: transparent !important;
+  border-top: none !important;
   flex-shrink: 0;
   display: flex;
   flex-direction: column;
