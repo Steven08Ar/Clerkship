@@ -1918,3 +1918,60 @@ html.theme-animating .crono-gantt-card {
   background: rgba(2, 132, 199, 0.12) !important;
   border-color: rgba(56, 189, 248, 0.25) !important;
 }
+
+[data-theme="dark"] .chats-ai-input-wrapper,
+[data-theme="dark"] .chats-voice-bar-active,
+[data-theme="dark"] .chats-ai-agent-dropdown {
+  background: #0F172A !important;
+  border-color: rgba(255, 255, 255, 0.12) !important;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.5) !important;
+}
+
+[data-theme="dark"] .chats-ai-context-chip,
+[data-theme="dark"] .chats-ai-plus-btn,
+[data-theme="dark"] .chats-ai-agent-pill,
+[data-theme="dark"] .chats-ai-tool-chip,
+[data-theme="dark"] .chats-ai-mic-btn,
+[data-theme="dark"] .chats-agent-drop-item,
+[data-theme="dark"] .chats-voice-cancel-btn,
+[data-theme="dark"] .chats-voice-pause-btn {
+  background: rgba(30, 41, 59, 0.8) !important;
+  border-color: rgba(255, 255, 255, 0.1) !important;
+  color: #F8FAFC !important;
+}
+
+[data-theme="dark"] .chats-ai-task-hint,
+[data-theme="dark"] .chats-voice-hint,
+[data-theme="dark"] .chats-agent-item-desc {
+  color: #94A3B8 !important;
+}
+
+[data-theme="dark"] .chats-voice-timer {
+  color: #F8FAFC !important;
+}
+
+[data-theme="dark"] .chats-agent-item-title {
+  color: #F8FAFC !important;
+}
+
+[data-theme="dark"] .chats-drag-card {
+  background: #0F172A !important;
+  border-color: #38BDF8 !important;
+}
+[data-theme="dark"] .chats-drag-card h3 {
+  color: #F8FAFC !important;
+}
+[data-theme="dark"] .chats-drag-card p {
+  color: #94A3B8 !important;
+}
+
+[data-theme="dark"] .chats-dropzone-embed-box {
+  background: rgba(2, 132, 199, 0.1) !important;
+  border-color: rgba(56, 189, 248, 0.35) !important;
+}
+[data-theme="dark"] .chats-dz-title {
+  color: #38BDF8 !important;
+}
+[data-theme="dark"] .chats-dz-sub {
+  color: #94A3B8 !important;
+}

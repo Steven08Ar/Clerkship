@@ -5849,3 +5849,489 @@
   line-height: 1.45;
 }
 
+/* ════════════════════════════════════════════════════════════
+   Barra de IA Exclusiva, Grabador de Voz & Drag and Drop
+   ════════════════════════════════════════════════════════════ */
+
+/* Global Drag & Drop Overlay */
+.chats-main-panel.drag-over {
+  position: relative;
+}
+.chats-global-drag-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 100;
+  background: rgba(2, 132, 199, 0.15);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40px;
+}
+.chats-drag-card {
+  background: var(--surface);
+  border: 2px dashed var(--p);
+  border-radius: 24px;
+  padding: 40px 60px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.15);
+}
+.chats-drag-icon {
+  color: var(--p);
+  margin-bottom: 12px;
+}
+.chats-drag-card h3 {
+  font-size: 1.2rem;
+  font-weight: 800;
+  color: var(--ink);
+  margin: 0 0 6px 0;
+}
+.chats-drag-card p {
+  font-size: 0.85rem;
+  color: var(--ink2);
+  margin: 0;
+}
+
+/* ── BARRA DE IA EXCLUSIVA (Pestaña IA de Clerkship) ── */
+.chats-ai-input-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 24px;
+  padding: 12px 16px;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.04);
+}
+
+.chats-ai-top-chip-bar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding-bottom: 6px;
+  border-bottom: 1px solid var(--border);
+}
+.chats-ai-context-chip {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 3px 10px;
+  font-size: 0.74rem;
+  color: var(--ink);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.chats-chip-at {
+  color: var(--p);
+}
+.chats-chip-icon {
+  font-size: 0.8rem;
+}
+.chats-chip-date {
+  color: var(--ink3);
+  font-size: 0.68rem;
+  margin-left: 2px;
+}
+.chats-ai-task-hint {
+  font-size: 0.74rem;
+  color: var(--ink2);
+  font-weight: 500;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.chats-ai-main-bar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.chats-ai-plus-btn {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 1px solid var(--border);
+  background: var(--surface2);
+  color: var(--ink2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+.chats-ai-plus-btn:hover {
+  background: var(--border);
+  color: var(--ink);
+}
+
+/* Selector Desplegable de los 3 Agentes de IA */
+.chats-ai-agent-picker {
+  position: relative;
+}
+.chats-ai-agent-pill {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 5px 12px;
+  cursor: pointer;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--ink);
+  transition: background 0.15s, border-color 0.15s;
+}
+.chats-ai-agent-pill:hover {
+  border-color: var(--p-subtle);
+}
+.chats-ai-pill-logo {
+  width: 16px;
+  height: 16px;
+}
+.chats-ai-pill-chevron {
+  color: var(--ink3);
+  transition: transform 0.15s;
+}
+.chats-ai-pill-chevron.open {
+  transform: rotate(180deg);
+}
+
+.chats-ai-agent-dropdown {
+  position: absolute;
+  bottom: 42px;
+  left: 0;
+  width: 320px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  padding: 12px;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.15);
+  z-index: 50;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.chats-agent-drop-head {
+  font-size: 0.72rem;
+  font-weight: 800;
+  color: var(--ink3);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 4px 6px;
+}
+.chats-agent-drop-item {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 10px 12px;
+  text-align: left;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  transition: background 0.15s, border-color 0.15s;
+}
+.chats-agent-drop-item:hover {
+  border-color: var(--p);
+  background: rgba(2, 132, 199, 0.06);
+}
+.chats-agent-drop-item.active {
+  border-color: var(--p);
+  background: rgba(2, 132, 199, 0.1);
+}
+.chats-agent-item-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.chats-agent-item-title {
+  font-size: 0.82rem;
+  font-weight: 800;
+  color: var(--ink);
+}
+.chats-agent-check {
+  color: var(--p);
+}
+.chats-agent-item-badge {
+  font-size: 0.68rem;
+  color: var(--p);
+  font-weight: 700;
+}
+.chats-agent-item-desc {
+  font-size: 0.72rem;
+  color: var(--ink2);
+  margin: 0;
+  line-height: 1.3;
+}
+
+/* Herramientas Rápidas */
+.chats-ai-tools-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.chats-ai-tool-chip {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 4px 10px;
+  font-size: 0.74rem;
+  font-weight: 600;
+  color: var(--ink2);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  transition: background 0.15s, color 0.15s;
+}
+.chats-ai-tool-chip:hover {
+  background: var(--p);
+  color: #ffffff;
+}
+
+.chats-ai-input {
+  flex: 1;
+  min-width: 200px;
+  font-size: 0.88rem;
+  color: var(--ink);
+}
+
+.chats-ai-right-controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-left: auto;
+}
+.chats-ai-mic-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: 1px solid var(--border);
+  background: var(--surface2);
+  color: var(--ink2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+.chats-ai-mic-btn:hover {
+  background: var(--border);
+  color: var(--ink);
+}
+.chats-ai-send-arrow-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: none;
+  background: var(--p);
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(2, 132, 199, 0.3);
+  transition: transform 0.15s, background 0.15s;
+}
+.chats-ai-send-arrow-btn:hover:not(:disabled) {
+  transform: scale(1.05);
+  background: var(--p-dk);
+}
+.chats-ai-send-arrow-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+.chats-ai-file-preview-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 6px 12px;
+  font-size: 0.76rem;
+  color: var(--ink);
+  margin-top: 4px;
+}
+.chats-ai-file-preview-bar button {
+  border: none;
+  background: none;
+  color: var(--ink3);
+  cursor: pointer;
+  margin-left: auto;
+}
+
+/* ── BARRA DE GRABACIÓN DE AUDIO (VOICE NOTE RECORDER) ── */
+.chats-voice-bar-active {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: var(--surface);
+  border: 1.5px solid var(--border);
+  border-radius: 26px;
+  padding: 8px 18px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.05);
+}
+.chats-voice-cancel-btn {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  padding: 6px 14px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--ink2);
+  cursor: pointer;
+}
+.chats-voice-cancel-btn:hover {
+  background: var(--border);
+  color: var(--ink);
+}
+.chats-voice-status-center {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.chats-voice-red-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #EF4444;
+  animation: rec-blink 1s infinite alternate;
+}
+@keyframes rec-blink {
+  0% { opacity: 0.4; }
+  100% { opacity: 1; transform: scale(1.15); }
+}
+.chats-voice-hint {
+  font-size: 0.82rem;
+  color: var(--ink2);
+  font-weight: 500;
+}
+.chats-voice-timer {
+  font-size: 0.88rem;
+  font-weight: 800;
+  color: var(--ink);
+  font-family: monospace;
+}
+
+.chats-voice-actions-right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.chats-voice-pause-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: 1px solid var(--border);
+  background: var(--surface2);
+  color: var(--ink2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+.chats-voice-send-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: none;
+  background: #2563EB;
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.35);
+}
+
+/* ── ZONA DE DROPZONE ARRASTRAR Y SOLTAR EMBEBIDA ── */
+.chats-dropzone-embed-box {
+  background: rgba(2, 132, 199, 0.04);
+  border: 2px dashed rgba(2, 132, 199, 0.4);
+  border-radius: 24px;
+  padding: 18px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.chats-dz-close-row {
+  display: flex;
+  justify-content: flex-end;
+}
+.chats-dz-close-row button {
+  border: none;
+  background: none;
+  color: var(--ink3);
+  cursor: pointer;
+}
+.chats-dz-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 6px;
+}
+.chats-dz-title {
+  font-size: 1rem;
+  font-weight: 800;
+  color: var(--p);
+  margin: 0;
+}
+.chats-dz-sub {
+  font-size: 0.76rem;
+  color: var(--ink2);
+  margin: 0 0 10px 0;
+}
+.chats-dz-buttons-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.chats-dz-icon-circle {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  border: none;
+  background: var(--p);
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 4px 14px rgba(2, 132, 199, 0.3);
+  transition: transform 0.15s, background 0.15s;
+}
+.chats-dz-icon-circle:hover {
+  transform: scale(1.08);
+  background: var(--p-dk);
+}
+.chats-dz-preview-tag {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 6px 12px;
+  font-size: 0.78rem;
+  color: var(--ink);
+  margin-top: 8px;
+}
+.chats-dz-preview-tag button {
+  border: none;
+  background: none;
+  color: var(--ink3);
+  cursor: pointer;
+}
+
+
