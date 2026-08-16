@@ -2,7 +2,7 @@ import { useState, useRef, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Search, Plus, Send, Paperclip, Phone, Video, MoreHorizontal,
-  CheckCheck, MessageSquare, Users, Bell, UserPlus, Sparkles, ShieldCheck
+  CheckCheck, MessageSquare, Sparkles
 } from 'lucide-react';
 import Sidebar from '../../components/shared/Sidebar';
 import logoUrl from '../../assets/Logo Clerkship.svg';
@@ -125,19 +125,6 @@ const INITIAL_MESSAGES: Record<string, Message[]> = {
   ],
 };
 
-/* ── Notifications and Suggestions for Right Panel ────── */
-const NOTIFICATIONS = [
-  { id: 'n1', text: '@Dra. Elena te mencionó en "Evaluación de Úlcera Péptica"', timeStr: 'Hace 10 min' },
-  { id: 'n2', text: 'Dr. Harshit te añadió al grupo "Discusión Gastroenterología"', timeStr: 'Hace 1 hora' },
-  { id: 'n3', text: 'Agente Orquestador completó el feedback de tu última simulación', timeStr: 'Hace 3 horas' },
-];
-
-const SUGGESTIONS = [
-  { id: 's1', name: 'Dr. Abhiman Singh', role: 'Especialista Hepatología', mutuals: '12 casos compartidos' },
-  { id: 's2', name: 'Dra. Ved Prakash', role: 'Preceptora Gastro', mutuals: '15 estudiantes en común' },
-  { id: 's3', name: 'Dr. Amit Trivedi', role: 'Residente R3 Gastro', mutuals: '7 discusiones activas' },
-];
-
 /* ═══════════════════════════════════════════════════════════
    ChatsPage Component
    ═══════════════════════════════════════════════════════════ */
@@ -216,97 +203,6 @@ export default function ChatsPage() {
 
       <div className="chats-page-wrapper">
         
-        {/* ── COLUMNA IZQUIERDA: LISTA DE CHATS ── */}
-        <aside className="chats-sidebar-panel">
-          <div className="chats-sb-header">
-            <div className="chats-sb-title-row">
-              <h1 className="chats-sb-title">Chats</h1>
-              <button className="chats-add-btn" title="Nuevo chat">
-                <Plus size={16} />
-              </button>
-            </div>
-
-            {/* Selector de pestañas: Directos | Grupos | Públicos */}
-            <div className="chats-tab-group">
-              <button
-                className={`chats-tab-btn ${tab === 'direct' ? 'active' : ''}`}
-                onClick={() => setTab('direct')}
-              >
-                DIRECTOS
-              </button>
-              <button
-                className={`chats-tab-btn ${tab === 'group' ? 'active' : ''}`}
-                onClick={() => setTab('group')}
-              >
-                GRUPOS
-              </button>
-              <button
-                className={`chats-tab-btn ${tab === 'public' ? 'active' : ''}`}
-                onClick={() => setTab('public')}
-              >
-                PÚBLICOS
-              </button>
-            </div>
-
-            {/* Barra de Búsqueda */}
-            <div className="chats-search-box">
-              <Search size={15} className="chats-search-icon" />
-              <input
-                type="text"
-                placeholder="Buscar conversación o preceptor..."
-                value={search}
-                onChange={e => setSearch(e.target.value)}
-              />
-            </div>
-          </div>
-
-          {/* Lista de Conversaciones */}
-          <div className="chats-list">
-            {filteredContacts.map(c => {
-              const active = c.id === activeContactId;
-              return (
-                <div
-                  key={c.id}
-                  className={`chats-item ${active ? 'active' : ''}`}
-                  onClick={() => setActiveContactId(c.id)}
-                >
-                  <div className="chats-item-avatar-wrap">
-                    {c.isAi ? (
-                      <div className="chats-avatar-ai">
-                        <img src={logoUrl} alt="AI" />
-                      </div>
-                    ) : (
-                      <div className="chats-avatar-text" style={{ background: c.avatarBg || '#0284C7' }}>
-                        {c.avatarText}
-                      </div>
-                    )}
-                    {c.online && <span className="chats-online-dot" />}
-                  </div>
-
-                  <div className="chats-item-body">
-                    <div className="chats-item-head">
-                      <span className="chats-item-name">{c.name}</span>
-                      <span className="chats-item-time">{c.timeStr}</span>
-                    </div>
-                    <p className="chats-item-preview">{c.lastMessage}</p>
-                  </div>
-
-                  {c.unreadCount && c.unreadCount > 0 && !active && (
-                    <span className="chats-unread-badge">{c.unreadCount}</span>
-                  )}
-                </div>
-              );
-            })}
-
-            {filteredContacts.length === 0 && (
-              <div className="chats-empty-list">
-                <MessageSquare size={32} />
-                <p>No se encontraron conversaciones.</p>
-              </div>
-            )}
-          </div>
-        </aside>
-
         {/* ── COLUMNA CENTRAL: CONVERSACIÓN ACTIVA ── */}
         <main className="chats-main-panel">
           {/* Header del Chat Activo */}
@@ -397,55 +293,94 @@ export default function ChatsPage() {
           </div>
         </main>
 
-        {/* ── COLUMNA DERECHA: NOTIFICACIONES & SUGERENCIAS ── */}
-        <aside className="chats-right-panel">
-          {/* Sección Notificaciones */}
-          <div className="chats-rp-section">
-            <div className="chats-rp-head">
-              <Bell size={16} className="chats-rp-icon" />
-              <h3>Notificaciones</h3>
+        {/* ── COLUMNA DERECHA: LISTA DE CHATS Y CONVERSACIONES ── */}
+        <aside className="chats-sidebar-panel right">
+          <div className="chats-sb-header">
+            <div className="chats-sb-title-row">
+              <h1 className="chats-sb-title">Chats</h1>
+              <button className="chats-add-btn" title="Nuevo chat">
+                <Plus size={16} />
+              </button>
             </div>
 
-            <div className="chats-rp-list">
-              {NOTIFICATIONS.map(n => (
-                <div key={n.id} className="chats-rp-item">
-                  <p className="chats-rp-item-text">{n.text}</p>
-                  <span className="chats-rp-item-time">{n.timeStr}</span>
-                </div>
-              ))}
+            {/* Selector de pestañas: Directos | Grupos | Públicos */}
+            <div className="chats-tab-group">
+              <button
+                className={`chats-tab-btn ${tab === 'direct' ? 'active' : ''}`}
+                onClick={() => setTab('direct')}
+              >
+                DIRECTOS
+              </button>
+              <button
+                className={`chats-tab-btn ${tab === 'group' ? 'active' : ''}`}
+                onClick={() => setTab('group')}
+              >
+                GRUPOS
+              </button>
+              <button
+                className={`chats-tab-btn ${tab === 'public' ? 'active' : ''}`}
+                onClick={() => setTab('public')}
+              >
+                PÚBLICOS
+              </button>
+            </div>
+
+            {/* Barra de Búsqueda */}
+            <div className="chats-search-box">
+              <Search size={15} className="chats-search-icon" />
+              <input
+                type="text"
+                placeholder="Buscar conversación o preceptor..."
+                value={search}
+                onChange={e => setSearch(e.target.value)}
+              />
             </div>
           </div>
 
-          {/* Sección Sugerencias de Preceptores / Contactos */}
-          <div className="chats-rp-section">
-            <div className="chats-rp-head">
-              <Users size={16} className="chats-rp-icon" />
-              <h3>Sugerencias</h3>
-            </div>
-
-            <div className="chats-rp-list">
-              {SUGGESTIONS.map(s => (
-                <div key={s.id} className="chats-rp-sug-card">
-                  <div className="chats-rp-sug-info">
-                    <h4>{s.name}</h4>
-                    <p>{s.role}</p>
-                    <span className="chats-rp-sug-sub">{s.mutuals}</span>
+          {/* Lista de Conversaciones */}
+          <div className="chats-list">
+            {filteredContacts.map(c => {
+              const active = c.id === activeContactId;
+              return (
+                <div
+                  key={c.id}
+                  className={`chats-item ${active ? 'active' : ''}`}
+                  onClick={() => setActiveContactId(c.id)}
+                >
+                  <div className="chats-item-avatar-wrap">
+                    {c.isAi ? (
+                      <div className="chats-avatar-ai">
+                        <img src={logoUrl} alt="AI" />
+                      </div>
+                    ) : (
+                      <div className="chats-avatar-text" style={{ background: c.avatarBg || '#0284C7' }}>
+                        {c.avatarText}
+                      </div>
+                    )}
+                    {c.online && <span className="chats-online-dot" />}
                   </div>
-                  <button className="chats-sug-add-btn">
-                    <UserPlus size={13} /> Agregar
-                  </button>
-                </div>
-              ))}
-            </div>
-          </div>
 
-          {/* Banner Informativo */}
-          <div className="chats-rp-info-card">
-            <ShieldCheck size={20} className="chats-rp-shield" />
-            <div>
-              <h4>Simulación Segura</h4>
-              <p>Todas las discusiones en chats clínicos están encriptadas y protegidas para entornos académicos.</p>
-            </div>
+                  <div className="chats-item-body">
+                    <div className="chats-item-head">
+                      <span className="chats-item-name">{c.name}</span>
+                      <span className="chats-item-time">{c.timeStr}</span>
+                    </div>
+                    <p className="chats-item-preview">{c.lastMessage}</p>
+                  </div>
+
+                  {c.unreadCount && c.unreadCount > 0 && !active && (
+                    <span className="chats-unread-badge">{c.unreadCount}</span>
+                  )}
+                </div>
+              );
+            })}
+
+            {filteredContacts.length === 0 && (
+              <div className="chats-empty-list">
+                <MessageSquare size={32} />
+                <p>No se encontraron conversaciones.</p>
+              </div>
+            )}
           </div>
         </aside>
 

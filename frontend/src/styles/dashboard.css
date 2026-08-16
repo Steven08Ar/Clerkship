@@ -5244,6 +5244,10 @@
   border-right: 1px solid var(--border);
   background: var(--surface);
 }
+.chats-sidebar-panel.right {
+  border-right: none;
+  border-left: 1px solid var(--border);
+}
 
 .chats-sb-header {
   padding: 20px 18px 14px 18px;
