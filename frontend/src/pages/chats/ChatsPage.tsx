@@ -556,22 +556,44 @@ export default function ChatsPage() {
                 </div>
               </motion.div>
             ) : activeContact.isAi ? (
-              /* CASO 3: BARRA EXCLUSIVA PARA EL CHAT DE LA IA DE CLERKSHIP (Fiel a la 1ª y 2ª barra) */
+              /* CASO 3: BARRA EXCLUSIVA PARA EL CHAT DE LA IA DE CLERKSHIP */
               <div className="chats-ai-input-wrapper">
                 
-                {/* Etiqueta de contexto superior (@ Onboarding / Historia Clínica) */}
-                <div className="chats-ai-top-chip-bar">
-                  <span className="chats-ai-context-chip">
-                    <span className="chats-chip-at">@</span>
-                    <span className="chats-chip-icon">📹</span>
-                    <strong>Onboarding call wit...</strong>
-                    <span className="chats-chip-date">Today</span>
-                  </span>
-                  <span className="chats-ai-task-hint">create a summary web page</span>
+                {/* FILA 1 (ARRIBA): Campo para escribir + Micrófono + Botón de Enviar */}
+                <div className="chats-ai-top-write-row">
+                  <input
+                    type="text"
+                    className="chats-text-input chats-ai-input"
+                    placeholder="Escribe una pregunta o consulta a la IA de Clerkship..."
+                    value={input}
+                    onChange={e => setInput(e.target.value)}
+                    onKeyDown={e => e.key === 'Enter' && handleSendMessage()}
+                  />
+
+                  <div className="chats-ai-right-controls">
+                    <button
+                      type="button"
+                      className="chats-ai-mic-btn"
+                      title="Grabar nota de voz"
+                      onClick={() => setIsRecording(true)}
+                    >
+                      <Mic size={18} />
+                    </button>
+
+                    <button
+                      type="button"
+                      className="chats-ai-send-arrow-btn"
+                      onClick={() => handleSendMessage()}
+                      disabled={!input.trim() && !attachedFile}
+                      title="Enviar mensaje a la IA"
+                    >
+                      <ArrowUp size={18} />
+                    </button>
+                  </div>
                 </div>
 
-                {/* Fila Principal de la IA */}
-                <div className="chats-ai-main-bar">
+                {/* FILA 2 (ABAJO): Añadir archivo (+) | Selector de IA | Opciones de Herramientas */}
+                <div className="chats-ai-bottom-tools-row">
                   {/* Botón + para agregar archivo/contexto */}
                   <button
                     type="button"
@@ -633,7 +655,7 @@ export default function ChatsPage() {
                     <button
                       type="button"
                       className="chats-ai-tool-chip"
-                      title="Sugerir hipótesis"
+                      title="Sugerir hipótesis diagnósticas"
                       onClick={() => handleSendMessage('✨ Sugerir hipótesis diagnósticas')}
                     >
                       <Sparkles size={14} />
@@ -641,7 +663,7 @@ export default function ChatsPage() {
                     <button
                       type="button"
                       className="chats-ai-tool-chip"
-                      title="Buscar literatura"
+                      title="Buscar literatura médica"
                       onClick={() => handleSendMessage('🔍 Buscar evidencia y guías WGO')}
                     >
                       <Search size={14} />
@@ -649,46 +671,12 @@ export default function ChatsPage() {
                     <button
                       type="button"
                       className="chats-ai-tool-chip"
-                      title="Generar resumen"
+                      title="Generar resumen de viñeta"
                       onClick={() => handleSendMessage('🪄 Generar resumen clínico')}
                     >
                       <Wand2 size={14} />
                     </button>
                   </div>
-
-                  {/* Controles del Lado Derecho: Micrófono y Botón de Enviar */}
-                  <div className="chats-ai-right-controls">
-                    <button
-                      type="button"
-                      className="chats-ai-mic-btn"
-                      title="Grabar nota de voz"
-                      onClick={() => setIsRecording(true)}
-                    >
-                      <Mic size={18} />
-                    </button>
-
-                    <button
-                      type="button"
-                      className="chats-ai-send-arrow-btn"
-                      onClick={() => handleSendMessage()}
-                      disabled={!input.trim() && !attachedFile}
-                      title="Enviar mensaje a la IA"
-                    >
-                      <ArrowUp size={18} />
-                    </button>
-                  </div>
-                </div>
-
-                {/* Fila de Input de Texto Secundario */}
-                <div className="chats-ai-input-row-second">
-                  <input
-                    type="text"
-                    className="chats-text-input chats-ai-input"
-                    placeholder="Ask a follow-up. Use @ to tag docs or files."
-                    value={input}
-                    onChange={e => setInput(e.target.value)}
-                    onKeyDown={e => e.key === 'Enter' && handleSendMessage()}
-                  />
                 </div>
 
                 {/* Previsualización de Archivo Adjunto */}
