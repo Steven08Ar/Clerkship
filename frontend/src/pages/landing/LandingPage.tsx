@@ -38,7 +38,7 @@ const DEVS = [
   },
   { initials: 'SA', name: 'Santiago Steven Arias Estupiñan', seed: 'Aneka', color: '#10B981',
     focus: 'Frontend · React · UI/UX · Conexión del Sistema',
-    desc: 'Líder de desarrollo Frontend. Diseña y construye la interfaz interactiva en React 19, los visores 3D y la conexión integral con el motor clínico.',
+    desc: 'Líder de desarrollo Frontend. Diseña y construye la interfaz interactiva en React 19 y la conexión integral con el motor clínico.',
     skills: [
       { label: 'React', icon: <Code size={13} /> },
       { label: 'TypeScript', icon: <Layout size={13} /> },
