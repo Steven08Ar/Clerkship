@@ -12,8 +12,10 @@ const DASHBOARD_ROUTES = [
   '/anatomia',
   '/simulacion',
   '/historial',
+  '/chats',
   '/explorar',
-  '/documentacion'
+  '/documentacion',
+  '/cuestionario',
 ];
 
 export default function ThemeToggleFloating() {
