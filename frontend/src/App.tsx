@@ -25,6 +25,7 @@ import AnatomiaPage from './pages/anatomia/AnatomiaPage';
 import SimulacionPage from './pages/simulacion/SimulacionPage';
 import CasosPage from './pages/simulacion/CasosPage';
 import HistorialPage from './pages/simulacion/HistorialPage';
+import ChatsPage from './pages/chats/ChatsPage';
 import CuestionarioPage from './pages/cuestionario/CuestionarioPage';
 import CronogramaPage from './pages/cronograma/CronogramaPage';
 import DesarrolloPage from './pages/desarrollo/DesarrolloPage';
@@ -114,6 +115,7 @@ export default function App() {
         <Route path="/simulacion"             element={<ProtectedRoute><SimulacionPage /></ProtectedRoute>} />
         <Route path="/casos"                  element={<ProtectedRoute><CasosPage /></ProtectedRoute>} />
         <Route path="/historial"              element={<ProtectedRoute><HistorialPage /></ProtectedRoute>} />
+        <Route path="/chats"                  element={<ProtectedRoute><ChatsPage /></ProtectedRoute>} />
         <Route path="/anatomia"               element={<ProtectedRoute><AnatomiaPage /></ProtectedRoute>} />
 
         {/* Informative Pages */}
