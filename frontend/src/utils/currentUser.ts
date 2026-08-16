@@ -27,12 +27,14 @@ function buildUserInfo(user: User | null): CurrentUserInfo | null {
   const member = memberId ? TEAM_MEMBERS.find((m) => m.id === memberId) : undefined;
 
   // 1. Uno de los 4 desarrolladores → reutiliza su avatar/nombre ya definidos.
+  //    (El rol técnico de teamData.ts es del Módulo de Desarrollo, no aplica
+  //    aquí — en el dashboard clínico todos comparten el mismo rol de cuenta.)
   if (member) {
     return {
       email,
       name: member.name,
       initials: member.initials,
-      role: member.role,
+      role: 'Cuenta de prueba · Equipo Clerkship',
       color: member.color,
       avatarUrl: user.photoURL || member.avatarUrl,
     };
@@ -46,7 +48,7 @@ function buildUserInfo(user: User | null): CurrentUserInfo | null {
     email,
     name,
     initials: initialsFrom(name),
-    role: 'Cuenta de prueba',
+    role: 'Cuenta de prueba · Equipo Clerkship',
     color: '#0284C7',
     avatarUrl: user.photoURL || `https://api.dicebear.com/7.x/notionists/svg?seed=${encodeURIComponent(email || name)}&backgroundColor=0284C7`,
   };

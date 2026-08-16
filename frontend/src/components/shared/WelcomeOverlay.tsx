@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { getActiveUserEmail } from '../../utils/authConsent';
+import { useCurrentUser } from '../../utils/currentUser';
 
 interface WelcomeOverlayProps {
   onComplete: () => void;
@@ -10,12 +10,11 @@ export default function WelcomeOverlay({ onComplete }: WelcomeOverlayProps) {
   const [phase, setPhase] = useState<'logo' | 'text' | 'fadeout'>('logo');
   const [msgIdx, setMsgIdx] = useState(0);
 
-  const email = getActiveUserEmail();
-  const rawName = email
-    ? email.split('@')[0].split('.')[0].replace(/[^a-zA-Z]/g, '')
-    : '';
-  const formattedName = rawName
-    ? rawName.charAt(0).toUpperCase() + rawName.slice(1).toLowerCase()
+  const currentUser = useCurrentUser();
+  // Nombre + primer apellido/segundo nombre (ej. "Santiago Steven"), no el
+  // nombre completo con apellidos ni nada derivado del correo.
+  const formattedName = currentUser?.name
+    ? currentUser.name.trim().split(/\s+/).slice(0, 2).join(' ')
     : 'Doctor(a)';
 
   const WELCOME_PHRASES = [
