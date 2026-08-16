@@ -38,34 +38,13 @@ interface Message {
 interface AiAgent {
   id: string;
   name: string;
-  modelBadge: string;
-  description: string;
-  iconName: string;
 }
 
 /* ── 3 Agentes IA de Clerkship ──────────────────────────── */
 const CLERKSHIP_AI_AGENTS: AiAgent[] = [
-  {
-    id: 'agent-orchestrator',
-    name: 'Clerkship: Orquestador Diagnóstico',
-    modelBadge: 'GPT-4o / Clinical Orchestrator',
-    description: 'Coordinación integral del caso clínico y evaluación sistemática.',
-    iconName: 'Orquestador',
-  },
-  {
-    id: 'agent-bayesian',
-    name: 'Clerkship: Razonamiento Bayesiano',
-    modelBadge: 'Bayesian Logic Agent v2',
-    description: 'Cálculo de probabilidades pre/post-test y refinamiento de hipótesis.',
-    iconName: 'Bayes',
-  },
-  {
-    id: 'agent-guidelines',
-    name: 'Clerkship: Guías Clínicas WGO & Gastro',
-    modelBadge: 'Evidence-Based Gastro Agent',
-    description: 'Soporte basado en evidencia, guías WGO, ACG y consenso médico.',
-    iconName: 'Evidencia',
-  },
+  { id: 'agent-orchestrator', name: 'Clerkship: Orquestador Diagnóstico' },
+  { id: 'agent-bayesian',     name: 'Clerkship: Razonamiento Bayesiano' },
+  { id: 'agent-guidelines',   name: 'Clerkship: Guías Clínicas WGO & Gastro' },
 ];
 
 /* ── Mock Contacts ─────────────────────────────────────── */
@@ -738,7 +717,14 @@ export default function ChatsPage() {
                       className="chats-ai-agent-pill"
                       onClick={() => setAgentMenuOpen(v => !v)}
                     >
-                      <img src={logoUrl} alt="AI" className="chats-ai-pill-logo" />
+                      <svg viewBox="0 0 600 600" fill="none" className="chats-ai-pill-logo" aria-hidden="true">
+                        <path d="M281 162.706C213.776 171.963 162 229.639 162 299.408C162 369.177 213.776 426.852 281 436.109V395.565C235.97 386.718 202 347.031 202 299.408C202 251.785 235.97 212.097 281 203.25V162.706Z" fill="currentColor" />
+                        <path d="M281 0C124.167 9.80161 0 140.105 0 299.408C0 458.712 124.167 589.014 281 598.815V558.723C146.277 548.992 40 436.612 40 299.408C40 162.204 146.277 49.8229 281 40.0928V0Z" fill="currentColor" />
+                        <path d="M281 81.7217C168.946 91.3515 81 185.359 81 299.908C81 414.457 168.946 508.464 281 518.094V477.908C191.074 468.42 121 392.349 121 299.908C121 207.467 191.074 131.395 281 121.907V81.7217Z" fill="currentColor" />
+                        <path d="M381 10.4707C361.456 5.20365 350.513 3.2851 331 0.990432V599.408H381V10.4707Z" fill="currentColor" />
+                        <path d="M490 67.2329C471.749 52.3211 460.342 45.7459 440 34.0101V599.408H490V67.2329Z" fill="currentColor" />
+                        <path d="M600 299.408C597.743 227.434 581.5 182.408 550 133.518V599.408H600V299.408Z" fill="currentColor" />
+                      </svg>
                       <span className="chats-ai-pill-name">{selectedAgent.name}</span>
                       <ChevronDown size={14} className={`chats-ai-pill-chevron ${agentMenuOpen ? 'open' : ''}`} />
                     </button>
@@ -753,7 +739,6 @@ export default function ChatsPage() {
                           exit={{ opacity: 0, y: 8, scale: 0.96 }}
                           transition={{ duration: 0.15 }}
                         >
-                          <div className="chats-agent-drop-head">Agentes Clínicos Disponibles (3)</div>
                           {CLERKSHIP_AI_AGENTS.map(agent => (
                             <button
                               key={agent.id}
@@ -764,12 +749,8 @@ export default function ChatsPage() {
                                 setAgentMenuOpen(false);
                               }}
                             >
-                              <div className="chats-agent-item-top">
-                                <span className="chats-agent-item-title">{agent.name}</span>
-                                {selectedAgent.id === agent.id && <Check size={14} className="chats-agent-check" />}
-                              </div>
-                              <span className="chats-agent-item-badge">{agent.modelBadge}</span>
-                              <p className="chats-agent-item-desc">{agent.description}</p>
+                              <span className="chats-agent-item-title">{agent.name}</span>
+                              {selectedAgent.id === agent.id && <Check size={14} className="chats-agent-check" />}
                             </button>
                           ))}
                         </motion.div>
