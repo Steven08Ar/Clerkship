@@ -1,0 +1,219 @@
+/**
+ * Grabación de notas de voz real, con MediaRecorder (nativo del navegador,
+ * sin librerías externas). Diseño pensado para que el archivo final sea muy
+ * liviano, ya que se guarda como texto (base64) dentro del documento de
+ * Mongo del mensaje — no hay todavía un bucket de almacenamiento de archivos
+ * conectado (Supabase Storage u otro), así que había que evitar que esto
+ * pese mucho:
+ *
+ * - Codec Opus (audio/webm;codecs=opus) — diseñado específicamente para voz,
+ *   mucho más eficiente que MP3/WAV para este caso de uso.
+ * - audioBitsPerSecond bajo (24 kbps) — de sobra para que una nota de voz se
+ *   entienda perfectamente, y reduce el tamaño del archivo drásticamente
+ *   frente a la calidad "de música" por defecto (~128 kbps).
+ *   Con esto, un minuto de audio pesa ~180 KB (antes de pasar a base64).
+ */
+import { useCallback, useEffect, useRef, useState } from 'react';
+
+const WAVEFORM_BARS = 40;
+
+export interface RecordingResult {
+  base64: string;
+  mimeType: string;
+  durationSeconds: number;
+  /** Resumen de amplitud (0-1) a lo largo del audio, para dibujar la forma
+   *  de onda al reproducirlo — no es el audio en sí, son 40 números. */
+  waveform: number[];
+}
+
+function pickMimeType(): string {
+  const candidates = ['audio/webm;codecs=opus', 'audio/webm', 'audio/mp4'];
+  return candidates.find(t => window.MediaRecorder?.isTypeSupported?.(t)) || '';
+}
+
+function blobToBase64(blob: Blob): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onloadend = () => resolve((reader.result as string).split(',')[1] || '');
+    reader.onerror = reject;
+    reader.readAsDataURL(blob);
+  });
+}
+
+function downsampleWaveform(samples: number[], targetCount: number): number[] {
+  if (samples.length === 0) return Array(targetCount).fill(0.08);
+  const bucketSize = Math.max(1, Math.floor(samples.length / targetCount));
+  const result: number[] = [];
+  for (let i = 0; i < targetCount; i++) {
+    const bucket = samples.slice(i * bucketSize, (i + 1) * bucketSize);
+    const avg = bucket.length ? bucket.reduce((a, b) => a + b, 0) / bucket.length : 0;
+    result.push(Math.max(0.08, Math.min(1, avg)));
+  }
+  return result;
+}
+
+export function useAudioRecorder() {
+  const [isRecording, setIsRecording] = useState(false);
+  const [isPaused, setIsPaused] = useState(false);
+  const [elapsedSeconds, setElapsedSeconds] = useState(0);
+  const [liveAmplitude, setLiveAmplitude] = useState<number[]>(Array(WAVEFORM_BARS).fill(0.08));
+  const [error, setError] = useState<string | null>(null);
+
+  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+  const streamRef = useRef<MediaStream | null>(null);
+  const audioContextRef = useRef<AudioContext | null>(null);
+  const analyserRef = useRef<AnalyserNode | null>(null);
+  const chunksRef = useRef<Blob[]>([]);
+  const waveformSamplesRef = useRef<number[]>([]);
+  const rafRef = useRef<number | null>(null);
+  const timerRef = useRef<number | null>(null);
+  const accumulatedMsRef = useRef(0);
+  const segmentStartRef = useRef(0);
+  const isPausedRef = useRef(false);
+
+  function currentElapsedMs() {
+    return accumulatedMsRef.current + (isPausedRef.current ? 0 : Date.now() - segmentStartRef.current);
+  }
+
+  // Se guarda en un ref (no useCallback) para poder recursionar sobre sí
+  // misma vía requestAnimationFrame sin depender de "declararse antes de usarse".
+  // La asignación va en un efecto (no en el cuerpo del render) porque React
+  // no permite mutar un ref durante el render.
+  const sampleLoopRef = useRef<() => void>(() => {});
+  useEffect(() => {
+    sampleLoopRef.current = () => {
+      const analyser = analyserRef.current;
+      if (!analyser) return;
+      const data = new Uint8Array(analyser.frequencyBinCount);
+      analyser.getByteTimeDomainData(data);
+
+      let sumSquares = 0;
+      for (let i = 0; i < data.length; i++) {
+        const v = (data[i] - 128) / 128;
+        sumSquares += v * v;
+      }
+      const rms = Math.sqrt(sumSquares / data.length);
+      const level = Math.min(1, rms * 4.5);
+
+      if (!isPausedRef.current) {
+        waveformSamplesRef.current.push(level);
+        setLiveAmplitude(prev => [...prev.slice(1), level]);
+      }
+      rafRef.current = requestAnimationFrame(() => sampleLoopRef.current());
+    };
+  });
+
+  function cleanupTracksAndContext() {
+    if (rafRef.current) cancelAnimationFrame(rafRef.current);
+    if (timerRef.current) window.clearInterval(timerRef.current);
+    streamRef.current?.getTracks().forEach(t => t.stop());
+    audioContextRef.current?.close().catch(() => {});
+    streamRef.current = null;
+    audioContextRef.current = null;
+    analyserRef.current = null;
+    mediaRecorderRef.current = null;
+  }
+
+  function resetState() {
+    setIsRecording(false);
+    setIsPaused(false);
+    setElapsedSeconds(0);
+    setLiveAmplitude(Array(WAVEFORM_BARS).fill(0.08));
+    isPausedRef.current = false;
+    accumulatedMsRef.current = 0;
+    chunksRef.current = [];
+    waveformSamplesRef.current = [];
+  }
+
+  const start = useCallback(async () => {
+    setError(null);
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      streamRef.current = stream;
+
+      const audioContext = new AudioContext();
+      const source = audioContext.createMediaStreamSource(stream);
+      const analyser = audioContext.createAnalyser();
+      analyser.fftSize = 256;
+      source.connect(analyser);
+      audioContextRef.current = audioContext;
+      analyserRef.current = analyser;
+
+      const mimeType = pickMimeType();
+      const recorder = new MediaRecorder(stream, {
+        ...(mimeType ? { mimeType } : {}),
+        audioBitsPerSecond: 24000,
+      });
+      chunksRef.current = [];
+      waveformSamplesRef.current = [];
+      recorder.ondataavailable = e => { if (e.data.size > 0) chunksRef.current.push(e.data); };
+      recorder.start();
+      mediaRecorderRef.current = recorder;
+
+      accumulatedMsRef.current = 0;
+      segmentStartRef.current = Date.now();
+      isPausedRef.current = false;
+      setElapsedSeconds(0);
+      setIsRecording(true);
+      setIsPaused(false);
+
+      timerRef.current = window.setInterval(() => {
+        setElapsedSeconds(Math.floor(currentElapsedMs() / 1000));
+      }, 200);
+
+      rafRef.current = requestAnimationFrame(() => sampleLoopRef.current());
+    } catch {
+      setError('No se pudo acceder al micrófono. Revisa los permisos del navegador.');
+    }
+  }, []);
+
+  const pause = useCallback(() => {
+    const recorder = mediaRecorderRef.current;
+    if (!recorder || recorder.state !== 'recording') return;
+    recorder.pause();
+    accumulatedMsRef.current += Date.now() - segmentStartRef.current;
+    isPausedRef.current = true;
+    setIsPaused(true);
+  }, []);
+
+  const resume = useCallback(() => {
+    const recorder = mediaRecorderRef.current;
+    if (!recorder || recorder.state !== 'paused') return;
+    recorder.resume();
+    segmentStartRef.current = Date.now();
+    isPausedRef.current = false;
+    setIsPaused(false);
+  }, []);
+
+  const cancel = useCallback(() => {
+    const recorder = mediaRecorderRef.current;
+    if (recorder && recorder.state !== 'inactive') {
+      recorder.onstop = null;
+      recorder.stop();
+    }
+    cleanupTracksAndContext();
+    resetState();
+  }, []);
+
+  const stop = useCallback((): Promise<RecordingResult | null> => {
+    return new Promise(resolve => {
+      const recorder = mediaRecorderRef.current;
+      if (!recorder || recorder.state === 'inactive') { resolve(null); return; }
+
+      recorder.onstop = async () => {
+        const mimeType = recorder.mimeType || 'audio/webm';
+        const durationSeconds = Math.max(1, Math.round(currentElapsedMs() / 1000));
+        const blob = new Blob(chunksRef.current, { type: mimeType });
+        const base64 = await blobToBase64(blob);
+        const waveform = downsampleWaveform(waveformSamplesRef.current, WAVEFORM_BARS);
+
+        cleanupTracksAndContext();
+        resetState();
+        resolve({ base64, mimeType, durationSeconds, waveform });
+      };
+      recorder.stop();
+    });
+  }, []);
+
+  return { isRecording, isPaused, elapsedSeconds, liveAmplitude, error, start, pause, resume, stop, cancel };
+}

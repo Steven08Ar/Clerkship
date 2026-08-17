@@ -1,10 +1,9 @@
 import { useEffect, useState } from 'react';
-import { onAuthStateChanged, type User } from 'firebase/auth';
-import { auth } from '../data/firebase';
-import { TEAM_MEMBERS } from '../data/teamData';
-import { memberIdForEmail } from '../data/devAuth';
+import { MAIN_AUTH_CHANGED_EVENT, getStoredUser, type MainUser } from '../data/mainAuth';
+import { generatedAvatarUrl } from './avatar';
 
 export interface CurrentUserInfo {
+  id: string;
   email: string | null;
   name: string;
   initials: string;
@@ -13,53 +12,44 @@ export interface CurrentUserInfo {
   avatarUrl: string;
 }
 
+const ROLE_LABELS: Record<MainUser['role'], string> = {
+  STUDENT: 'Estudiante de Medicina',
+  TEACHER: 'Docente · Preceptor',
+};
+
 function initialsFrom(name: string): string {
   const parts = name.trim().split(/\s+/).filter(Boolean);
   if (parts.length === 0) return '??';
   return (parts[0][0] + (parts[1]?.[0] || '')).toUpperCase();
 }
 
-function buildUserInfo(user: User | null): CurrentUserInfo | null {
+function buildUserInfo(user: MainUser | null): CurrentUserInfo | null {
   if (!user) return null;
 
-  const email = user.email;
-  const memberId = email ? memberIdForEmail(email) : undefined;
-  const member = memberId ? TEAM_MEMBERS.find((m) => m.id === memberId) : undefined;
-
-  // 1. Uno de los 4 desarrolladores → reutiliza su avatar/nombre ya definidos.
-  //    (El rol técnico de teamData.ts es del Módulo de Desarrollo, no aplica
-  //    aquí — en el dashboard clínico todos comparten el mismo rol de cuenta.)
-  if (member) {
-    return {
-      email,
-      name: member.name,
-      initials: member.initials,
-      role: 'Cuenta de prueba · Equipo Clerkship',
-      color: member.color,
-      avatarUrl: user.photoURL || member.avatarUrl,
-    };
-  }
-
-  // 2. Cualquier otra cuenta (ej. directores de proyecto, o futuros usuarios
-  //    de Supabase en producción) → foto real si Firebase la tiene, si no
-  //    un avatar generado de forma consistente a partir de su correo.
-  const name = user.displayName || email?.split('@')[0] || 'Usuario';
+  const name = `${user.first_name} ${user.last_name}`.trim();
   return {
-    email,
+    id: user.id,
+    email: user.email,
     name,
     initials: initialsFrom(name),
-    role: 'Cuenta de prueba · Equipo Clerkship',
+    role: ROLE_LABELS[user.role] || 'Cuenta Clerkship',
     color: '#0284C7',
-    avatarUrl: user.photoURL || `https://api.dicebear.com/7.x/notionists/svg?seed=${encodeURIComponent(email || name)}&backgroundColor=0284C7`,
+    avatarUrl: generatedAvatarUrl(user.email),
   };
 }
 
-/** Usuario de Firebase actualmente autenticado, reactivo a login/logout. */
+/** Usuario autenticado contra el backend real (Flask/Supabase), reactivo a login/logout. */
 export function useCurrentUser(): CurrentUserInfo | null {
-  const [info, setInfo] = useState<CurrentUserInfo | null>(() => buildUserInfo(auth.currentUser));
+  const [info, setInfo] = useState<CurrentUserInfo | null>(() => buildUserInfo(getStoredUser()));
 
   useEffect(() => {
-    return onAuthStateChanged(auth, (user) => setInfo(buildUserInfo(user)));
+    const sync = () => setInfo(buildUserInfo(getStoredUser()));
+    window.addEventListener(MAIN_AUTH_CHANGED_EVENT, sync);
+    window.addEventListener('storage', sync);
+    return () => {
+      window.removeEventListener(MAIN_AUTH_CHANGED_EVENT, sync);
+      window.removeEventListener('storage', sync);
+    };
   }, []);
 
   return info;
