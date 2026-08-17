@@ -1889,6 +1889,14 @@ html.theme-animating .crono-gantt-card {
   color: #94A3B8 !important;
 }
 
+[data-theme="dark"] .chats-typing-indicator {
+  background: rgba(30, 41, 59, 0.95) !important;
+  border-color: rgba(255, 255, 255, 0.12) !important;
+}
+[data-theme="dark"] .chats-typing-dots span {
+  background: #94A3B8 !important;
+}
+
 [data-theme="dark"] .chats-bubble.user {
   background: linear-gradient(135deg, #2563EB 0%, #1D4ED8 100%) !important;
   color: #FFFFFF !important;
@@ -1988,6 +1996,6 @@ html.theme-animating .crono-gantt-card {
   color: var(--ink3) !important;
 }
 [data-theme="dark"] .chats-nav-icon-btn.active {
-  color: #C084FC !important;
-  background: rgba(168, 85, 247, 0.2) !important;
+  color: #60A5FA !important;
+  background: rgba(59, 130, 246, 0.2) !important;
 }

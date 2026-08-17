@@ -190,6 +190,43 @@
   margin-top: 4px;
 }
 
+/* Fila de dos campos lado a lado (Nombre + Apellido) */
+.auth-field-row {
+  display: flex;
+  gap: 14px;
+}
+.auth-field-row .auth-field { flex: 1; min-width: 0; }
+
+/* Selector de rol (Estudiante / Docente) */
+.auth-role-group {
+  display: flex;
+  gap: 10px;
+}
+.auth-role-btn {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px 14px;
+  background: var(--surface2);
+  border: 1px solid var(--border2);
+  border-radius: var(--r-md);
+  color: var(--ink2);
+  font-family: var(--font);
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+.auth-role-btn:hover { border-color: var(--ink3); }
+.auth-role-btn.active {
+  background: #ffffff;
+  border-color: var(--ink);
+  color: var(--ink);
+  box-shadow: 0 0 0 1px var(--ink);
+}
+
 /* Row opciones */
 .auth-options-row {
   display: flex;

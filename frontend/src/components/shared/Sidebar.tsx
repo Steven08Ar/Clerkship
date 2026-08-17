@@ -8,6 +8,7 @@ import { auth } from '../../data/firebase';
 import { getInitialTheme, triggerThemeToggle, type ThemeMode } from '../../utils/themeHelper';
 import { logoutUserSession } from '../../utils/authConsent';
 import { useCurrentUser } from '../../utils/currentUser';
+import { clearMainAuthSession } from '../../data/mainAuth';
 import logoUrl from '../../assets/Logo Clerkship.svg';
 
 /* ── Panel content per section ─────────────────────────────── */
@@ -377,6 +378,7 @@ export default function Sidebar() {
                     className="sb-profile-item sb-profile-item-danger"
                     onClick={async () => {
                       logoutUserSession();
+                      clearMainAuthSession();
                       try {
                         await signOut(auth);
                       } catch {
