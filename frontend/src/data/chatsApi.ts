@@ -15,9 +15,19 @@ export interface ParticipantInfo {
   last_name: string;
   email: string;
   role: 'STUDENT' | 'TEACHER';
+  /** Última vez que este participante pidió los mensajes de la conversación
+   *  (se actualiza solo en el backend al llamar listMessages). Sirve para
+   *  saber si un mensaje mío ya fue leído o no. */
+  last_read_at?: string | null;
 }
 
 export type ConversationType = 'DIRECT' | 'GROUP' | 'PUBLIC';
+
+export interface LastMessagePreview {
+  preview: string;
+  sender_id: string;
+  created_at: string | null;
+}
 
 export interface ConversationSummary {
   id: string;
@@ -27,6 +37,12 @@ export interface ConversationSummary {
   ai_agent_id: string | null;
   updated_at: string | null;
   participants: ParticipantInfo[];
+  /** Ausente en la respuesta de crear/reutilizar conversación (todavía no
+   *  hay mensajes); siempre presente (puede ser null) en GET /api/chats. */
+  last_message?: LastMessagePreview | null;
+  /** Mensajes de otros que no he visto — ausente en crear/reutilizar,
+   *  siempre presente en GET /api/chats. */
+  unread_count?: number;
 }
 
 export interface VoiceNoteData {
@@ -40,13 +56,22 @@ export interface VoiceNoteData {
   waveform: number[];
 }
 
+export interface FileAttachmentInfo {
+  name: string;
+  mime_type: string;
+  size_bytes: number;
+  /** Archivo en base64 (sin el prefijo "data:...;base64,"). Las imágenes ya
+   *  llegan comprimidas/redimensionadas desde utils/fileUpload.ts. */
+  data: string;
+}
+
 export interface ChatMessage {
   _id: string;
   conversation_id: string;
   sender_type: 'student' | 'teacher';
   sender_id: string;
   content: string;
-  file_attachment?: { name: string; sizeStr: string; type: string } | null;
+  file_attachment?: FileAttachmentInfo | null;
   audio?: VoiceNoteData | null;
   created_at: string;
   /** Solo local (nunca viene del backend): id estable para el envío optimista,
@@ -70,11 +95,19 @@ export function listMessages(conversationId: string): Promise<{ mensajes: ChatMe
   return apiFetch(`/api/chats/${conversationId}/mensajes`);
 }
 
+/** Marca la conversación como leída para mí — llamar SOLO cuando el usuario
+ *  de verdad tiene esta conversación abierta y visible en pantalla (no basta
+ *  con que esté "seleccionada" mientras la pestaña está en otra sección o en
+ *  segundo plano). */
+export function markConversationRead(conversationId: string): Promise<{ ok: boolean }> {
+  return apiFetch(`/api/chats/${conversationId}/leido`, { method: 'POST' });
+}
+
 export function sendMessage(
   conversationId: string,
   payload: {
     content: string;
-    file_attachment?: { name: string; sizeStr: string; type: string };
+    file_attachment?: FileAttachmentInfo;
     audio?: VoiceNoteData;
   },
 ): Promise<{ mensaje: ChatMessage }> {

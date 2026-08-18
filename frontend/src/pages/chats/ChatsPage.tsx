@@ -3,177 +3,35 @@ import { motion, AnimatePresence } from 'framer-motion';
 import {
   Search, Plus, Send, Paperclip, MoreHorizontal,
   CheckCheck, MessageSquare, Mic, Pause, Play, Check, X,
-  UploadCloud, Link as LinkIcon, FileText,
-  Mail, Users, BookOpen, FileCheck, Archive, Info, Trash2, Reply, Forward,
-  BadgeCheck, Inbox, ArrowLeft, UserPlus, Loader2,
+  UploadCloud, Link as LinkIcon,
+  Users, BookOpen, FileCheck, Trash2,
+  ArrowLeft, UserPlus, Loader2,
 } from 'lucide-react';
 import Sidebar from '../../components/shared/Sidebar';
 import { useCurrentUser } from '../../utils/currentUser';
 import { generatedAvatarUrl } from '../../utils/avatar';
 import { useAudioRecorder } from '../../utils/audioRecorder';
+import { buildFileAttachment, formatFileSize } from '../../utils/fileUpload';
 import VoiceMessagePlayer from '../../components/chats/VoiceMessagePlayer';
+import FileAttachmentPreview from '../../components/chats/FileAttachmentPreview';
+import ImageLightbox from '../../components/chats/ImageLightbox';
+import LinkPreviewCard from '../../components/chats/LinkPreviewCard';
+import { extractFirstUrl } from '../../utils/linkPreview';
 import { mainAuthErrorMessage, getStoredUser } from '../../data/mainAuth';
 import {
   listConversations, createDirectConversation, listMessages, sendMessage, searchUsers,
-  pingTyping, getTypingUsers,
-  type ConversationSummary, type ChatMessage, type ParticipantInfo, type VoiceNoteData,
+  pingTyping, getTypingUsers, markConversationRead,
+  type ConversationSummary, type ChatMessage, type ParticipantInfo, type VoiceNoteData, type FileAttachmentInfo,
 } from '../../data/chatsApi';
+import { CHATS_READ_EVENT } from '../../utils/chatsUnread';
 
-/* ── Interfaces: Correo (sigue mock — Buzón real usará Mailgun más adelante) ── */
-interface EmailBody {
-  paragraphs: string[];
-  bullets?: string[];
-  closing?: string;
-}
-interface EmailAttachment {
-  name: string;
-}
-interface EmailItem {
-  id: string;
-  sender: string;
-  senderEmail: string;
-  verified?: boolean;
-  avatarText: string;
-  avatarBg: string;
-  dateLabel: string;
-  fullDateLabel: string;
-  subject: string;
-  preview: string;
-  read: boolean;
-  to: string;
-  body: EmailBody;
-  attachment?: EmailAttachment;
-}
-
-/* ── Mock Correos (pendiente de conectar a Mailgun) ─────── */
-const EMAILS: EmailItem[] = [
-  {
-    id: 'e1',
-    sender: 'Clerkship Plataforma',
-    senderEmail: 'notificaciones@clerkship.app',
-    verified: true,
-    avatarText: 'CP',
-    avatarBg: '#0284C7',
-    dateLabel: '16 Nov',
-    fullDateLabel: '16 Nov, 11:45 p. m.',
-    subject: '¡Tu caso clínico ha sido aprobado!',
-    preview: 'Nos complace informarte que tu presentación del caso de Gastroenterología ha superado la revisión...',
-    read: false,
-    to: 'Santiago Arias',
-    body: {
-      paragraphs: [
-        'Nos complace informarte que tu presentación del caso de Gastroenterología ha superado la revisión del comité académico y ya está disponible en tu portafolio de Clerkship. Profesores y compañeros del programa pueden ahora acceder a tu análisis y aprender de tu trabajo.',
-        'Para revisar tu caso y su desempeño:',
-      ],
-      bullets: [
-        'Accede a tu portafolio: consulta calificaciones, comentarios y retroalimentación en tiempo real.',
-        'Participa en la discusión: responde preguntas de tus compañeros y mejora tu razonamiento clínico.',
-        'Actualiza tu caso: mantenlo vigente incorporando nueva evidencia u observaciones.',
-      ],
-      closing: '¡Gracias por tu dedicación al programa de Clerkship! Estamos deseosos de ver el impacto de tu trabajo.',
-    },
-    attachment: { name: 'Informe_Caso_Clinico.pdf' },
-  },
-  {
-    id: 'e2',
-    sender: 'Comité Editorial WGO',
-    senderEmail: 'guias@wgo-clinical.org',
-    verified: true,
-    avatarText: 'WG',
-    avatarBg: '#8B5CF6',
-    dateLabel: '15 Nov',
-    fullDateLabel: '15 Nov, 9:10 a. m.',
-    subject: 'Nuevas guías clínicas disponibles',
-    preview: 'Ya están publicadas las guías actualizadas de pancreatitis aguda y enfermedad por reflujo...',
-    read: true,
-    to: 'Santiago Arias',
-    body: {
-      paragraphs: [
-        'Ya están publicadas las guías actualizadas de pancreatitis aguda y enfermedad por reflujo gastroesofágico, con nueva evidencia incorporada este trimestre.',
-        'Puedes consultarlas directamente desde la Biblioteca de Clerkship, en la sección de guías por especialidad.',
-      ],
-    },
-  },
-  {
-    id: 'e3',
-    sender: 'Dra. Elena Rostova',
-    senderEmail: 'e.rostova@clerkship.app',
-    avatarText: 'ER',
-    avatarBg: '#E11D48',
-    dateLabel: '14 Nov',
-    fullDateLabel: '14 Nov, 4:32 p. m.',
-    subject: 'Revisé tu caso, ¡buen trabajo!',
-    preview: 'Santiago, tu razonamiento bayesiano en la sesión de úlcera péptica estuvo muy acertado...',
-    read: true,
-    to: 'Santiago Arias',
-    body: {
-      paragraphs: [
-        'Santiago, tu razonamiento bayesiano en la sesión de úlcera péptica estuvo muy acertado. Justificaste bien la endoscopia digestiva alta y el orden de tus hipótesis diagnósticas.',
-        'Sigamos así — nos vemos en la próxima sesión de discusión clínica.',
-      ],
-    },
-  },
-  {
-    id: 'e4',
-    sender: 'Biblioteca Médica Clerkship',
-    senderEmail: 'biblioteca@clerkship.app',
-    verified: true,
-    avatarText: 'BM',
-    avatarBg: '#10B981',
-    dateLabel: '13 Nov',
-    fullDateLabel: '13 Nov, 8:00 a. m.',
-    subject: 'Tu recurso solicitado está listo',
-    preview: 'El capítulo de Harrison sobre hepatología que solicitaste ya está disponible para consulta...',
-    read: true,
-    to: 'Santiago Arias',
-    body: {
-      paragraphs: [
-        'El capítulo de Harrison sobre hepatología que solicitaste ya está disponible para consulta en tu Biblioteca personal.',
-      ],
-    },
-  },
-  {
-    id: 'e5',
-    sender: 'Dr. Ashish Singh',
-    senderEmail: 'a.singh@clerkship.app',
-    avatarText: 'AS',
-    avatarBg: '#F59E0B',
-    dateLabel: '12 Nov',
-    fullDateLabel: '12 Nov, 4:00 p. m.',
-    subject: 'Resultados del perfil hepático — Caso 7',
-    preview: 'Te comparto los últimos resultados del perfil hepático del caso 7 para que los revises antes de...',
-    read: true,
-    to: 'Santiago Arias',
-    body: {
-      paragraphs: [
-        'Te comparto los últimos resultados del perfil hepático del caso 7 para que los revises antes de la sesión de mañana.',
-      ],
-    },
-  },
-  {
-    id: 'e6',
-    sender: 'Clerkship Comunidad',
-    senderEmail: 'comunidad@clerkship.app',
-    verified: true,
-    avatarText: 'CC',
-    avatarBg: '#0EA5E9',
-    dateLabel: '11 Nov',
-    fullDateLabel: '11 Nov, 7:00 a. m.',
-    subject: 'Tu resumen semanal de actividad',
-    preview: 'Esta semana completaste 4 casos clínicos y participaste en 2 discusiones grupales. ¡Sigue así!...',
-    read: true,
-    to: 'Santiago Arias',
-    body: {
-      paragraphs: [
-        'Esta semana completaste 4 casos clínicos y participaste en 2 discusiones grupales. ¡Sigue así!',
-      ],
-    },
-  },
-];
-
-type Section = 'chats' | 'mail' | 'community';
+type Section = 'chats' | 'community';
 
 /* ── Helpers de presentación para conversaciones reales ─── */
+function firstWord(s: string): string {
+  return s.trim().split(/\s+/)[0] || '';
+}
+
 function conversationDisplayName(c: ConversationSummary): string {
   if (c.name) return c.name;
   if (c.type === 'DIRECT' && c.participants[0]) {
@@ -181,6 +39,25 @@ function conversationDisplayName(c: ConversationSummary): string {
   }
   if (c.type === 'GROUP') return 'Grupo sin nombre';
   return 'Conversación pública';
+}
+
+/** Versión corta para mobile: solo el primer nombre + primer apellido (por si
+ *  first_name/last_name traen nombres compuestos, ej. "Juan Camilo" o "De la Cruz"). */
+function conversationShortName(c: ConversationSummary): string {
+  if (c.name) return c.name;
+  if (c.type === 'DIRECT' && c.participants[0]) {
+    return `${firstWord(c.participants[0].first_name)} ${firstWord(c.participants[0].last_name)}`.trim();
+  }
+  return conversationDisplayName(c);
+}
+
+/** Segunda línea de la lista de chats: el último mensaje real (con "Tú: " si
+ *  lo mandé yo), o el cargo del otro participante si todavía no hay ninguno. */
+function conversationPreviewText(c: ConversationSummary, currentUserId?: string): string {
+  const last = c.last_message;
+  if (!last) return conversationSubtitle(c);
+  const prefix = last.sender_id === currentUserId ? 'Tú: ' : '';
+  return `${prefix}${last.preview || ''}`;
 }
 
 function conversationSubtitle(c: ConversationSummary): string {
@@ -196,6 +73,16 @@ function conversationSubtitle(c: ConversationSummary): string {
 function conversationAvatarSeed(c: ConversationSummary): string {
   if (c.type === 'DIRECT' && c.participants[0]) return c.participants[0].email;
   return c.id;
+}
+
+/** "Leído" = todos los demás participantes pidieron los mensajes (last_read_at)
+ *  después de que se envió éste. Con `_is_participant`, listMessages() en el
+ *  backend actualiza last_read_at de quien la llama cada vez que entra a ver
+ *  la conversación — por eso esto refleja lectura real, no un simple "entregado". */
+function isMessageReadByOthers(message: ChatMessage, conversation: ConversationSummary | null): boolean {
+  if (!conversation || conversation.participants.length === 0) return false;
+  const sentAt = new Date(message.created_at).getTime();
+  return conversation.participants.every(p => p.last_read_at && new Date(p.last_read_at).getTime() >= sentAt);
 }
 
 function formatTime(iso: string | null | undefined): string {
@@ -252,15 +139,16 @@ function mergeMessages(serverMsgs: ChatMessage[], localMsgs: ChatMessage[]): Cha
 }
 
 /* ═══════════════════════════════════════════════════════════
-   ChatsPage Component — Chats, Correo y Comunidad en un solo
-   lugar: cambiar de sección NUNCA navega a otra ruta, solo
-   cambia qué se muestra dentro de este mismo panel.
+   ChatsPage Component — Chats y Comunidad en un solo lugar:
+   cambiar de sección NUNCA navega a otra ruta, solo cambia qué
+   se muestra dentro de este mismo panel. El Buzón real (correo
+   de verdad, vía Mailgun) es su propia página independiente,
+   ver pages/mailbox/MailboxPage.tsx.
 
    Chats habla con el backend real (pruebas/back/flask-api,
-   rutas /api/chats y /api/usuarios/buscar). Buzón sigue con
-   datos de ejemplo — el Buzón real usará Mailgun más adelante.
-   Comunidad sigue como placeholder (su backend ya existe en
-   /api/comunidad, pero no fue lo priorizado en este batch).
+   rutas /api/chats y /api/usuarios/buscar). Comunidad sigue
+   como placeholder (su backend ya existe en /api/comunidad,
+   pero no fue lo priorizado en este batch).
    ═══════════════════════════════════════════════════════════ */
 export default function ChatsPage() {
   const currentUser = useCurrentUser();
@@ -287,16 +175,13 @@ export default function ChatsPage() {
   const [typingUserIds, setTypingUserIds] = useState<string[]>([]);
   const lastTypingPingRef = useRef<number>(0);
 
-  /* ── Estado: Correo (mock) ── */
-  const [mailSearch, setMailSearch] = useState('');
-  const [mailTab, setMailTab] = useState<'all' | 'read' | 'unread'>('all');
-  const [activeMailId, setActiveMailId] = useState<string>(EMAILS[0].id);
-  const [mailReplyText, setMailReplyText] = useState('');
-
   /* 📁 Estados de Archivos & Drag and Drop */
   const [isDragOver, setIsDragOver] = useState(false);
-  const [attachedFile, setAttachedFile] = useState<{ name: string; sizeStr: string; type: string } | null>(null);
+  const [attachedFile, setAttachedFile] = useState<FileAttachmentInfo | null>(null);
+  const [isProcessingFile, setIsProcessingFile] = useState(false);
+  const [fileError, setFileError] = useState<string | null>(null);
   const [showDropZoneModal, setShowDropZoneModal] = useState(false);
+  const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   /* 🎙️ Grabación de audio real (MediaRecorder) */
@@ -331,19 +216,27 @@ export default function ChatsPage() {
     });
   }, [conversations, tab, search]);
 
-  /* Auto-seleccionar la primera conversación disponible */
-  useEffect(() => {
-    if (!activeConversationId && filteredConversations.length > 0) {
-      setActiveConversationId(filteredConversations[0].id);
-    }
-  }, [filteredConversations, activeConversationId]);
-
   const activeConversation = conversations.find(c => c.id === activeConversationId) || null;
   const typingParticipant = activeConversation?.participants.find(p => typingUserIds.includes(p.id)) || null;
 
+  /* "Visto" real: solo se marca cuando el usuario de verdad tiene la
+     conversación en pantalla — con la pestaña de Chats activa (no Comunidad)
+     Y el documento visible (no en segundo plano/minimizado). El backend ya
+     NO marca esto solo, así que hay que dispararlo explícitamente. */
+  async function markReadIfVisible(conversationId: string) {
+    if (document.hidden || section !== 'chats') return;
+    try {
+      await markConversationRead(conversationId);
+      setConversations(prev => prev.map(c => (c.id === conversationId ? { ...c, unread_count: 0 } : c)));
+      window.dispatchEvent(new Event(CHATS_READ_EVENT));
+    } catch {
+      // Silencioso — si falla, el próximo tick del poll lo vuelve a intentar.
+    }
+  }
+
   /* Poll de mensajes + "está escribiendo" de la conversación activa
-     (sin WebSockets todavía — esto se acerca a tiempo real cada ~1s, pero
-     no es instantáneo para los mensajes que llegan de la otra persona). */
+     (sin WebSockets todavía — 500ms se siente prácticamente instantáneo para
+     un chat de este tamaño, sin llegar a martillar el backend). */
   useEffect(() => {
     if (!activeConversationId) return;
     let cancelled = false;
@@ -360,15 +253,49 @@ export default function ChatsPage() {
           [activeConversationId!]: mergeMessages(mensajes, prev[activeConversationId!] || []),
         }));
         setTypingUserIds(typing_user_ids);
+        // Marca como visto SOLO si de verdad se está viendo ahora mismo
+        // (ver markReadIfVisible) — y trae el last_read_at actualizado de LA
+        // OTRA persona, para que el chulo se ponga azul sin recargar nada.
+        markReadIfVisible(activeConversationId!);
+        refreshConversations({ silent: true });
       } catch (err) {
         if (!cancelled) setChatsError(mainAuthErrorMessage(err));
       }
     }
 
     poll();
-    const interval = setInterval(poll, 1000);
+    const interval = setInterval(poll, 500);
     return () => { cancelled = true; clearInterval(interval); setTypingUserIds([]); };
-  }, [activeConversationId]);
+  }, [activeConversationId, section]);
+
+  /* Marca como visto EN EL ACTO al abrir la conversación (o al volver de
+     Comunidad a Chats con una ya abierta) — sin esperar a que el poll
+     de arriba complete su primer ciclo. También cubre el caso de dejar la
+     pestaña del navegador en segundo plano y volver más tarde: recién ahí
+     se marca, no antes, aunque hayan llegado mensajes nuevos mientras tanto. */
+  useEffect(() => {
+    if (activeConversationId && section === 'chats') {
+      markReadIfVisible(activeConversationId);
+    }
+    function handleVisibility() {
+      if (!document.hidden && activeConversationId && section === 'chats') {
+        markReadIfVisible(activeConversationId);
+      }
+    }
+    document.addEventListener('visibilitychange', handleVisibility);
+    return () => document.removeEventListener('visibilitychange', handleVisibility);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeConversationId, section]);
+
+  /* Poll de la LISTA de conversaciones mientras se está en la pestaña Chats
+     (con o sin una conversación abierta) — así los mensajes nuevos, el
+     círculo de "no leído" y el orden de la lista se actualizan solos aunque
+     el usuario esté mirando la lista sin haber entrado a ningún chat. */
+  useEffect(() => {
+    if (section !== 'chats') return;
+    const interval = setInterval(() => refreshConversations({ silent: true }), 3000);
+    return () => clearInterval(interval);
+  }, [section]);
 
   /* Búsqueda de usuarios para iniciar un chat nuevo */
   useEffect(() => {
@@ -406,20 +333,22 @@ export default function ChatsPage() {
     }
   }
 
-  /* Filter emails by search & tab */
-  const filteredEmails = useMemo(() => {
-    return EMAILS.filter((e) => {
-      if (mailTab === 'read' && !e.read) return false;
-      if (mailTab === 'unread' && e.read) return false;
-      if (mailSearch && !`${e.sender} ${e.subject} ${e.preview}`.toLowerCase().includes(mailSearch.toLowerCase())) return false;
-      return true;
-    });
-  }, [mailSearch, mailTab]);
-
-  const activeEmail = EMAILS.find((e) => e.id === activeMailId) || EMAILS[0];
-  const unreadMailCount = EMAILS.filter((e) => !e.read).length;
-
   const currentChatMsgs = activeConversationId ? (messagesByConversation[activeConversationId] || []) : [];
+
+  /* Todas las imágenes de la conversación activa, en orden — así el lightbox
+     puede navegar entre todas con una tira de miniaturas, no solo la que se
+     clickeó. */
+  const chatImages = useMemo(
+    () =>
+      currentChatMsgs
+        .filter(m => m.file_attachment && m.file_attachment.mime_type.startsWith('image/'))
+        .map(m => ({
+          msgId: m.client_id || m._id,
+          src: `data:${m.file_attachment!.mime_type};base64,${m.file_attachment!.data}`,
+          name: m.file_attachment!.name,
+        })),
+    [currentChatMsgs],
+  );
 
   /* Auto scroll chat messages to bottom */
   useEffect(() => {
@@ -431,7 +360,7 @@ export default function ChatsPage() {
      se siente como esperar un F5. Si el envío falla, se retira solo. */
   async function sendChatMessage(
     content: string,
-    extra: { file_attachment?: { name: string; sizeStr: string; type: string }; audio?: VoiceNoteData } = {},
+    extra: { file_attachment?: FileAttachmentInfo; audio?: VoiceNoteData } = {},
   ) {
     if (!activeConversationId || !currentUser) return;
 
@@ -516,17 +445,26 @@ export default function ChatsPage() {
     }
   }
 
+  /* Lee y prepara el archivo de verdad (comprime si es imagen) para adjuntarlo. */
+  async function processAndAttachFile(file: File) {
+    setFileError(null);
+    setIsProcessingFile(true);
+    try {
+      const attachment = await buildFileAttachment(file);
+      setAttachedFile(attachment);
+      setShowDropZoneModal(false);
+    } catch (err) {
+      setFileError(err instanceof Error ? err.message : 'No se pudo leer el archivo.');
+    } finally {
+      setIsProcessingFile(false);
+    }
+  }
+
   /* File Selection Handler */
   function handleFileSelected(e: React.ChangeEvent<HTMLInputElement>) {
-    if (e.target.files && e.target.files[0]) {
-      const file = e.target.files[0];
-      setAttachedFile({
-        name: file.name,
-        sizeStr: `${(file.size / 1024).toFixed(1)} KB`,
-        type: file.type.includes('image') ? 'image' : 'doc',
-      });
-      setShowDropZoneModal(false);
-    }
+    const file = e.target.files?.[0];
+    if (file) processAndAttachFile(file);
+    e.target.value = ''; // permite volver a elegir el mismo archivo después
   }
 
   /* Drag and Drop Handlers */
@@ -541,14 +479,8 @@ export default function ChatsPage() {
   function handleDropFile(e: React.DragEvent) {
     e.preventDefault();
     setIsDragOver(false);
-    if (e.dataTransfer.files && e.dataTransfer.files[0]) {
-      const file = e.dataTransfer.files[0];
-      setAttachedFile({
-        name: file.name,
-        sizeStr: `${(file.size / 1024).toFixed(1)} KB`,
-        type: file.type.includes('image') ? 'image' : 'doc',
-      });
-    }
+    const file = e.dataTransfer.files?.[0];
+    if (file) processAndAttachFile(file);
   }
 
   /* Formato del Temporizador mm:ss (simple, no el formato "0:00:02" de antes) */
@@ -560,9 +492,9 @@ export default function ChatsPage() {
     <div className="dash-root">
       <Sidebar />
 
-      <div className="chats-page-wrapper">
+      <div className={`chats-page-wrapper ${activeConversationId && section === 'chats' ? 'has-active-chat' : 'no-active-chat'}`}>
 
-        {/* ── COLUMNA IZQUIERDA: LISTA (Chats / Correo / Comunidad) ── */}
+        {/* ── COLUMNA IZQUIERDA: LISTA (Chats / Comunidad) ── */}
         <aside className="chats-sidebar-panel">
           <div className="chats-sb-header">
 
@@ -575,16 +507,6 @@ export default function ChatsPage() {
               >
                 <MessageSquare size={20} />
                 {section === 'chats' && <span className="chats-nav-icon-label">Mensajes</span>}
-              </button>
-
-              <button
-                className={`chats-nav-icon-btn ${section === 'mail' ? 'active' : ''}`}
-                title="Buzón"
-                onClick={() => setSection('mail')}
-              >
-                <Mail size={20} />
-                {section === 'mail' && <span className="chats-nav-icon-label">Buzón</span>}
-                {unreadMailCount > 0 && <span className="chats-nav-badge">{unreadMailCount}</span>}
               </button>
 
               <button
@@ -669,31 +591,6 @@ export default function ChatsPage() {
               </>
             )}
 
-            {/* ── Encabezado de sección: Correo ── */}
-            {section === 'mail' && (
-              <>
-                <div className="chats-sb-title-row">
-                  <h1 className="chats-sb-title">Buzón</h1>
-                </div>
-
-                <div className="chats-search-box">
-                  <Search size={15} className="chats-search-icon" />
-                  <input
-                    type="text"
-                    placeholder="Buscar"
-                    value={mailSearch}
-                    onChange={(e) => setMailSearch(e.target.value)}
-                  />
-                </div>
-
-                <div className="mail-tab-group">
-                  <button className={`mail-tab-btn ${mailTab === 'all' ? 'active' : ''}`} onClick={() => setMailTab('all')}>Todos</button>
-                  <button className={`mail-tab-btn ${mailTab === 'read' ? 'active' : ''}`} onClick={() => setMailTab('read')}>Leídos</button>
-                  <button className={`mail-tab-btn ${mailTab === 'unread' ? 'active' : ''}`} onClick={() => setMailTab('unread')}>No leídos</button>
-                </div>
-              </>
-            )}
-
             {/* ── Encabezado de sección: Comunidad ── */}
             {section === 'community' && (
               <div className="chats-sb-title-row">
@@ -722,7 +619,10 @@ export default function ChatsPage() {
                   </div>
                   <div className="chats-item-body">
                     <div className="chats-item-head">
-                      <span className="chats-item-name">{u.first_name} {u.last_name}</span>
+                      <span className="chats-item-name">
+                        <span className="chats-name-full">{u.first_name} {u.last_name}</span>
+                        <span className="chats-name-short">{firstWord(u.first_name)} {firstWord(u.last_name)}</span>
+                      </span>
                     </div>
                     <p className="chats-item-preview">@{u.username} · {u.role === 'TEACHER' ? 'Docente' : 'Estudiante'}</p>
                   </div>
@@ -747,10 +647,11 @@ export default function ChatsPage() {
 
               {!loadingConversations && !chatsError && filteredConversations.map(c => {
                 const active = c.id === activeConversationId;
+                const unread = (c.unread_count || 0) > 0;
                 return (
                   <div
                     key={c.id}
-                    className={`chats-item ${active ? 'active' : ''}`}
+                    className={`chats-item ${active ? 'active' : ''} ${unread ? 'unread' : ''}`}
                     onClick={() => setActiveConversationId(c.id)}
                   >
                     <div className="chats-item-avatar-wrap">
@@ -759,10 +660,20 @@ export default function ChatsPage() {
 
                     <div className="chats-item-body">
                       <div className="chats-item-head">
-                        <span className="chats-item-name">{conversationDisplayName(c)}</span>
+                        <span className="chats-item-name">
+                          <span className="chats-name-full">{conversationDisplayName(c)}</span>
+                          <span className="chats-name-short">{conversationShortName(c)}</span>
+                        </span>
                         <span className="chats-item-time">{formatTime(c.updated_at)}</span>
                       </div>
-                      <p className="chats-item-preview">{conversationSubtitle(c)}</p>
+                      <div className="chats-item-preview-row">
+                        <p className="chats-item-preview">{conversationPreviewText(c, currentUser?.id)}</p>
+                        {unread && (
+                          <span className="chats-unread-badge">
+                            {c.unread_count! > 9 ? '9+' : c.unread_count}
+                          </span>
+                        )}
+                      </div>
                     </div>
                   </div>
                 );
@@ -772,41 +683,6 @@ export default function ChatsPage() {
                 <div className="chats-empty-list">
                   <MessageSquare size={32} />
                   <p>No tienes conversaciones aquí todavía. Usa el botón + para empezar una.</p>
-                </div>
-              )}
-            </div>
-          )}
-
-          {/* ── Lista: Correo ── */}
-          {section === 'mail' && (
-            <div className="chats-list">
-              {filteredEmails.map((e) => {
-                const active = e.id === activeMailId;
-                return (
-                  <div
-                    key={e.id}
-                    className={`mail-item ${active ? 'active' : ''} ${!e.read ? 'unread' : ''}`}
-                    onClick={() => setActiveMailId(e.id)}
-                  >
-                    <div className="mail-item-head">
-                      <span className="mail-item-sender">{e.sender}</span>
-                      <span className="mail-item-date">{e.dateLabel}</span>
-                    </div>
-                    <p className="mail-item-subject">{e.subject}</p>
-                    <p className="mail-item-preview">{e.preview}</p>
-                    <div className="mail-item-chip">
-                      <span className="mail-item-chip-avatar" style={{ background: e.avatarBg }}>{e.avatarText}</span>
-                      <span>{e.sender}</span>
-                      {e.verified && <BadgeCheck size={12} className="mail-verified-icon" />}
-                    </div>
-                  </div>
-                );
-              })}
-
-              {filteredEmails.length === 0 && (
-                <div className="chats-empty-list">
-                  <Inbox size={32} />
-                  <p>No se encontraron correos.</p>
                 </div>
               )}
             </div>
@@ -824,7 +700,7 @@ export default function ChatsPage() {
         {/* ── COLUMNA DERECHA/CENTRAL ── */}
         {section === 'chats' && (
           <main
-            className={`chats-main-panel ${isDragOver ? 'drag-over' : ''}`}
+            className={`chats-main-panel chats-conversation-panel ${isDragOver ? 'drag-over' : ''}`}
             onDragOver={handleDragOver}
             onDragLeave={handleDragLeave}
             onDrop={handleDropFile}
@@ -865,12 +741,28 @@ export default function ChatsPage() {
                 {/* Header del Chat Activo */}
                 <header className="chats-main-header">
                   <div className="chats-mh-left">
+                    <button
+                      type="button"
+                      className="chats-mh-back-btn"
+                      title="Volver a la lista de chats"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        setActiveConversationId(null);
+                      }}
+                    >
+                      <ArrowLeft size={20} />
+                    </button>
+
                     <div className="chats-mh-avatar">
                       <img className="chats-avatar-img large" src={generatedAvatarUrl(conversationAvatarSeed(activeConversation))} alt={conversationDisplayName(activeConversation)} />
                     </div>
 
                     <div>
-                      <h2 className="chats-mh-name">{conversationDisplayName(activeConversation)}</h2>
+                      <h2 className="chats-mh-name">
+                        <span className="chats-name-full">{conversationDisplayName(activeConversation)}</span>
+                        <span className="chats-name-short">{conversationShortName(activeConversation)}</span>
+                      </h2>
                       <p className="chats-mh-status">{conversationSubtitle(activeConversation)}</p>
                     </div>
                   </div>
@@ -883,39 +775,58 @@ export default function ChatsPage() {
                 {/* Área de Mensajes */}
                 <div className="chats-messages-body">
                   <AnimatePresence initial={false}>
-                    {currentChatMsgs.map(m => {
+                    {currentChatMsgs.map((m, idx) => {
                       const isOwn = m.sender_id === currentUser?.id;
+                      const msgId = m.client_id || m._id;
+                      // Audios "seguidos": si el mensaje inmediatamente después
+                      // de este también es una nota de voz, se encadenan solas.
+                      const nextMsg = currentChatMsgs[idx + 1];
+                      const autoPlayNextId = m.audio && nextMsg?.audio ? (nextMsg.client_id || nextMsg._id) : null;
+                      const isImageMsg = m.file_attachment?.mime_type.startsWith('image/');
                       return (
                         <motion.div
-                          key={m.client_id || m._id}
+                          key={msgId}
                           className={`chats-bubble-wrapper ${isOwn ? 'user' : 'contact'}`}
                           initial={{ opacity: 0, y: 10, scale: 0.98 }}
                           animate={{ opacity: 1, y: 0, scale: 1 }}
                           transition={{ duration: 0.2 }}
                         >
-                          <div className={`chats-bubble ${isOwn ? 'user' : 'contact'}`}>
+                          <div className={`chats-bubble ${isOwn ? 'user' : 'contact'} ${isImageMsg ? 'chats-bubble-has-image' : ''}`}>
                             {m.audio ? (
                               <VoiceMessagePlayer
+                                id={msgId}
                                 src={`data:${m.audio.mime_type};base64,${m.audio.data}`}
                                 waveform={m.audio.waveform}
                                 durationSeconds={m.audio.duration_seconds}
                                 variant={isOwn ? 'user' : 'contact'}
+                                autoPlayNextId={autoPlayNextId}
                               />
+                            ) : m.file_attachment ? (
+                              <>
+                                <FileAttachmentPreview
+                                  file={m.file_attachment}
+                                  variant={isOwn ? 'user' : 'contact'}
+                                  onImageClick={() => setLightboxIndex(chatImages.findIndex(img => img.msgId === msgId))}
+                                />
+                                {m.content && <p className="chats-bubble-text">{m.content}</p>}
+                              </>
                             ) : (
-                              <p className="chats-bubble-text">{m.content}</p>
-                            )}
-
-                            {m.file_attachment && (
-                              <div className="chats-msg-attachment">
-                                <FileText size={16} />
-                                <span>{m.file_attachment.name} ({m.file_attachment.sizeStr})</span>
-                              </div>
+                              <>
+                                <p className="chats-bubble-text">{m.content}</p>
+                                {extractFirstUrl(m.content) && <LinkPreviewCard url={extractFirstUrl(m.content)!} />}
+                              </>
                             )}
                           </div>
 
                           <div className={`chats-bubble-meta ${isOwn ? 'user' : 'contact'}`}>
                             <span>{formatTime(m.created_at)}</span>
-                            {isOwn && <CheckCheck size={14} className="chats-check-icon" />}
+                            {isOwn && (
+                              isMessageReadByOthers(m, activeConversation) ? (
+                                <CheckCheck size={14} className="chats-check-icon read" />
+                              ) : (
+                                <Check size={14} className="chats-check-icon" />
+                              )
+                            )}
                           </div>
                         </motion.div>
                       );
@@ -964,9 +875,13 @@ export default function ChatsPage() {
                         <span className="chats-voice-timer-big">{timerDisplay}</span>
                       </div>
 
-                      <div className="chats-voice-live-waveform">
+                      <div className={`chats-voice-live-waveform ${recorder.isPaused ? 'paused' : ''}`}>
                         {recorder.liveAmplitude.map((level, i) => (
-                          <span key={i} className="chats-voice-live-bar" style={{ height: `${Math.max(15, level * 100)}%` }} />
+                          <span
+                            key={i}
+                            className="chats-voice-live-bar"
+                            style={{ height: `${Math.max(12, Math.min(100, level * 100))}%` }}
+                          />
                         ))}
                       </div>
 
@@ -1054,9 +969,15 @@ export default function ChatsPage() {
                           </button>
                         </div>
 
+                        {isProcessingFile && (
+                          <div className="chats-dz-preview-tag">
+                            <Loader2 size={14} className="chats-spin" /> Leyendo archivo...
+                          </div>
+                        )}
+                        {fileError && <p className="auth-field-error">{fileError}</p>}
                         {attachedFile && (
                           <div className="chats-dz-preview-tag">
-                            <span>📄 {attachedFile.name} ({attachedFile.sizeStr})</span>
+                            <span>📄 {attachedFile.name} ({formatFileSize(attachedFile.size_bytes)})</span>
                             <button onClick={() => setAttachedFile(null)}><X size={12} /></button>
                           </div>
                         )}
@@ -1064,7 +985,16 @@ export default function ChatsPage() {
                     </motion.div>
                   ) : (
                     /* CASO 3: BARRA DE ESCRITURA ── */
-                    <div className="chats-input-bar">
+                    <div className="chats-input-bar-wrap">
+                      {attachedFile && (
+                        <div className="chats-dz-preview-tag chats-attached-preview">
+                          <span>📄 {attachedFile.name} ({formatFileSize(attachedFile.size_bytes)})</span>
+                          <button onClick={() => setAttachedFile(null)} title="Quitar archivo">
+                            <X size={12} />
+                          </button>
+                        </div>
+                      )}
+                      <div className="chats-input-bar">
                       <button
                         className="chats-attach-btn"
                         title="Adjuntar archivo o paraclínico"
@@ -1094,114 +1024,18 @@ export default function ChatsPage() {
                       <button
                         className="chats-send-btn"
                         onClick={() => handleSendMessage()}
-                        disabled={!input.trim() && !attachedFile}
+                        disabled={(!input.trim() && !attachedFile) || isProcessingFile}
                         title="Enviar mensaje"
                       >
                         <Send size={16} />
                       </button>
+                      </div>
                     </div>
                   )}
 
                 </div>
               </>
             )}
-          </main>
-        )}
-
-        {section === 'mail' && (
-          <main className="chats-main-panel mail-main-panel">
-            <header className="mail-toolbar">
-              <div className="mail-toolbar-left">
-                <button className="mail-toolbar-btn" title="Volver a Mensajes" onClick={() => setSection('chats')}>
-                  <ArrowLeft size={17} />
-                </button>
-                <button className="mail-toolbar-btn" title="Archivar"><Archive size={17} /></button>
-                <button className="mail-toolbar-btn" title="Información"><Info size={17} /></button>
-                <button className="mail-toolbar-btn" title="Eliminar"><Trash2 size={17} /></button>
-                <button className="mail-toolbar-btn" title="Responder"><Reply size={17} /></button>
-                <button className="mail-toolbar-btn" title="Reenviar"><Forward size={17} /></button>
-              </div>
-              <span className="mail-toolbar-count">1-{EMAILS.length} de {EMAILS.length}</span>
-            </header>
-
-            <div className="mail-detail-body">
-              <div className="mail-detail-head">
-                <div className="mail-detail-sender-row">
-                  <span className="mail-detail-avatar" style={{ background: activeEmail.avatarBg }}>
-                    {activeEmail.avatarText}
-                  </span>
-                  <div className="mail-detail-sender-info">
-                    <div className="mail-detail-sender-name">
-                      {activeEmail.sender}
-                      {activeEmail.verified && <BadgeCheck size={14} className="mail-verified-icon" />}
-                      <span className="mail-detail-sender-email">{activeEmail.senderEmail}</span>
-                    </div>
-                    <span className="mail-detail-to">para {activeEmail.to}</span>
-                  </div>
-                </div>
-                <span className="mail-detail-date">{activeEmail.fullDateLabel}</span>
-              </div>
-
-              <h2 className="mail-detail-subject">{activeEmail.subject}</h2>
-
-              <div className="mail-detail-content">
-                {activeEmail.body.paragraphs.map((p, i) => (
-                  <p key={i}>{p}</p>
-                ))}
-                {activeEmail.body.bullets && (
-                  <ul>
-                    {activeEmail.body.bullets.map((b, i) => (
-                      <li key={i}>{b}</li>
-                    ))}
-                  </ul>
-                )}
-                {activeEmail.body.closing && <p>{activeEmail.body.closing}</p>}
-              </div>
-
-              {activeEmail.attachment && (
-                <div className="mail-attachment-card">
-                  <span className="mail-attachment-label">Adjunto</span>
-                  <div className="mail-attachment-row">
-                    <div className="mail-attachment-icon"><FileText size={18} /></div>
-                    <div className="mail-attachment-info">
-                      <span className="mail-attachment-name">{activeEmail.attachment.name}</span>
-                      <span className="mail-attachment-actions">
-                        <button type="button">Ver</button>
-                        <span>|</span>
-                        <button type="button">Descargar</button>
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              <div className="mail-action-row">
-                <button className="mail-action-btn"><Reply size={15} /> Responder</button>
-                <button className="mail-action-btn"><Forward size={15} /> Reenviar</button>
-              </div>
-            </div>
-
-            <div className="mail-compose-bar">
-              <input
-                type="text"
-                placeholder="Escribe algo..."
-                value={mailReplyText}
-                onChange={(e) => setMailReplyText(e.target.value)}
-              />
-              <div className="mail-compose-right">
-                {currentUser && (
-                  <div className="mail-compose-user">
-                    {currentUser.avatarUrl ? (
-                      <img src={currentUser.avatarUrl} alt={currentUser.name} />
-                    ) : null}
-                    <span>{currentUser.name}</span>
-                  </div>
-                )}
-                <button type="button" className="mail-compose-send" title="Enviar" disabled={!mailReplyText.trim()}>
-                  <Send size={16} />
-                </button>
-              </div>
-            </div>
           </main>
         )}
 
@@ -1216,6 +1050,15 @@ export default function ChatsPage() {
         )}
 
       </div>
+
+      {lightboxIndex !== null && chatImages[lightboxIndex] && (
+        <ImageLightbox
+          images={chatImages}
+          index={lightboxIndex}
+          onClose={() => setLightboxIndex(null)}
+          onNavigate={setLightboxIndex}
+        />
+      )}
     </div>
   );
 }
