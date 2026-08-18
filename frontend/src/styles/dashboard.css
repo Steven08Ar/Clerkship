@@ -11602,6 +11602,13 @@
   flex-shrink: 0;
 }
 
+.gdrive-file-text-meta {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  flex: 1;
+}
+
 .gdrive-file-title {
   font-weight: 700;
   color: var(--ink, #0F172A);
@@ -11609,6 +11616,14 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+.gdrive-file-sub-meta {
+  display: none;
+  font-size: 0.70rem;
+  font-weight: 600;
+  color: var(--ink3, #64748B);
+  margin-top: 1px;
 }
 
 .gdrive-folder-pill {
@@ -11951,23 +11966,92 @@
   .gdrive-folders-grid .bib2-folder-meta-front {
     font-size: 0.65rem !important;
   }
-  .gdrive-files-grid {
-    grid-template-columns: 1fr !important;
-    gap: 10px !important;
+  /* ── Tabla de Archivos Optimizada en Móvil ── */
+  .gdrive-table-container {
+    border-radius: 12px;
+    overflow-x: hidden;
+    width: 100%;
+  }
+  .gdrive-table {
+    table-layout: fixed;
+    width: 100%;
+  }
+  .gdrive-table th,
+  .gdrive-table td {
+    padding: 10px 8px !important;
   }
   .gdrive-table th:nth-child(2),
-  .gdrive-table td:nth-child(2) {
-    display: none;
-  }
+  .gdrive-table td:nth-child(2),
   .gdrive-table th:nth-child(3),
   .gdrive-table td:nth-child(3) {
-    display: none;
+    display: none !important;
+  }
+  .gdrive-table th.gdrive-th-name,
+  .gdrive-table td.gdrive-td-name {
+    width: auto !important;
+    min-width: 0 !important;
+    padding-left: 12px !important;
+  }
+  .gdrive-file-cell {
+    gap: 8px !important;
+    min-width: 0 !important;
+  }
+  .gdrive-file-title {
+    font-size: 0.80rem !important;
+    max-width: 100% !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+  }
+  .gdrive-table th.gdrive-th-size,
+  .gdrive-table td.gdrive-td-size {
+    width: 68px !important;
+    min-width: 68px !important;
+    max-width: 68px !important;
+    text-align: center !important;
+    font-size: 0.72rem !important;
+    padding: 10px 4px !important;
+    white-space: nowrap !important;
+  }
+  .gdrive-table th.gdrive-th-actions,
+  .gdrive-table td.gdrive-td-actions {
+    width: 76px !important;
+    min-width: 76px !important;
+    max-width: 76px !important;
+    text-align: right !important;
+    padding-right: 10px !important;
+    padding-left: 2px !important;
+  }
+  .gdrive-table th.gdrive-th-actions {
+    font-size: 0.68rem !important;
+    letter-spacing: 0 !important;
+    white-space: nowrap !important;
+  }
+  .gdrive-row-actions {
+    gap: 2px !important;
+    justify-content: flex-end !important;
+  }
+  .gdrive-action-icon-btn {
+    width: 26px !important;
+    height: 26px !important;
   }
 }
 
 @media (max-width: 480px) {
   .gdrive-sort-label {
     display: none;
+  }
+  .gdrive-file-sub-meta {
+    display: block !important;
+  }
+  .gdrive-table th.gdrive-th-size,
+  .gdrive-table td.gdrive-td-size {
+    display: none !important;
+  }
+  .gdrive-table th.gdrive-th-actions,
+  .gdrive-table td.gdrive-td-actions {
+    width: 80px !important;
+    min-width: 80px !important;
   }
 }
 

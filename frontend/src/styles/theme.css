@@ -2551,7 +2551,8 @@ html.theme-animating .crono-gantt-card {
 }
 
 [data-theme="dark"] .gdrive-td-date,
-[data-theme="dark"] .gdrive-td-size {
+[data-theme="dark"] .gdrive-td-size,
+[data-theme="dark"] .gdrive-file-sub-meta {
   color: #94A3B8 !important;
 }
 

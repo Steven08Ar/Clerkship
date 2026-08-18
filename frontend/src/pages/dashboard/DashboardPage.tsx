@@ -823,7 +823,10 @@ export default function DashboardPage() {
                 )}
               </span>
             ) : (
-              <span className="gdrive-file-title" title={doc.name}>{doc.name}</span>
+              <div className="gdrive-file-text-meta">
+                <span className="gdrive-file-title" title={doc.name}>{doc.name}</span>
+                <span className="gdrive-file-sub-meta">{formatFileSize(doc.size_bytes)}</span>
+              </div>
             )}
           </div>
         </td>
