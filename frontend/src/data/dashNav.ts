@@ -1,6 +1,6 @@
 import {
   LayoutDashboard, FileText,
-  Clock, Library, MessageSquare,
+  Clock, Library, MessageSquare, Mail,
 } from 'lucide-react';
 import type { ComponentType } from 'react';
 
@@ -17,4 +17,5 @@ export const DASH_NAV: NavTab[] = [
   { id: 'historial',  label: 'Historial',  Icon: Clock,           route: '/historial'  },
   { id: 'biblioteca', label: 'Biblioteca', Icon: Library,         route: '/biblioteca' },
   { id: 'chats',      label: 'Chats',      Icon: MessageSquare,   route: '/chats'      },
+  { id: 'mailbox',    label: 'Buzón',      Icon: Mail,            route: '/buzon'      },
 ];
