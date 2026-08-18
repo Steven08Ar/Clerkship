@@ -67,42 +67,75 @@ function sortDocs(docs: DocumentSummary[], sort: SortOption): DocumentSummary[] 
 }
 
 function getDocTypeInfo(name: string, mime: string) {
-  const n = (name || '').toLowerCase();
-  const m = (mime || '').toLowerCase();
-  const ext = n.split('.').pop() || '';
+  const n = (name || '').trim().toLowerCase();
+  const m = (mime || '').trim().toLowerCase();
+  
+  // Extraer extensión de forma ultra robusta
+  const lastDot = n.lastIndexOf('.');
+  const ext = lastDot >= 0 ? n.slice(lastDot + 1).toLowerCase() : '';
 
-  if (m.includes('pdf') || ext === 'pdf') {
+  // 1. PDF
+  if (
+    ext === 'pdf' ||
+    m.includes('pdf') ||
+    m.includes('postscript')
+  ) {
     return { typeClass: 'bmd-pdf', typeLabel: 'PDF' as FilterType };
   }
+
+  // 2. WORD / DOCUMENTOS DE TEXTO
   if (
-    m.includes('presentation') ||
-    m.includes('powerpoint') ||
-    ['ppt', 'pptx', 'pps', 'ppsx', 'pot', 'potx'].includes(ext)
-  ) {
-    return { typeClass: 'bmd-ppt', typeLabel: 'PPT' as FilterType };
-  }
-  if (
-    m.includes('spreadsheetml') ||
-    m.includes('excel') ||
-    m.includes('csv') ||
-    ['xls', 'xlsx', 'csv', 'xlsm', 'xltx'].includes(ext)
-  ) {
-    return { typeClass: 'bmd-xls', typeLabel: 'XLS' as FilterType };
-  }
-  if (
+    ['doc', 'docx', 'docm', 'dot', 'dotx', 'dotm', 'rtf', 'odt', 'pages', 'wpd'].includes(ext) ||
     m.includes('word') ||
-    m.includes('wordprocessingml') ||
-    ['doc', 'docx', 'rtf', 'dotx'].includes(ext)
+    m.includes('wordprocessing') ||
+    m.includes('officedocument.word') ||
+    m.includes('msword') ||
+    m.includes('opendocument.text')
   ) {
     return { typeClass: 'bmd-doc', typeLabel: 'DOC' as FilterType };
   }
+
+  // 3. EXCEL / HOJAS DE CÁLCULO
   if (
-    m.includes('image') ||
-    ['png', 'jpg', 'jpeg', 'webp', 'gif', 'svg', 'bmp', 'tiff'].includes(ext)
+    ['xls', 'xlsx', 'xlsm', 'xlsb', 'xlt', 'xltx', 'xltm', 'csv', 'tsv', 'ods', 'numbers'].includes(ext) ||
+    m.includes('excel') ||
+    m.includes('spreadsheet') ||
+    m.includes('officedocument.spreadsheet') ||
+    m.includes('csv') ||
+    m.includes('tab-separated') ||
+    m.includes('opendocument.spreadsheet')
+  ) {
+    return { typeClass: 'bmd-xls', typeLabel: 'XLS' as FilterType };
+  }
+
+  // 4. POWERPOINT / PRESENTACIONES
+  if (
+    ['ppt', 'pptx', 'pptm', 'pps', 'ppsx', 'pot', 'potx', 'odp', 'key', 'keynote'].includes(ext) ||
+    m.includes('presentation') ||
+    m.includes('powerpoint') ||
+    m.includes('officedocument.presentation') ||
+    m.includes('slides') ||
+    m.includes('opendocument.presentation')
+  ) {
+    return { typeClass: 'bmd-ppt', typeLabel: 'PPT' as FilterType };
+  }
+
+  // 5. IMÁGENES
+  if (
+    ['png', 'jpg', 'jpeg', 'webp', 'gif', 'svg', 'bmp', 'ico', 'tiff', 'tif', 'heic', 'heif', 'avif'].includes(ext) ||
+    m.startsWith('image/')
   ) {
     return { typeClass: 'bmd-img', typeLabel: 'IMG' as FilterType };
   }
-  if (m.includes('text') || ['txt', 'json', 'md', 'js', 'py', 'ts', 'html', 'css'].includes(ext)) {
+
+  // 6. TEXTO PLANO / CÓDIGO
+  if (
+    ['txt', 'json', 'md', 'markdown', 'js', 'jsx', 'ts', 'tsx', 'py', 'html', 'htm', 'css', 'scss', 'xml', 'log', 'sql', 'sh', 'c', 'cpp', 'h', 'java', 'cs', 'yaml', 'yml'].includes(ext) ||
+    m.startsWith('text/') ||
+    m.includes('json') ||
+    m.includes('javascript') ||
+    m.includes('xml')
+  ) {
     return { typeClass: 'bmd-txt', typeLabel: 'TXT' as FilterType };
   }
 
@@ -513,7 +546,19 @@ export default function DashboardPage() {
   /* ── Filtered & Sorted Data ── */
   const cleanSearch = searchQuery.trim().toLowerCase();
 
+  // Unificar allDocs + recent de forma segura para no perder ningún archivo existente
+  const universeDocs = useMemo(() => {
+    const map = new Map<string, DocumentSummary>();
+    allDocs.forEach(d => map.set(d.id, d));
+    recent.forEach(d => map.set(d.id, d));
+    return Array.from(map.values());
+  }, [allDocs, recent]);
+
   const filteredFolders = useMemo(() => {
+    // Si hay un filtro de tipo de archivo específico activo (ej. Word, Excel, PPT, PDF...),
+    // no mostramos las carpetas generales porque el usuario quiere ver los archivos del tipo
+    if (selectedFilter !== 'ALL') return [];
+
     let list = openFolder
       ? folders.filter(f => f.parent_folder_id === openFolder.id)
       : folders.filter(f => !f.parent_folder_id);
@@ -522,10 +567,10 @@ export default function DashboardPage() {
       list = list.filter(f => f.name.toLowerCase().includes(cleanSearch));
     }
     return sortFolders(list, sortLabel);
-  }, [folders, openFolder, cleanSearch, sortLabel]);
+  }, [folders, openFolder, cleanSearch, selectedFilter, sortLabel]);
 
   const filteredDocs = useMemo(() => {
-    let list = openFolder ? folderDocs : (cleanSearch || selectedFilter !== 'ALL' ? allDocs : recent);
+    let list = openFolder ? folderDocs : (cleanSearch || selectedFilter !== 'ALL' ? universeDocs : recent);
 
     if (cleanSearch) {
       list = list.filter(d => d.name.toLowerCase().includes(cleanSearch));
@@ -539,7 +584,7 @@ export default function DashboardPage() {
     }
 
     return sortDocs(list, sortLabel);
-  }, [openFolder, folderDocs, allDocs, recent, cleanSearch, selectedFilter, sortLabel]);
+  }, [openFolder, folderDocs, universeDocs, recent, cleanSearch, selectedFilter, sortLabel]);
 
   function getFileCardIcon(name: string, mime: string) {
     const info = getDocTypeInfo(name, mime);
@@ -985,7 +1030,7 @@ export default function DashboardPage() {
                       key={chip.id}
                       type="button"
                       className={`gdrive-filter-chip ${active ? 'active' : ''}`}
-                      onClick={() => setSelectedFilter(chip.id)}
+                      onClick={() => setSelectedFilter(prev => prev === chip.id ? 'ALL' : chip.id)}
                     >
                       {chip.color && (
                         <span className="gdrive-chip-dot" style={{ background: chip.color }} />
@@ -1199,8 +1244,8 @@ export default function DashboardPage() {
               </div>
             )}
 
-            {/* ── SECCIÓN DE CARPETAS ── */}
-            {!loading && (
+            {/* ── SECCIÓN DE CARPETAS (Visible solo en vista general sin filtro de tipo) ── */}
+            {!loading && selectedFilter === 'ALL' && (
               <section className="bib2-section gdrive-section">
                 <div className="gdrive-section-header">
                   <h2 className="gdrive-section-title">
