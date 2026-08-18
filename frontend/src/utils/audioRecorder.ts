@@ -84,20 +84,61 @@ export function useAudioRecorder() {
     sampleLoopRef.current = () => {
       const analyser = analyserRef.current;
       if (!analyser) return;
-      const data = new Uint8Array(analyser.frequencyBinCount);
-      analyser.getByteTimeDomainData(data);
+
+      const freqData = new Uint8Array(analyser.frequencyBinCount);
+      analyser.getByteFrequencyData(freqData);
+
+      const timeData = new Uint8Array(analyser.fftSize);
+      analyser.getByteTimeDomainData(timeData);
 
       let sumSquares = 0;
-      for (let i = 0; i < data.length; i++) {
-        const v = (data[i] - 128) / 128;
+      for (let i = 0; i < timeData.length; i++) {
+        const v = (timeData[i] - 128) / 128;
         sumSquares += v * v;
       }
-      const rms = Math.sqrt(sumSquares / data.length);
-      const level = Math.min(1, rms * 4.5);
+      const rms = Math.sqrt(sumSquares / timeData.length);
+      const rmsLevel = Math.min(1, rms * 5.5);
 
       if (!isPausedRef.current) {
-        waveformSamplesRef.current.push(level);
-        setLiveAmplitude(prev => [...prev.slice(1), level]);
+        waveformSamplesRef.current.push(rmsLevel);
+
+        // Visualizador continuo fluido (centro a lados) que sube y baja según el micrófono
+        const HALF_BARS = WAVEFORM_BARS / 2; // 20 barras por lado
+        const binStep = Math.max(1, Math.floor((freqData.length * 0.45) / HALF_BARS));
+        const t = Date.now() * 0.005; // Fase de animación continua
+
+        const halfBars: number[] = [];
+        for (let j = 0; j < HALF_BARS; j++) {
+          const normDist = j / (HALF_BARS - 1); // 0 en el centro, 1 en extremo
+
+          // Muestreo de frecuencia del micrófono en tiempo real
+          const rawFreq = freqData[j * binStep] || 0;
+          const normFreq = rawFreq / 255;
+
+          // Sensibilidad al volumen de voz (RMS + frecuencia)
+          const micVolume = Math.min(1, Math.max(normFreq * 1.1, rmsLevel * 3.2));
+
+          // Envolvente suave con mayor respuesta en el centro
+          const centerEnvelope = Math.cos(normDist * (Math.PI * 0.38));
+
+          // Onda continua orgánica compuesta (oscila permanentemente)
+          const osc1 = Math.sin(t * 3.5 - normDist * 3.8);
+          const osc2 = Math.cos(t * 2.2 + normDist * 2.4) * 0.45;
+          const continuousBase = (osc1 + osc2 + 1.45) / 2.9; // Normalizado ~0.15 a 1.0
+
+          // La altura total de la onda continua escala directamente con el volumen del micrófono
+          // Cuando no habla: altura baja (~10% - 18%)
+          // Cuando habla: la onda sube y se expande en vivo (~40% - 100%)
+          const heightMultiplier = 0.12 + (micVolume * 0.88 * centerEnvelope);
+          const finalLevel = Math.min(1, Math.max(0.08, continuousBase * heightMultiplier * 1.5));
+
+          halfBars.push(finalLevel);
+        }
+
+        // Espejo simétrico del centro a los lados
+        const newBars: number[] = [...[...halfBars].reverse(), ...halfBars];
+
+        setLiveAmplitude(newBars);
       }
       rafRef.current = requestAnimationFrame(() => sampleLoopRef.current());
     };
