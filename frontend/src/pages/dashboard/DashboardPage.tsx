@@ -1123,42 +1123,6 @@ export default function DashboardPage() {
                       <span className="gdrive-widget-label">Trabajos:</span>
                       <span className="gdrive-widget-badge badge-trabajos">{MOCK_PENDING_CASES.length}</span>
                     </button>
-
-                    <AnimatePresence>
-                      {activeWidgetPopover === 'trabajos' && (
-                        <motion.div
-                          className="gdrive-widget-popover"
-                          initial={{ opacity: 0, y: 8, scale: 0.95 }}
-                          animate={{ opacity: 1, y: 0, scale: 1 }}
-                          exit={{ opacity: 0, y: 8, scale: 0.95 }}
-                          transition={{ duration: 0.15 }}
-                        >
-                          <div className="gdrive-popover-head">
-                            <span className="gdrive-popover-title">Trabajos pendientes</span>
-                            <span className="gdrive-popover-count">{MOCK_PENDING_CASES.length} casos</span>
-                          </div>
-                          <div className="gdrive-popover-list">
-                            {MOCK_PENDING_CASES.slice(0, 4).map(c => (
-                              <div
-                                key={c.id}
-                                className="gdrive-popover-item"
-                                onClick={() => { setActiveWidgetPopover(null); navigate('/casos'); }}
-                              >
-                                <span className={`gdrive-popover-dot ${c.status === 'en_progreso' ? 'in-progress' : 'pending'}`} />
-                                <span className="gdrive-popover-item-title">{c.title}</span>
-                              </div>
-                            ))}
-                          </div>
-                          <button
-                            type="button"
-                            className="gdrive-popover-footer-btn"
-                            onClick={() => { setActiveWidgetPopover(null); navigate('/casos'); }}
-                          >
-                            Ir a Casos clínicos <ChevronRight size={13} />
-                          </button>
-                        </motion.div>
-                      )}
-                    </AnimatePresence>
                   </div>
 
                   {/* Widget 2: Calificaciones */}
@@ -1173,42 +1137,6 @@ export default function DashboardPage() {
                       <span className="gdrive-widget-label">Notas:</span>
                       <span className="gdrive-widget-badge badge-calificaciones">{MOCK_UNREVIEWED_GRADES.length}</span>
                     </button>
-
-                    <AnimatePresence>
-                      {activeWidgetPopover === 'calificaciones' && (
-                        <motion.div
-                          className="gdrive-widget-popover"
-                          initial={{ opacity: 0, y: 8, scale: 0.95 }}
-                          animate={{ opacity: 1, y: 0, scale: 1 }}
-                          exit={{ opacity: 0, y: 8, scale: 0.95 }}
-                          transition={{ duration: 0.15 }}
-                        >
-                          <div className="gdrive-popover-head">
-                            <span className="gdrive-popover-title">Calificaciones sin revisar</span>
-                            <span className="gdrive-popover-count">{MOCK_UNREVIEWED_GRADES.length} notas</span>
-                          </div>
-                          <div className="gdrive-popover-list">
-                            {MOCK_UNREVIEWED_GRADES.map(g => (
-                              <div
-                                key={g.id}
-                                className="gdrive-popover-item"
-                                onClick={() => { setActiveWidgetPopover(null); navigate('/historial'); }}
-                              >
-                                <span className="gdrive-popover-score">{g.score}%</span>
-                                <span className="gdrive-popover-item-title">{g.caseTitle}</span>
-                              </div>
-                            ))}
-                          </div>
-                          <button
-                            type="button"
-                            className="gdrive-popover-footer-btn"
-                            onClick={() => { setActiveWidgetPopover(null); navigate('/historial'); }}
-                          >
-                            Ver historial completo <ChevronRight size={13} />
-                          </button>
-                        </motion.div>
-                      )}
-                    </AnimatePresence>
                   </div>
 
                   {/* Widget 3: Buzón */}
@@ -1238,6 +1166,108 @@ export default function DashboardPage() {
                 )}
               </div>
             </div>
+
+            {/* ── MODAL / POPOVER CENTRADO EN LA PANTALLA PARA TRABAJOS Y NOTAS ── */}
+            <AnimatePresence>
+              {activeWidgetPopover && (
+                <div className="gdrive-popover-overlay" onClick={() => setActiveWidgetPopover(null)}>
+                  <motion.div
+                    className="gdrive-widget-popover-centered"
+                    initial={{ opacity: 0, scale: 0.92, y: 12 }}
+                    animate={{ opacity: 1, scale: 1, y: 0 }}
+                    exit={{ opacity: 0, scale: 0.92, y: 12 }}
+                    transition={{ duration: 0.18, ease: [0.16, 1, 0.3, 1] }}
+                    onClick={e => e.stopPropagation()}
+                  >
+                    {activeWidgetPopover === 'trabajos' && (
+                      <>
+                        <div className="gdrive-popover-head">
+                          <div className="gdrive-popover-head-left">
+                            <ClipboardList size={18} className="icon-trabajos" />
+                            <span className="gdrive-popover-title">Trabajos pendientes</span>
+                            <span className="gdrive-popover-count badge-trabajos">{MOCK_PENDING_CASES.length}</span>
+                          </div>
+                          <button
+                            type="button"
+                            className="gdrive-popover-close-btn"
+                            onClick={() => setActiveWidgetPopover(null)}
+                            title="Cerrar"
+                            aria-label="Cerrar"
+                          >
+                            <X size={15} />
+                          </button>
+                        </div>
+
+                        <div className="gdrive-popover-list">
+                          {MOCK_PENDING_CASES.slice(0, 5).map(c => (
+                            <div
+                              key={c.id}
+                              className="gdrive-popover-item"
+                              onClick={() => { setActiveWidgetPopover(null); navigate('/casos'); }}
+                            >
+                              <span className={`gdrive-popover-dot ${c.status === 'en_progreso' ? 'in-progress' : 'pending'}`} />
+                              <span className="gdrive-popover-item-title">{c.title}</span>
+                              <ChevronRight size={14} className="gdrive-popover-item-arrow" />
+                            </div>
+                          ))}
+                        </div>
+
+                        <button
+                          type="button"
+                          className="gdrive-popover-footer-btn"
+                          onClick={() => { setActiveWidgetPopover(null); navigate('/casos'); }}
+                        >
+                          Ir a Casos clínicos <ChevronRight size={14} />
+                        </button>
+                      </>
+                    )}
+
+                    {activeWidgetPopover === 'calificaciones' && (
+                      <>
+                        <div className="gdrive-popover-head">
+                          <div className="gdrive-popover-head-left">
+                            <GraduationCap size={18} className="icon-calificaciones" />
+                            <span className="gdrive-popover-title">Calificaciones sin revisar</span>
+                            <span className="gdrive-popover-count badge-calificaciones">{MOCK_UNREVIEWED_GRADES.length}</span>
+                          </div>
+                          <button
+                            type="button"
+                            className="gdrive-popover-close-btn"
+                            onClick={() => setActiveWidgetPopover(null)}
+                            title="Cerrar"
+                            aria-label="Cerrar"
+                          >
+                            <X size={15} />
+                          </button>
+                        </div>
+
+                        <div className="gdrive-popover-list">
+                          {MOCK_UNREVIEWED_GRADES.map(g => (
+                            <div
+                              key={g.id}
+                              className="gdrive-popover-item"
+                              onClick={() => { setActiveWidgetPopover(null); navigate('/historial'); }}
+                            >
+                              <span className="gdrive-popover-score">{g.score}%</span>
+                              <span className="gdrive-popover-item-title">{g.caseTitle}</span>
+                              <ChevronRight size={14} className="gdrive-popover-item-arrow" />
+                            </div>
+                          ))}
+                        </div>
+
+                        <button
+                          type="button"
+                          className="gdrive-popover-footer-btn"
+                          onClick={() => { setActiveWidgetPopover(null); navigate('/historial'); }}
+                        >
+                          Ver historial completo <ChevronRight size={14} />
+                        </button>
+                      </>
+                    )}
+                  </motion.div>
+                </div>
+              )}
+            </AnimatePresence>
 
             {error && (
               <div className="gdrive-error-banner">
