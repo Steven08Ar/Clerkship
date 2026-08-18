@@ -266,14 +266,15 @@ export default function DocumentPreviewView({ document, onBack }: DocumentPrevie
     }
   }
 
-  // Obtener ícono y color temático
+  // Obtener ícono, etiqueta y color temático
   function getTypeBadge() {
-    if (isPdf) return { label: 'PDF', bg: '#EF4444', icon: FileText };
-    if (isWord) return { label: 'WORD', bg: '#2563EB', icon: FileText };
-    if (isExcel) return { label: 'EXCEL', bg: '#10B981', icon: FileSpreadsheet };
-    if (isPpt) return { label: 'POWERPOINT', bg: '#F97316', icon: Presentation };
-    if (isImage) return { label: 'IMAGEN', bg: '#9333EA', icon: ImageIcon };
-    return { label: 'ARCHIVO', bg: '#64748B', icon: FileText };
+    if (isPdf) return { label: 'PDF', bg: '#EF4444', gradient: 'linear-gradient(135deg, #EF4444 0%, #DC2626 100%)', icon: FileText, colorClass: 'badge-pdf' };
+    if (isWord) return { label: 'WORD', bg: '#2563EB', gradient: 'linear-gradient(135deg, #3B82F6 0%, #1D4ED8 100%)', icon: FileText, colorClass: 'badge-word' };
+    if (isExcel) return { label: 'EXCEL', bg: '#10B981', gradient: 'linear-gradient(135deg, #10B981 0%, #059669 100%)', icon: FileSpreadsheet, colorClass: 'badge-excel' };
+    if (isPpt) return { label: 'POWERPOINT', bg: '#F97316', gradient: 'linear-gradient(135deg, #FB923C 0%, #EA580C 100%)', icon: Presentation, colorClass: 'badge-ppt' };
+    if (isImage) return { label: ext ? ext.toUpperCase() : 'IMAGEN', bg: '#8B5CF6', gradient: 'linear-gradient(135deg, #A855F7 0%, #7C3AED 100%)', icon: ImageIcon, colorClass: 'badge-img' };
+    if (isText) return { label: ext ? ext.toUpperCase() : 'TEXTO', bg: '#64748B', gradient: 'linear-gradient(135deg, #64748B 0%, #475569 100%)', icon: FileText, colorClass: 'badge-text' };
+    return { label: ext ? ext.toUpperCase() : 'ARCHIVO', bg: '#64748B', gradient: 'linear-gradient(135deg, #64748B 0%, #475569 100%)', icon: FileText, colorClass: 'badge-file' };
   }
 
   const badgeInfo = getTypeBadge();
@@ -292,56 +293,114 @@ export default function DocumentPreviewView({ document, onBack }: DocumentPrevie
     >
       {/* ── Barra Superior (Top Header) ── */}
       <div className="doc-fulltab-header">
-        <div className="doc-fulltab-left">
-          <button
-            type="button"
-            className="doc-fulltab-back-btn"
-            onClick={onBack}
-            title="Volver a Documentos"
-          >
-            <ArrowLeft size={16} />
-            <span>Volver</span>
-          </button>
+        <div className="doc-fulltab-main-row">
+          <div className="doc-fulltab-left">
+            <button
+              type="button"
+              className="doc-fulltab-back-btn"
+              onClick={onBack}
+              title="Volver a Documentos"
+            >
+              <ArrowLeft size={16} />
+              <span className="doc-back-btn-text">Volver</span>
+            </button>
 
-          <div className="doc-fulltab-divider" />
+            <div className="doc-fulltab-divider" />
 
-          {/* Badge del tipo de documento */}
-          <div
-            className="doc-preview-badge"
-            style={{ backgroundColor: badgeInfo.bg }}
-            title={badgeInfo.label}
-          >
-            <BadgeIcon size={14} color="#FFFFFF" />
-            <span>{badgeInfo.label}</span>
+            {/* Badge del tipo de documento con ícono y texto */}
+            <div
+              className={`doc-preview-badge ${badgeInfo.colorClass}`}
+              style={{ background: badgeInfo.gradient }}
+              title={`Tipo de documento: ${badgeInfo.label}`}
+            >
+              <BadgeIcon size={14} color="#FFFFFF" strokeWidth={2.2} />
+              <span className="doc-preview-badge-text">{badgeInfo.label}</span>
+            </div>
+
+            <div className="doc-preview-title-group">
+              <h2 className="doc-fulltab-file-name" title={fileName}>{fileName}</h2>
+              <span className="doc-preview-file-sub">{formatFileSize(document.size_bytes)}</span>
+            </div>
           </div>
 
-          <div className="doc-preview-title-group">
-            <h2 className="doc-fulltab-file-name" title={fileName}>{fileName}</h2>
-            <span className="doc-preview-file-sub">{formatFileSize(document.size_bytes)}</span>
+          {/* Controles de la barra superior */}
+          <div className="doc-preview-actions">
+            {/* Zoom controls para Imagen / Word / Excel / PPT (en escritorio) */}
+            {!isPdf && (
+              <div className="doc-preview-zoom-group doc-zoom-desktop">
+                <button
+                  type="button"
+                  className="doc-preview-tool-btn"
+                  title="Reducir zoom (Ctrl + -)"
+                  onClick={() => setZoom(z => Math.max(50, z - 20))}
+                >
+                  <ZoomOut size={15} />
+                </button>
+                <span className="doc-preview-zoom-label">{zoom}%</span>
+                <button
+                  type="button"
+                  className="doc-preview-tool-btn"
+                  title="Aumentar zoom (Ctrl + +)"
+                  onClick={() => setZoom(z => Math.min(300, z + 20))}
+                >
+                  <ZoomIn size={15} />
+                </button>
+                {isImage && (
+                  <button
+                    type="button"
+                    className="doc-preview-tool-btn"
+                    title="Rotar imagen 90°"
+                    onClick={() => setRotation(r => (r + 90) % 360)}
+                  >
+                    <RotateCw size={15} />
+                  </button>
+                )}
+              </div>
+            )}
+
+            {/* Botón de Pantalla Completa nativa (F11) */}
+            <button
+              type="button"
+              className="doc-preview-tool-btn"
+              title={fullscreen ? 'Salir de pantalla completa (F11 / Esc)' : 'Pantalla completa (F11)'}
+              onClick={toggleNativeFullscreen}
+            >
+              {fullscreen ? <Minimize2 size={15} /> : <Maximize2 size={15} />}
+            </button>
+
+            <button
+              type="button"
+              className="doc-preview-btn-download"
+              title="Descargar archivo original"
+              onClick={handleDownload}
+              disabled={!detail}
+            >
+              <Download size={15} />
+              <span className="doc-download-btn-text">Descargar</span>
+            </button>
           </div>
         </div>
 
-        {/* Controles de la barra superior */}
-        <div className="doc-preview-actions">
-          {/* Zoom controls para Imagen / Word / Excel / PPT */}
-          {!isPdf && (
+        {/* Barra de herramientas secundaria en móvil para controles de zoom */}
+        {!isPdf && (
+          <div className="doc-preview-mobile-tools-bar">
             <div className="doc-preview-zoom-group">
               <button
                 type="button"
                 className="doc-preview-tool-btn"
-                title="Reducir zoom (Ctrl + -)"
+                title="Reducir zoom"
                 onClick={() => setZoom(z => Math.max(50, z - 20))}
               >
-                <ZoomOut size={16} />
+                <ZoomOut size={14} />
               </button>
               <span className="doc-preview-zoom-label">{zoom}%</span>
               <button
                 type="button"
                 className="doc-preview-tool-btn"
-                title="Aumentar zoom (Ctrl + +)"
+                title="Aumentar zoom"
                 onClick={() => setZoom(z => Math.min(300, z + 20))}
               >
-                <ZoomIn size={16} />
+                <ZoomIn size={14} />
               </button>
               {isImage && (
                 <button
@@ -350,33 +409,12 @@ export default function DocumentPreviewView({ document, onBack }: DocumentPrevie
                   title="Rotar imagen 90°"
                   onClick={() => setRotation(r => (r + 90) % 360)}
                 >
-                  <RotateCw size={16} />
+                  <RotateCw size={14} />
                 </button>
               )}
             </div>
-          )}
-
-          {/* Botón de Pantalla Completa nativa (F11) */}
-          <button
-            type="button"
-            className="doc-preview-tool-btn"
-            title={fullscreen ? 'Salir de pantalla completa (F11 / Esc)' : 'Pantalla completa (F11)'}
-            onClick={toggleNativeFullscreen}
-          >
-            {fullscreen ? <Minimize2 size={16} /> : <Maximize2 size={16} />}
-          </button>
-
-          <button
-            type="button"
-            className="doc-preview-btn-download"
-            title="Descargar archivo original"
-            onClick={handleDownload}
-            disabled={!detail}
-          >
-            <Download size={15} />
-            <span>Descargar</span>
-          </button>
-        </div>
+          </div>
+        )}
       </div>
 
       {/* ── Área Principal de Vista Previa ── */}

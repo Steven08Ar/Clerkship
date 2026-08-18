@@ -2183,8 +2183,14 @@ html.theme-animating .crono-gantt-card {
 [data-theme="dark"] .doc-fulltab-file-name {
   color: #F8FAFC !important;
 }
+[data-theme="dark"] .doc-preview-file-sub {
+  color: #94A3B8 !important;
+}
 [data-theme="dark"] .doc-fulltab-divider {
   background: rgba(255, 255, 255, 0.12) !important;
+}
+[data-theme="dark"] .doc-preview-mobile-tools-bar {
+  border-top-color: rgba(255, 255, 255, 0.08) !important;
 }
 [data-theme="dark"] .bib2-body.is-preview-mode {
   background: #0B1120 !important;
