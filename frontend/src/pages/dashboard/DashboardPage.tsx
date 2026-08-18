@@ -920,11 +920,19 @@ export default function DashboardPage() {
               <div className="gdrive-search-box">
                 <Search size={18} className="gdrive-search-icon" />
                 <input
-                  type="text"
-                  placeholder="Buscar en tu Unidad, carpetas o documentos..."
+                  type="search"
+                  placeholder="Buscar en tu Unidad..."
                   value={searchQuery}
                   onChange={e => setSearchQuery(e.target.value)}
+                  onKeyDown={e => {
+                    if (e.key === 'Escape') setSearchQuery('');
+                  }}
                   className="gdrive-search-input"
+                  autoComplete="off"
+                  autoCorrect="off"
+                  autoCapitalize="none"
+                  spellCheck={false}
+                  aria-label="Buscar en tu Unidad"
                 />
                 {searchQuery && (
                   <button
@@ -932,6 +940,7 @@ export default function DashboardPage() {
                     className="gdrive-search-clear"
                     onClick={() => setSearchQuery('')}
                     title="Limpiar búsqueda"
+                    aria-label="Limpiar búsqueda"
                   >
                     <X size={15} />
                   </button>
