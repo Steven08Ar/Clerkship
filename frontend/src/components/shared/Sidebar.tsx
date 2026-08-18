@@ -72,6 +72,11 @@ const PANEL: Record<string, PanelSection> = {
       },
     ],
   },
+  mailbox: {
+    flat: [
+      { label: 'Buzón', route: '/buzon' },
+    ],
+  },
 };
 
 /* ── Helpers ────────────────────────────────────────────────── */
@@ -123,7 +128,7 @@ export default function Sidebar() {
   /* Auto-open the group that contains the current active sub-item */
   const [openGroup, setOpenGroup] = useState<string | null>(() => {
     const section = PANEL[initialId];
-    if (!section.groups || !activeModulo) return null;
+    if (!section?.groups || !activeModulo) return null;
     return section.groups.find(g =>
       g.items.some(i => i.route && getModuloFromRoute(i.route) === activeModulo)
     )?.label ?? null;
@@ -131,7 +136,7 @@ export default function Sidebar() {
 
   useEffect(() => {
     const section = PANEL[activeId];
-    if (!section.groups) return;
+    if (!section?.groups) return;
     if (!activeModulo) return;
     const group = section.groups.find(g =>
       g.items.some(i => i.route && getModuloFromRoute(i.route) === activeModulo)
@@ -148,7 +153,7 @@ export default function Sidebar() {
   }
 
   const activeTab    = DASH_NAV.find(t => t.id === activeId)!;
-  const panelContent = PANEL[activeId];
+  const panelContent = PANEL[activeId] ?? { flat: [] };
 
   /* Active state helpers */
   function isFlatActive(route: string | undefined) {
