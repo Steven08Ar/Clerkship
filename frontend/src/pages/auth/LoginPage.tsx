@@ -9,7 +9,8 @@ import logoUrl from '../../assets/Logo Clerkship.svg';
 import InteractiveBackgroundCanvas from '../../components/shared/InteractiveBackgroundCanvas';
 import ThemeToggleFloating from '../../components/shared/ThemeToggleFloating';
 import { setActiveUser, hasUserAcceptedConsent } from '../../utils/authConsent';
-import { loginWithEmailPassword, mainAuthErrorMessage } from '../../data/mainAuth';
+import { loginWithEmailPassword, mainAuthErrorMessage, EmailNotVerifiedError } from '../../data/mainAuth';
+import VerifyEmailStep from '../../components/auth/VerifyEmailStep';
 import '../../styles/landing.css';
 import '../../styles/auth.css';
 
@@ -50,7 +51,7 @@ export default function LoginPage() {
   const [errors, setErrors]    = useState<FormErrors>({});
   const [showPass, setShowPass] = useState(false);
   const [loading, setLoading]   = useState(false);
-  const [success, setSuccess]   = useState(false);
+  const [step, setStep] = useState<'form' | 'verify' | 'success'>('form');
 
   function patch<K extends keyof FormState>(key: K, value: FormState[K]) {
     setForm(prev => ({ ...prev, [key]: value }));
@@ -63,7 +64,7 @@ export default function LoginPage() {
        2. Card fades out via AnimatePresence
        3. onExitComplete waits then navigates                */
     setActiveUser(form.email);
-    setSuccess(true);
+    setStep('success');
   }
 
   async function handleSubmit(e: React.FormEvent) {
@@ -77,7 +78,11 @@ export default function LoginPage() {
       await loginWithEmailPassword(form.email, form.password);
       finishLogin();
     } catch (err) {
-      setErrors({ general: mainAuthErrorMessage(err) });
+      if (err instanceof EmailNotVerifiedError) {
+        setStep('verify');
+      } else {
+        setErrors({ general: mainAuthErrorMessage(err) });
+      }
     } finally {
       setLoading(false);
     }
@@ -105,7 +110,7 @@ export default function LoginPage() {
       {/* ── Card (animates out on success) ── */}
       <div className="auth-body">
         <AnimatePresence onExitComplete={handleExitComplete}>
-          {!success && (
+          {step !== 'success' && (
             <motion.div
               className="auth-card auth-card-glass"
               key="login-card"
@@ -125,6 +130,26 @@ export default function LoginPage() {
                 <img src={logoUrl} alt="Clerkship" />
                 Clerkship
               </Link>
+
+              <AnimatePresence mode="wait">
+                {step === 'verify' ? (
+                  <motion.div
+                    key="login-step-verify"
+                    initial={{ opacity: 0, x: 16 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: -16 }}
+                    transition={{ duration: 0.25 }}
+                  >
+                    <VerifyEmailStep email={form.email} onVerified={finishLogin} />
+                  </motion.div>
+                ) : (
+                  <motion.div
+                    key="login-step-form"
+                    initial={{ opacity: 0, x: 16 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: -16 }}
+                    transition={{ duration: 0.25 }}
+                  >
 
               {/* Cabecera */}
               <div className="auth-card-head">
@@ -258,6 +283,9 @@ export default function LoginPage() {
               <Link to="/" className="auth-back-link">
                 <ArrowLeft size={16} /> Volver al inicio
               </Link>
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </motion.div>
           )}
         </AnimatePresence>

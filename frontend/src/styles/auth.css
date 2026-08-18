@@ -1382,3 +1382,188 @@
 [data-theme="dark"] .welcome-phrase-text {
   color: #94A3B8 !important;
 }
+
+/* ══════════════════════════════════════════════════════════
+   Verificación de correo (registro + login sin verificar)
+══════════════════════════════════════════════════════════ */
+.auth-verify-icon {
+  width: 56px;
+  height: 56px;
+  margin: 0 auto 20px;
+  border-radius: 50%;
+  background: var(--p-subtle, #E3F2FD);
+  color: var(--p, #0284C7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.auth-code-input {
+  width: 100%;
+  padding: 14px 16px;
+  border-radius: 14px;
+  border: 1.5px solid var(--border);
+  background: var(--surface);
+  color: var(--ink);
+  font-size: 1.6rem;
+  font-weight: 700;
+  text-align: center;
+  letter-spacing: 10px;
+  font-variant-numeric: tabular-nums;
+  transition: border-color 0.15s;
+}
+.auth-code-input::placeholder { color: var(--ink3); letter-spacing: 10px; }
+.auth-code-input:focus { outline: none; border-color: var(--p, #0284C7); }
+
+.auth-resend-row {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  margin: 18px 0 24px;
+}
+.auth-resend-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: none;
+  border: none;
+  color: var(--p, #0284C7);
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+.auth-resend-btn:disabled { color: var(--ink3); cursor: not-allowed; }
+.auth-resend-ok {
+  font-size: 0.8rem;
+  color: #10B981;
+  font-weight: 600;
+}
+.auth-spin { animation: auth-spin-rotate 0.8s linear infinite; }
+@keyframes auth-spin-rotate { to { transform: rotate(360deg); } }
+
+/* ══════════════════════════════════════════════════════════
+   Selector de avatar DiceBear (paso final del registro)
+══════════════════════════════════════════════════════════ */
+.auth-avatar-preview-wrap {
+  position: relative;
+  width: 128px;
+  height: 128px;
+  margin: 4px auto 18px;
+}
+.auth-avatar-preview {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  border: 3px solid var(--surface);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.12);
+  background: var(--surface2);
+  object-fit: cover;
+}
+.auth-avatar-shuffle-btn {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  border: 2px solid var(--surface);
+  background: var(--p, #0284C7);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 3px 10px rgba(2, 132, 199, 0.35);
+}
+
+.auth-avatar-suggestions {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  margin-bottom: 22px;
+  flex-wrap: wrap;
+}
+.auth-avatar-thumb {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  border: 2px solid transparent;
+  padding: 0;
+  overflow: hidden;
+  cursor: pointer;
+  background: var(--surface2);
+  opacity: 0.7;
+  transition: opacity 0.15s, border-color 0.15s;
+}
+.auth-avatar-thumb img { width: 100%; height: 100%; display: block; }
+.auth-avatar-thumb:hover { opacity: 1; }
+.auth-avatar-thumb.active {
+  opacity: 1;
+  border-color: var(--p, #0284C7);
+}
+
+.auth-avatar-section {
+  text-align: left;
+  margin-bottom: 18px;
+}
+.auth-avatar-style-row,
+.auth-avatar-bg-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 8px;
+}
+.auth-avatar-style-btn {
+  padding: 7px 14px;
+  border-radius: 999px;
+  border: 1.5px solid var(--border);
+  background: var(--surface);
+  color: var(--ink2);
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: border-color 0.15s, color 0.15s, background 0.15s;
+}
+.auth-avatar-style-btn.active {
+  border-color: var(--p, #0284C7);
+  background: var(--p-subtle, #E3F2FD);
+  color: var(--p, #0284C7);
+}
+
+.auth-avatar-bg-swatch {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  border: 1.5px solid var(--border);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #0F172A;
+  flex-shrink: 0;
+}
+.auth-avatar-bg-swatch.is-transparent {
+  background: repeating-conic-gradient(#d1d5db 0% 25%, #f3f4f6 0% 50%) 50% / 10px 10px;
+}
+.auth-avatar-bg-swatch.active {
+  border-color: var(--p, #0284C7);
+  border-width: 2px;
+}
+
+.auth-avatar-bg-custom {
+  position: relative;
+  overflow: hidden;
+  background: conic-gradient(from 0deg, #f43f5e, #f59e0b, #eab308, #22c55e, #06b6d4, #6366f1, #d946ef, #f43f5e);
+  color: #ffffff;
+}
+.auth-avatar-bg-custom-input {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  cursor: pointer;
+  border: none;
+  padding: 0;
+}

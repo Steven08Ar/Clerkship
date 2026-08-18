@@ -10,6 +10,8 @@ import InteractiveBackgroundCanvas from '../../components/shared/InteractiveBack
 import ThemeToggleFloating from '../../components/shared/ThemeToggleFloating';
 import { setActiveUser, hasUserAcceptedConsent } from '../../utils/authConsent';
 import { registerUser, mainAuthErrorMessage } from '../../data/mainAuth';
+import VerifyEmailStep from '../../components/auth/VerifyEmailStep';
+import AvatarPickerStep from '../../components/auth/AvatarPickerStep';
 import '../../styles/landing.css';
 import '../../styles/auth.css';
 
@@ -49,8 +51,13 @@ function validate(form: FormState): FormErrors {
     errors.password = 'La contraseña es requerida.';
   else if (form.password.length < 8)
     errors.password = 'Mínimo 8 caracteres.';
-  if (form.role === 'STUDENT' && !form.studentCode.trim())
-    errors.studentCode = 'Tu código de estudiante es requerido.';
+  if (form.role === 'STUDENT') {
+    const code = form.studentCode.trim();
+    if (!code)
+      errors.studentCode = 'Tu código de estudiante es requerido.';
+    else if (!/^U00/i.test(code))
+      errors.studentCode = 'El código debe empezar con "U00" (ej. U00123456).';
+  }
   return errors;
 }
 
@@ -71,7 +78,10 @@ export default function RegisterPage() {
   const [errors, setErrors] = useState<FormErrors>({});
   const [showPass, setShowPass] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [success, setSuccess] = useState(false);
+  /* form: datos básicos → verify: confirmar correo (obligatorio, el backend
+     no deja loguear sin esto) → avatar: elegir/crear con DiceBear → success:
+     la animación de salida de siempre hacia /dashboard o /consent. */
+  const [step, setStep] = useState<'form' | 'verify' | 'avatar' | 'success'>('form');
 
   function patch<K extends keyof FormState>(key: K, value: FormState[K]) {
     setForm(prev => ({ ...prev, [key]: value }));
@@ -99,7 +109,7 @@ export default function RegisterPage() {
         ...(form.role === 'STUDENT' ? { student_code: form.studentCode.trim() } : {}),
       });
       setActiveUser(form.email);
-      setSuccess(true);
+      setStep('verify');
     } catch (err) {
       setErrors({ general: mainAuthErrorMessage(err) });
     } finally {
@@ -128,7 +138,7 @@ export default function RegisterPage() {
       {/* ── Cuerpo centrado ─────────────────────────────────────── */}
       <div className="auth-body">
         <AnimatePresence onExitComplete={handleExitComplete}>
-          {!success && (
+          {step !== 'success' && (
             <motion.div
               className="auth-card auth-card-glass"
               key="register-card"
@@ -148,6 +158,36 @@ export default function RegisterPage() {
                 <img src={logoUrl} alt="Clerkship" />
                 Clerkship
               </Link>
+
+              <AnimatePresence mode="wait">
+                {step === 'verify' ? (
+                  <motion.div
+                    key="step-verify"
+                    initial={{ opacity: 0, x: 16 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: -16 }}
+                    transition={{ duration: 0.25 }}
+                  >
+                    <VerifyEmailStep email={form.email} onVerified={() => setStep('avatar')} />
+                  </motion.div>
+                ) : step === 'avatar' ? (
+                  <motion.div
+                    key="step-avatar"
+                    initial={{ opacity: 0, x: 16 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: -16 }}
+                    transition={{ duration: 0.25 }}
+                  >
+                    <AvatarPickerStep defaultSeed={form.email} onDone={() => setStep('success')} />
+                  </motion.div>
+                ) : (
+                  <motion.div
+                    key="step-form"
+                    initial={{ opacity: 0, x: 16 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: -16 }}
+                    transition={{ duration: 0.25 }}
+                  >
 
               {/* Cabecera */}
               <div className="auth-card-head">
@@ -251,7 +291,7 @@ export default function RegisterPage() {
                           id="auth-student-code"
                           type="text"
                           className="auth-input"
-                          placeholder="Ej. 20231045"
+                          placeholder="Ej. U00123456"
                           value={form.studentCode}
                           onChange={e => patch('studentCode', e.target.value)}
                         />
@@ -386,6 +426,9 @@ export default function RegisterPage() {
               <Link to="/" className="auth-back-link">
                 <ArrowLeft size={16} /> Volver al inicio
               </Link>
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </motion.div>
           )}
         </AnimatePresence>
