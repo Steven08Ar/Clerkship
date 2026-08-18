@@ -2595,3 +2595,69 @@ html.theme-animating .crono-gantt-card {
   color: #A5B4FC !important;
 }
 
+[data-theme="dark"] .gdrive-storage-pill {
+  background: #0F172A !important;
+  border-color: rgba(255, 255, 255, 0.08) !important;
+}
+
+[data-theme="dark"] .gdrive-storage-val {
+  color: #F8FAFC !important;
+}
+
+[data-theme="dark"] .gdrive-storage-of {
+  color: #94A3B8 !important;
+}
+
+[data-theme="dark"] .gdrive-storage-track {
+  background: #334155 !important;
+}
+
+[data-theme="dark"] .gdrive-widget-chip {
+  background: #0F172A !important;
+  border-color: rgba(255, 255, 255, 0.08) !important;
+  color: #CBD5E1 !important;
+}
+
+[data-theme="dark"] .gdrive-widget-chip:hover,
+[data-theme="dark"] .gdrive-widget-chip.active {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.35) !important;
+}
+
+[data-theme="dark"] .gdrive-widget-popover {
+  background: #1E293B !important;
+  border-color: rgba(255, 255, 255, 0.1) !important;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.5) !important;
+}
+
+[data-theme="dark"] .gdrive-popover-head {
+  border-bottom-color: rgba(255, 255, 255, 0.08) !important;
+}
+
+[data-theme="dark"] .gdrive-popover-title {
+  color: #FFFFFF !important;
+}
+
+[data-theme="dark"] .gdrive-popover-count {
+  color: #94A3B8 !important;
+}
+
+[data-theme="dark"] .gdrive-popover-item:hover {
+  background: rgba(255, 255, 255, 0.06) !important;
+}
+
+[data-theme="dark"] .gdrive-popover-item-title {
+  color: #E2E8F0 !important;
+}
+
+[data-theme="dark"] .gdrive-popover-footer-btn {
+  background: #0F172A !important;
+  border-color: rgba(255, 255, 255, 0.08) !important;
+  color: #818CF8 !important;
+}
+
+[data-theme="dark"] .gdrive-popover-footer-btn:hover {
+  background: rgba(99, 102, 241, 0.15) !important;
+  color: #A5B4FC !important;
+}
+
+

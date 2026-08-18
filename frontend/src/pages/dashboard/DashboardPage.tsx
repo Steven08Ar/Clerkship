@@ -1,43 +1,35 @@
 import { useEffect, useMemo, useRef, useState, type DragEvent } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
+import { useNavigate } from 'react-router-dom';
 import {
   Plus, ArrowUpDown, FileText, FileSpreadsheet,
   Presentation, Image as ImageIcon, FileCode, File,
   MoreVertical, Pencil, Trash2, ArrowLeft, FolderPlus, UploadCloud, Loader2, Download, Eye,
-  LayoutGrid, List, Search, X, Folder, HardDrive, Check
+  LayoutGrid, List, Search, X, Folder, HardDrive, Check,
+  ClipboardList, GraduationCap, Mail, ChevronRight
 } from 'lucide-react';
 import Sidebar from '../../components/shared/Sidebar';
 import WelcomeOverlay from '../../components/shared/WelcomeOverlay';
 import FolderModal from '../../components/dashboard/FolderModal';
 import UploadDocumentModal from '../../components/dashboard/UploadDocumentModal';
-import InfoCards from '../../components/dashboard/InfoCards';
 import DocumentPreviewView from '../../components/dashboard/DocumentPreviewView';
-import { formatFileSize } from '../../utils/fileUpload';
+import { formatFileSize, readFileAsBase64 } from '../../utils/fileUpload';
 import { mainAuthErrorMessage } from '../../data/mainAuth';
 import {
   listFolders, createFolder, updateFolder, deleteFolder,
   listDocuments, getDocument, uploadDocument, updateDocument, deleteDocument,
   type DocumentFolder, type DocumentSummary,
 } from '../../data/documentosApi';
-
-function readFileAsBase64(file: File): Promise<string> {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onloadend = () => {
-      const res = (reader.result as string) || '';
-      resolve(res.split(',')[1] || '');
-    };
-    reader.onerror = reject;
-    reader.readAsDataURL(file);
-  });
-}
+import { getStorageUsage, type StorageUsage } from '../../data/usuariosApi';
+import { getMailboxStatus } from '../../data/mailboxApi';
+import { MOCK_PENDING_CASES, MOCK_UNREVIEWED_GRADES } from '../../data/mockAcademicData';
 
 const SORT_OPTIONS = ['Más reciente', 'Más antiguo', 'Nombre A–Z', 'Tamaño (Mayor)'] as const;
 type SortOption = typeof SORT_OPTIONS[number];
 
 type FilterType = 'ALL' | 'PDF' | 'DOC' | 'XLS' | 'PPT' | 'IMG' | 'TXT';
 
-const FILTER_CHIPS: { id: FilterType; label: string; icon?: any; color?: string }[] = [
+const FILTER_CHIPS: { id: FilterType; label: string; color?: string }[] = [
   { id: 'ALL', label: 'Todos' },
   { id: 'PDF', label: 'PDFs', color: '#EF4444' },
   { id: 'DOC', label: 'Word', color: '#2563EB' },
@@ -79,12 +71,9 @@ function getDocTypeInfo(name: string, mime: string) {
   const m = (mime || '').toLowerCase();
   const ext = n.split('.').pop() || '';
 
-  // 1. PDF
   if (m.includes('pdf') || ext === 'pdf') {
     return { typeClass: 'bmd-pdf', typeLabel: 'PDF' as FilterType };
   }
-
-  // 2. PowerPoint (.pptx, .ppt, .pps, .ppsx)
   if (
     m.includes('presentation') ||
     m.includes('powerpoint') ||
@@ -92,8 +81,6 @@ function getDocTypeInfo(name: string, mime: string) {
   ) {
     return { typeClass: 'bmd-ppt', typeLabel: 'PPT' as FilterType };
   }
-
-  // 3. Excel (.xlsx, .xls, .csv, spreadsheetml)
   if (
     m.includes('spreadsheetml') ||
     m.includes('excel') ||
@@ -102,8 +89,6 @@ function getDocTypeInfo(name: string, mime: string) {
   ) {
     return { typeClass: 'bmd-xls', typeLabel: 'XLS' as FilterType };
   }
-
-  // 4. Word (.docx, .doc, wordprocessingml)
   if (
     m.includes('word') ||
     m.includes('wordprocessingml') ||
@@ -111,16 +96,12 @@ function getDocTypeInfo(name: string, mime: string) {
   ) {
     return { typeClass: 'bmd-doc', typeLabel: 'DOC' as FilterType };
   }
-
-  // 5. Imágenes
   if (
     m.includes('image') ||
     ['png', 'jpg', 'jpeg', 'webp', 'gif', 'svg', 'bmp', 'tiff'].includes(ext)
   ) {
     return { typeClass: 'bmd-img', typeLabel: 'IMG' as FilterType };
   }
-
-  // 6. Texto plano / código
   if (m.includes('text') || ['txt', 'json', 'md', 'js', 'py', 'ts', 'html', 'css'].includes(ext)) {
     return { typeClass: 'bmd-txt', typeLabel: 'TXT' as FilterType };
   }
@@ -200,6 +181,7 @@ function getPeekDocsForFolder(docsInFolder: DocumentSummary[], fileCount: number
    Página Dashboard (Estilo Google Drive / Cloud 100% Responsivo)
    ════════════════════════════════════════════════════════════ */
 export default function DashboardPage() {
+  const navigate = useNavigate();
   const [showWelcome, setShowWelcome] = useState(() => {
     return sessionStorage.getItem('clerkship_show_welcome') === 'true';
   });
@@ -239,7 +221,13 @@ export default function DashboardPage() {
   const [isDraggingOver, setIsDraggingOver] = useState(false);
   const [isDropUploading, setIsDropUploading] = useState(false);
 
+  /* ── Datos de Almacenamiento, Trabajos, Calificaciones y Buzón ── */
+  const [storageUsage, setStorageUsage] = useState<StorageUsage | null>(null);
+  const [mailboxUnread, setMailboxUnread] = useState(0);
+  const [activeWidgetPopover, setActiveWidgetPopover] = useState<'trabajos' | 'calificaciones' | null>(null);
+
   const menuRef = useRef<HTMLDivElement>(null);
+  const widgetPopoverRef = useRef<HTMLDivElement>(null);
   const dragCounterRef = useRef(0);
 
   function handleWelcomeComplete() {
@@ -256,14 +244,18 @@ export default function DashboardPage() {
     setLoading(true);
     setError(null);
     try {
-      const [{ folders: f }, { documents: d }, { documents: fullDocs }] = await Promise.all([
+      const [{ folders: f }, { documents: d }, { documents: fullDocs }, storageRes, mbStatus] = await Promise.all([
         listFolders(),
         listDocuments(undefined, 18),
         listDocuments(undefined, 300),
+        getStorageUsage().catch(() => null),
+        getMailboxStatus().catch(() => null),
       ]);
       setFolders(f);
       setRecent(d);
       setAllDocs(fullDocs || []);
+      if (storageRes) setStorageUsage(storageRes);
+      if (mbStatus) setMailboxUnread(mbStatus.unread_count || 0);
     } catch (err) {
       setError(mainAuthErrorMessage(err));
     } finally {
@@ -276,10 +268,13 @@ export default function DashboardPage() {
   useEffect(() => {
     function handleClickOutside(e: MouseEvent) {
       if (menuRef.current && !menuRef.current.contains(e.target as Node)) setMenuFor(null);
+      if (widgetPopoverRef.current && !widgetPopoverRef.current.contains(e.target as Node)) {
+        setActiveWidgetPopover(null);
+      }
     }
-    if (menuFor) document.addEventListener('mousedown', handleClickOutside);
+    if (menuFor || activeWidgetPopover) document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, [menuFor]);
+  }, [menuFor, activeWidgetPopover]);
 
   async function loadFolder(folder: DocumentFolder) {
     setOpenFolder(folder);
@@ -386,6 +381,13 @@ export default function DashboardPage() {
       setAllDocs(prev => [document, ...prev]);
     }
     if (!folderId) setRecent(prev => prev.slice(0, 18));
+    // Actualizar uso de almacenamiento local
+    if (storageUsage) {
+      setStorageUsage({
+        ...storageUsage,
+        used_bytes: storageUsage.used_bytes + file.size_bytes,
+      });
+    }
   }
 
   /* ── Drag and Drop Cloud Upload Handler ── */
@@ -575,6 +577,11 @@ export default function DashboardPage() {
     const match = folders.find(f => f.id === id);
     return match ? match.name : 'Carpeta';
   }
+
+  /* ── Cálculos de Almacenamiento ── */
+  const usedBytes = storageUsage?.used_bytes ?? 2.1 * 1024 * 1024;
+  const limitBytes = storageUsage?.limit_bytes ?? 5 * 1024 * 1024 * 1024;
+  const percentUsed = Math.min(100, Math.max(0.2, (usedBytes / limitBytes) * 100));
 
   function renderFolderCard(f: DocumentFolder) {
     const c = f.color || '#10B981';
@@ -990,53 +997,186 @@ export default function DashboardPage() {
               </div>
             </div>
 
-            {/* ── BREADCRUMB TRAIL (GOOGLE DRIVE STYLE) ── */}
-            <div className="gdrive-breadcrumb-bar">
-              <div className="gdrive-breadcrumbs">
-                <button
-                  type="button"
-                  className={`gdrive-crumb-item ${!openFolder ? 'active' : ''}`}
-                  onClick={() => jumpToBreadcrumb(null)}
-                >
-                  <HardDrive size={15} />
-                  <span>Mi Unidad</span>
-                </button>
+            {/* ── BARRA UNIFICADA: BREADCRUMBS + ALMACENAMIENTO + WIDGETS LATERAL DERECHO ── */}
+            <div className="gdrive-breadcrumb-bar gdrive-unified-bar">
+              {/* Izquierda: Mi Unidad + Información de Almacenamiento */}
+              <div className="gdrive-bar-left">
+                <div className="gdrive-breadcrumbs">
+                  <button
+                    type="button"
+                    className={`gdrive-crumb-item ${!openFolder ? 'active' : ''}`}
+                    onClick={() => jumpToBreadcrumb(null)}
+                  >
+                    <HardDrive size={15} />
+                    <span>Mi Unidad</span>
+                  </button>
 
-                {folderStack.map((sf, idx) => (
-                  <div key={sf.id} className="gdrive-crumb-group">
-                    <span className="gdrive-crumb-sep">/</span>
-                    <button
-                      type="button"
-                      className="gdrive-crumb-item"
-                      onClick={() => jumpToBreadcrumb(sf, idx)}
-                    >
-                      <Folder size={14} style={{ color: sf.color || '#10B981' }} />
-                      <span>{sf.name}</span>
-                    </button>
-                  </div>
-                ))}
+                  {folderStack.map((sf, idx) => (
+                    <div key={sf.id} className="gdrive-crumb-group">
+                      <span className="gdrive-crumb-sep">/</span>
+                      <button
+                        type="button"
+                        className="gdrive-crumb-item"
+                        onClick={() => jumpToBreadcrumb(sf, idx)}
+                      >
+                        <Folder size={14} style={{ color: sf.color || '#10B981' }} />
+                        <span>{sf.name}</span>
+                      </button>
+                    </div>
+                  ))}
 
-                {openFolder && (
-                  <div className="gdrive-crumb-group">
-                    <span className="gdrive-crumb-sep">/</span>
-                    <span className="gdrive-crumb-item active">
-                      <Folder size={14} style={{ color: openFolder.color || '#10B981' }} />
-                      <span>{openFolder.name}</span>
-                    </span>
+                  {openFolder && (
+                    <div className="gdrive-crumb-group">
+                      <span className="gdrive-crumb-sep">/</span>
+                      <span className="gdrive-crumb-item active">
+                        <Folder size={14} style={{ color: openFolder.color || '#10B981' }} />
+                        <span>{openFolder.name}</span>
+                      </span>
+                    </div>
+                  )}
+                </div>
+
+                {/* Información de Almacenamiento al lado de Mi Unidad */}
+                <div className="gdrive-storage-pill" title={`${formatFileSize(usedBytes)} usados de ${formatFileSize(limitBytes)}`}>
+                  <div className="gdrive-storage-text">
+                    <span className="gdrive-storage-val">{formatFileSize(usedBytes)}</span>
+                    <span className="gdrive-storage-of">de {formatFileSize(limitBytes)}</span>
                   </div>
-                )}
+                  <div className="gdrive-storage-track">
+                    <div className="gdrive-storage-fill" style={{ width: `${percentUsed}%` }} />
+                  </div>
+                </div>
               </div>
 
-              {openFolder && (
-                <button
-                  type="button"
-                  className="gdrive-back-folder-btn"
-                  onClick={goBackFolder}
-                  title="Volver a la carpeta anterior"
-                >
-                  <ArrowLeft size={14} /> Volver
-                </button>
-              )}
+              {/* Derecha: Indicadores Interactivos (Trabajos, Calificaciones, Buzón) + Volver */}
+              <div className="gdrive-bar-right" ref={widgetPopoverRef}>
+                <div className="gdrive-quick-widgets">
+                  {/* Widget 1: Trabajos pendientes */}
+                  <div className="gdrive-widget-item-wrap">
+                    <button
+                      type="button"
+                      className={`gdrive-widget-chip gdrive-chip-trabajos ${activeWidgetPopover === 'trabajos' ? 'active' : ''}`}
+                      onClick={() => setActiveWidgetPopover(prev => prev === 'trabajos' ? null : 'trabajos')}
+                      title="Ver trabajos pendientes"
+                    >
+                      <ClipboardList size={15} className="gdrive-widget-icon icon-trabajos" />
+                      <span className="gdrive-widget-label">Trabajos:</span>
+                      <span className="gdrive-widget-badge badge-trabajos">{MOCK_PENDING_CASES.length}</span>
+                    </button>
+
+                    <AnimatePresence>
+                      {activeWidgetPopover === 'trabajos' && (
+                        <motion.div
+                          className="gdrive-widget-popover"
+                          initial={{ opacity: 0, y: 8, scale: 0.95 }}
+                          animate={{ opacity: 1, y: 0, scale: 1 }}
+                          exit={{ opacity: 0, y: 8, scale: 0.95 }}
+                          transition={{ duration: 0.15 }}
+                        >
+                          <div className="gdrive-popover-head">
+                            <span className="gdrive-popover-title">Trabajos pendientes</span>
+                            <span className="gdrive-popover-count">{MOCK_PENDING_CASES.length} casos</span>
+                          </div>
+                          <div className="gdrive-popover-list">
+                            {MOCK_PENDING_CASES.slice(0, 4).map(c => (
+                              <div
+                                key={c.id}
+                                className="gdrive-popover-item"
+                                onClick={() => { setActiveWidgetPopover(null); navigate('/casos'); }}
+                              >
+                                <span className={`gdrive-popover-dot ${c.status === 'en_progreso' ? 'in-progress' : 'pending'}`} />
+                                <span className="gdrive-popover-item-title">{c.title}</span>
+                              </div>
+                            ))}
+                          </div>
+                          <button
+                            type="button"
+                            className="gdrive-popover-footer-btn"
+                            onClick={() => { setActiveWidgetPopover(null); navigate('/casos'); }}
+                          >
+                            Ir a Casos clínicos <ChevronRight size={13} />
+                          </button>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+                  </div>
+
+                  {/* Widget 2: Calificaciones */}
+                  <div className="gdrive-widget-item-wrap">
+                    <button
+                      type="button"
+                      className={`gdrive-widget-chip gdrive-chip-calificaciones ${activeWidgetPopover === 'calificaciones' ? 'active' : ''}`}
+                      onClick={() => setActiveWidgetPopover(prev => prev === 'calificaciones' ? null : 'calificaciones')}
+                      title="Ver calificaciones sin revisar"
+                    >
+                      <GraduationCap size={15} className="gdrive-widget-icon icon-calificaciones" />
+                      <span className="gdrive-widget-label">Notas:</span>
+                      <span className="gdrive-widget-badge badge-calificaciones">{MOCK_UNREVIEWED_GRADES.length}</span>
+                    </button>
+
+                    <AnimatePresence>
+                      {activeWidgetPopover === 'calificaciones' && (
+                        <motion.div
+                          className="gdrive-widget-popover"
+                          initial={{ opacity: 0, y: 8, scale: 0.95 }}
+                          animate={{ opacity: 1, y: 0, scale: 1 }}
+                          exit={{ opacity: 0, y: 8, scale: 0.95 }}
+                          transition={{ duration: 0.15 }}
+                        >
+                          <div className="gdrive-popover-head">
+                            <span className="gdrive-popover-title">Calificaciones sin revisar</span>
+                            <span className="gdrive-popover-count">{MOCK_UNREVIEWED_GRADES.length} notas</span>
+                          </div>
+                          <div className="gdrive-popover-list">
+                            {MOCK_UNREVIEWED_GRADES.map(g => (
+                              <div
+                                key={g.id}
+                                className="gdrive-popover-item"
+                                onClick={() => { setActiveWidgetPopover(null); navigate('/historial'); }}
+                              >
+                                <span className="gdrive-popover-score">{g.score}%</span>
+                                <span className="gdrive-popover-item-title">{g.caseTitle}</span>
+                              </div>
+                            ))}
+                          </div>
+                          <button
+                            type="button"
+                            className="gdrive-popover-footer-btn"
+                            onClick={() => { setActiveWidgetPopover(null); navigate('/historial'); }}
+                          >
+                            Ver historial completo <ChevronRight size={13} />
+                          </button>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+                  </div>
+
+                  {/* Widget 3: Buzón */}
+                  <button
+                    type="button"
+                    className="gdrive-widget-chip gdrive-chip-buzon"
+                    onClick={() => navigate('/buzon')}
+                    title="Ir a mi buzón de correo"
+                  >
+                    <Mail size={15} className="gdrive-widget-icon icon-buzon" />
+                    <span className="gdrive-widget-label">Buzón</span>
+                    {mailboxUnread > 0 && (
+                      <span className="gdrive-widget-badge badge-buzon">{mailboxUnread}</span>
+                    )}
+                  </button>
+                </div>
+
+                {openFolder && (
+                  <button
+                    type="button"
+                    className="gdrive-back-folder-btn"
+                    onClick={goBackFolder}
+                    title="Volver a la carpeta anterior"
+                  >
+                    <ArrowLeft size={14} /> Volver
+                  </button>
+                )}
+              </div>
             </div>
 
             {error && (
@@ -1057,10 +1197,6 @@ export default function DashboardPage() {
                 <Loader2 size={24} className="dfm-spin" />
                 <span>Cargando tu almacenamiento en la nube...</span>
               </div>
-            )}
-
-            {!loading && !openFolder && !cleanSearch && selectedFilter === 'ALL' && (
-              <InfoCards />
             )}
 
             {/* ── SECCIÓN DE CARPETAS ── */}
