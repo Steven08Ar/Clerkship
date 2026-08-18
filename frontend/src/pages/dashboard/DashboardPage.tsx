@@ -1060,115 +1060,131 @@ export default function DashboardPage() {
               </div>
             </div>
 
-            {/* ── BARRA UNIFICADA: BREADCRUMBS + ALMACENAMIENTO + WIDGETS LATERAL DERECHO ── */}
-            <div className="gdrive-breadcrumb-bar gdrive-unified-bar">
-              {/* Izquierda: Mi Unidad + Información de Almacenamiento */}
-              <div className="gdrive-bar-left">
-                <div className="gdrive-breadcrumbs">
-                  <button
-                    type="button"
-                    className={`gdrive-crumb-item ${!openFolder ? 'active' : ''}`}
-                    onClick={() => jumpToBreadcrumb(null)}
-                  >
-                    <HardDrive size={15} />
-                    <span>Mi Unidad</span>
-                  </button>
-
-                  {folderStack.map((sf, idx) => (
-                    <div key={sf.id} className="gdrive-crumb-group">
-                      <span className="gdrive-crumb-sep">/</span>
-                      <button
-                        type="button"
-                        className="gdrive-crumb-item"
-                        onClick={() => jumpToBreadcrumb(sf, idx)}
-                      >
-                        <Folder size={14} style={{ color: sf.color || '#10B981' }} />
-                        <span>{sf.name}</span>
-                      </button>
-                    </div>
-                  ))}
-
-                  {openFolder && (
-                    <div className="gdrive-crumb-group">
-                      <span className="gdrive-crumb-sep">/</span>
-                      <span className="gdrive-crumb-item active">
-                        <Folder size={14} style={{ color: openFolder.color || '#10B981' }} />
-                        <span>{openFolder.name}</span>
-                      </span>
-                    </div>
-                  )}
-                </div>
-
-                {/* Información de Almacenamiento al lado de Mi Unidad */}
-                <div className="gdrive-storage-pill" title={`${formatFileSize(usedBytes)} usados de ${formatFileSize(limitBytes)}`}>
-                  <div className="gdrive-storage-text">
-                    <span className="gdrive-storage-val">{formatFileSize(usedBytes)}</span>
-                    <span className="gdrive-storage-of">de {formatFileSize(limitBytes)}</span>
-                  </div>
-                  <div className="gdrive-storage-track">
-                    <div className="gdrive-storage-fill" style={{ width: `${percentUsed}%` }} />
-                  </div>
-                </div>
-              </div>
-
-              {/* Derecha: Indicadores Interactivos (Trabajos, Calificaciones, Buzón) + Volver */}
-              <div className="gdrive-bar-right" ref={widgetPopoverRef}>
-                <div className="gdrive-quick-widgets">
-                  {/* Widget 1: Trabajos pendientes */}
-                  <div className="gdrive-widget-item-wrap">
-                    <button
-                      type="button"
-                      className={`gdrive-widget-chip gdrive-chip-trabajos ${activeWidgetPopover === 'trabajos' ? 'active' : ''}`}
-                      onClick={() => setActiveWidgetPopover(prev => prev === 'trabajos' ? null : 'trabajos')}
-                      title="Ver trabajos pendientes"
-                    >
-                      <ClipboardList size={15} className="gdrive-widget-icon icon-trabajos" />
-                      <span className="gdrive-widget-label">Trabajos:</span>
-                      <span className="gdrive-widget-badge badge-trabajos">{MOCK_PENDING_CASES.length}</span>
-                    </button>
-                  </div>
-
-                  {/* Widget 2: Calificaciones */}
-                  <div className="gdrive-widget-item-wrap">
-                    <button
-                      type="button"
-                      className={`gdrive-widget-chip gdrive-chip-calificaciones ${activeWidgetPopover === 'calificaciones' ? 'active' : ''}`}
-                      onClick={() => setActiveWidgetPopover(prev => prev === 'calificaciones' ? null : 'calificaciones')}
-                      title="Ver calificaciones sin revisar"
-                    >
-                      <GraduationCap size={15} className="gdrive-widget-icon icon-calificaciones" />
-                      <span className="gdrive-widget-label">Notas:</span>
-                      <span className="gdrive-widget-badge badge-calificaciones">{MOCK_UNREVIEWED_GRADES.length}</span>
-                    </button>
-                  </div>
-
-                  {/* Widget 3: Buzón */}
-                  <button
-                    type="button"
-                    className="gdrive-widget-chip gdrive-chip-buzon"
-                    onClick={() => navigate('/buzon')}
-                    title="Ir a mi buzón de correo"
-                  >
-                    <Mail size={15} className="gdrive-widget-icon icon-buzon" />
-                    <span className="gdrive-widget-label">Buzón</span>
-                    {mailboxUnread > 0 && (
-                      <span className="gdrive-widget-badge badge-buzon">{mailboxUnread}</span>
-                    )}
-                  </button>
-                </div>
-
-                {openFolder && (
+            {/* ── BARRA UNIFICADA / ENCABEZADO DE CARPETA ACTIVA ── */}
+            {openFolder ? (
+              /* ── BARRA SIMPLE DE CARPETA ACTIVA (SOLO CARPETA Y NOMBRE) ── */
+              <div className="gdrive-folder-nav-bar">
+                <div className="gdrive-folder-nav-left">
                   <button
                     type="button"
                     className="gdrive-back-folder-btn"
                     onClick={goBackFolder}
                     title="Volver a la carpeta anterior"
                   >
-                    <ArrowLeft size={14} /> Volver
+                    <ArrowLeft size={15} />
+                    <span>Volver</span>
                   </button>
-                )}
+
+                  <div className="gdrive-folder-breadcrumbs">
+                    <button
+                      type="button"
+                      className="gdrive-crumb-link"
+                      onClick={() => jumpToBreadcrumb(null)}
+                    >
+                      <HardDrive size={15} />
+                      <span>Mi Unidad</span>
+                    </button>
+
+                    {folderStack.map((sf, idx) => (
+                      <div key={sf.id} className="gdrive-crumb-group">
+                        <span className="gdrive-crumb-sep">/</span>
+                        <button
+                          type="button"
+                          className="gdrive-crumb-link"
+                          onClick={() => jumpToBreadcrumb(sf, idx)}
+                        >
+                          <Folder size={14} style={{ color: sf.color || '#10B981' }} />
+                          <span>{sf.name}</span>
+                        </button>
+                      </div>
+                    ))}
+
+                    <div className="gdrive-crumb-group">
+                      <span className="gdrive-crumb-sep">/</span>
+                      <span className="gdrive-crumb-current">
+                        <Folder size={15} style={{ color: openFolder.color || '#10B981' }} />
+                        <span className="gdrive-current-folder-name">{openFolder.name}</span>
+                      </span>
+                    </div>
+                  </div>
+                </div>
               </div>
-            </div>
+            ) : (
+              /* ── BARRA UNIFICADA DE MI UNIDAD: BREADCRUMBS + ALMACENAMIENTO + WIDGETS ── */
+              <div className="gdrive-breadcrumb-bar gdrive-unified-bar">
+                {/* Izquierda: Mi Unidad + Información de Almacenamiento */}
+                <div className="gdrive-bar-left">
+                  <div className="gdrive-breadcrumbs">
+                    <button
+                      type="button"
+                      className="gdrive-crumb-item active"
+                      onClick={() => jumpToBreadcrumb(null)}
+                    >
+                      <HardDrive size={15} />
+                      <span>Mi Unidad</span>
+                    </button>
+                  </div>
+
+                  {/* Información de Almacenamiento al lado de Mi Unidad */}
+                  <div className="gdrive-storage-pill" title={`${formatFileSize(usedBytes)} usados de ${formatFileSize(limitBytes)}`}>
+                    <div className="gdrive-storage-text">
+                      <span className="gdrive-storage-val">{formatFileSize(usedBytes)}</span>
+                      <span className="gdrive-storage-of">de {formatFileSize(limitBytes)}</span>
+                    </div>
+                    <div className="gdrive-storage-track">
+                      <div className="gdrive-storage-fill" style={{ width: `${percentUsed}%` }} />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Derecha: Indicadores Interactivos (Trabajos, Calificaciones, Buzón) */}
+                <div className="gdrive-bar-right" ref={widgetPopoverRef}>
+                  <div className="gdrive-quick-widgets">
+                    {/* Widget 1: Trabajos pendientes */}
+                    <div className="gdrive-widget-item-wrap">
+                      <button
+                        type="button"
+                        className={`gdrive-widget-chip gdrive-chip-trabajos ${activeWidgetPopover === 'trabajos' ? 'active' : ''}`}
+                        onClick={() => setActiveWidgetPopover(prev => prev === 'trabajos' ? null : 'trabajos')}
+                        title="Ver trabajos pendientes"
+                      >
+                        <ClipboardList size={15} className="gdrive-widget-icon icon-trabajos" />
+                        <span className="gdrive-widget-label">Trabajos:</span>
+                        <span className="gdrive-widget-badge badge-trabajos">{MOCK_PENDING_CASES.length}</span>
+                      </button>
+                    </div>
+
+                    {/* Widget 2: Calificaciones */}
+                    <div className="gdrive-widget-item-wrap">
+                      <button
+                        type="button"
+                        className={`gdrive-widget-chip gdrive-chip-calificaciones ${activeWidgetPopover === 'calificaciones' ? 'active' : ''}`}
+                        onClick={() => setActiveWidgetPopover(prev => prev === 'calificaciones' ? null : 'calificaciones')}
+                        title="Ver calificaciones sin revisar"
+                      >
+                        <GraduationCap size={15} className="gdrive-widget-icon icon-calificaciones" />
+                        <span className="gdrive-widget-label">Notas:</span>
+                        <span className="gdrive-widget-badge badge-calificaciones">{MOCK_UNREVIEWED_GRADES.length}</span>
+                      </button>
+                    </div>
+
+                    {/* Widget 3: Buzón */}
+                    <button
+                      type="button"
+                      className="gdrive-widget-chip gdrive-chip-buzon"
+                      onClick={() => navigate('/buzon')}
+                      title="Ir a mi buzón de correo"
+                    >
+                      <Mail size={15} className="gdrive-widget-icon icon-buzon" />
+                      <span className="gdrive-widget-label">Buzón</span>
+                      {mailboxUnread > 0 && (
+                        <span className="gdrive-widget-badge badge-buzon">{mailboxUnread}</span>
+                      )}
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
 
             {/* ── MODAL / POPOVER CENTRADO EN LA PANTALLA PARA TRABAJOS Y NOTAS ── */}
             <AnimatePresence>

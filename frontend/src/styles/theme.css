@@ -2596,6 +2596,27 @@ html.theme-animating .crono-gantt-card {
   color: #A5B4FC !important;
 }
 
+[data-theme="dark"] .gdrive-folder-nav-bar {
+  background: #1E293B !important;
+  border-color: rgba(255, 255, 255, 0.08) !important;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3) !important;
+}
+
+[data-theme="dark"] .gdrive-crumb-link {
+  color: #94A3B8 !important;
+}
+
+[data-theme="dark"] .gdrive-crumb-link:hover {
+  background: rgba(255, 255, 255, 0.08) !important;
+  color: #FFFFFF !important;
+}
+
+[data-theme="dark"] .gdrive-crumb-current {
+  background: #0F172A !important;
+  border-color: rgba(255, 255, 255, 0.1) !important;
+  color: #FFFFFF !important;
+}
+
 [data-theme="dark"] .gdrive-storage-pill {
   background: #0F172A !important;
   border-color: rgba(255, 255, 255, 0.08) !important;

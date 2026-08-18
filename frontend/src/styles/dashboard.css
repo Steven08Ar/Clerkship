@@ -11279,24 +11279,97 @@
 .icon-buzon { color: #E11D48; }
 .badge-buzon { background: #E11D48; }
 
+/* ── Barra de Navegación Limpia al Ingresar a una Carpeta ── */
+.gdrive-folder-nav-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: var(--surface, #FFFFFF);
+  border: 1px solid var(--border, #E2E8F0);
+  border-radius: 14px;
+  padding: 10px 14px;
+  margin-bottom: 20px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02);
+  flex-shrink: 0;
+  clear: both;
+  width: 100%;
+}
+
+.gdrive-folder-nav-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  min-width: 0;
+}
+
+.gdrive-folder-breadcrumbs {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+  min-width: 0;
+}
+
+.gdrive-crumb-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border: none;
+  background: transparent;
+  color: var(--ink3, #64748B);
+  font-size: 0.84rem;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 6px;
+  transition: all 0.15s ease;
+}
+
+.gdrive-crumb-link:hover {
+  background: var(--surface2, #F1F5F9);
+  color: var(--ink, #0F172A);
+}
+
+.gdrive-crumb-current {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.90rem;
+  font-weight: 800;
+  color: var(--ink, #0F172A);
+  background: var(--surface2, #F8FAFC);
+  border: 1px solid var(--border, #E2E8F0);
+  padding: 4px 10px;
+  border-radius: 8px;
+}
+
+.gdrive-current-folder-name {
+  max-width: 260px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 .gdrive-back-folder-btn {
   display: inline-flex;
   align-items: center;
   gap: 6px;
   border: 1px solid var(--border, #E2E8F0);
-  background: var(--surface, #FFFFFF);
-  color: var(--ink2, #475569);
-  font-size: 0.78rem;
-  font-weight: 600;
-  padding: 5px 10px;
+  background: var(--surface2, #F8FAFC);
+  color: var(--ink, #0F172A);
+  font-size: 0.80rem;
+  font-weight: 700;
+  padding: 6px 12px;
   border-radius: 8px;
   cursor: pointer;
   transition: all 0.15s ease;
 }
 
 .gdrive-back-folder-btn:hover {
-  background: var(--surface2, #F1F5F9);
-  color: var(--ink, #0F172A);
+  background: #EEF2FF;
+  border-color: #C7D2FE;
+  color: #4F46E5;
 }
 
 /* ── Overlay y Popover Centrado en Pantalla (Móvil y Escritorio) ── */
