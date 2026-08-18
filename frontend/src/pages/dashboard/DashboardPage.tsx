@@ -1,14 +1,16 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState, type DragEvent } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import {
-  Plus, SlidersHorizontal, ArrowUpDown, FileText, FileSpreadsheet,
+  Plus, ArrowUpDown, FileText, FileSpreadsheet,
   Presentation, Image as ImageIcon, FileCode, File,
-  MoreVertical, Pencil, Trash2, ArrowLeft, FolderPlus, UploadCloud, Loader2, Download, Eye
+  MoreVertical, Pencil, Trash2, ArrowLeft, FolderPlus, UploadCloud, Loader2, Download, Eye,
+  LayoutGrid, List, Search, X, Folder, HardDrive, Check
 } from 'lucide-react';
 import Sidebar from '../../components/shared/Sidebar';
 import WelcomeOverlay from '../../components/shared/WelcomeOverlay';
 import FolderModal from '../../components/dashboard/FolderModal';
 import UploadDocumentModal from '../../components/dashboard/UploadDocumentModal';
+import InfoCards from '../../components/dashboard/InfoCards';
 import DocumentPreviewView from '../../components/dashboard/DocumentPreviewView';
 import { formatFileSize } from '../../utils/fileUpload';
 import { mainAuthErrorMessage } from '../../data/mainAuth';
@@ -18,8 +20,32 @@ import {
   type DocumentFolder, type DocumentSummary,
 } from '../../data/documentosApi';
 
-const SORT_OPTIONS = ['Más reciente', 'Más antiguo', 'Nombre A–Z'] as const;
+function readFileAsBase64(file: File): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      const res = (reader.result as string) || '';
+      resolve(res.split(',')[1] || '');
+    };
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+}
+
+const SORT_OPTIONS = ['Más reciente', 'Más antiguo', 'Nombre A–Z', 'Tamaño (Mayor)'] as const;
 type SortOption = typeof SORT_OPTIONS[number];
+
+type FilterType = 'ALL' | 'PDF' | 'DOC' | 'XLS' | 'PPT' | 'IMG' | 'TXT';
+
+const FILTER_CHIPS: { id: FilterType; label: string; icon?: any; color?: string }[] = [
+  { id: 'ALL', label: 'Todos' },
+  { id: 'PDF', label: 'PDFs', color: '#EF4444' },
+  { id: 'DOC', label: 'Word', color: '#2563EB' },
+  { id: 'XLS', label: 'Hojas de cálculo', color: '#10B981' },
+  { id: 'PPT', label: 'Presentaciones', color: '#F97316' },
+  { id: 'IMG', label: 'Imágenes', color: '#9333EA' },
+  { id: 'TXT', label: 'Texto y Código', color: '#0284C7' },
+];
 
 function splitExtension(name: string): { base: string; ext: string } {
   const dot = name.lastIndexOf('.');
@@ -36,6 +62,7 @@ function sortFolders(folders: DocumentFolder[], sort: SortOption): DocumentFolde
   const copy = [...folders];
   if (sort === 'Nombre A–Z') return copy.sort((a, b) => a.name.localeCompare(b.name));
   if (sort === 'Más antiguo') return copy.sort((a, b) => (a.created_at || '').localeCompare(b.created_at || ''));
+  if (sort === 'Tamaño (Mayor)') return copy.sort((a, b) => (b.total_size_bytes || 0) - (a.total_size_bytes || 0));
   return copy.sort((a, b) => (b.created_at || '').localeCompare(a.created_at || ''));
 }
 
@@ -43,6 +70,7 @@ function sortDocs(docs: DocumentSummary[], sort: SortOption): DocumentSummary[] 
   const copy = [...docs];
   if (sort === 'Nombre A–Z') return copy.sort((a, b) => a.name.localeCompare(b.name));
   if (sort === 'Más antiguo') return copy.sort((a, b) => (a.created_at || '').localeCompare(b.created_at || ''));
+  if (sort === 'Tamaño (Mayor)') return copy.sort((a, b) => (b.size_bytes || 0) - (a.size_bytes || 0));
   return copy.sort((a, b) => (b.created_at || '').localeCompare(a.created_at || ''));
 }
 
@@ -53,7 +81,7 @@ function getDocTypeInfo(name: string, mime: string) {
 
   // 1. PDF
   if (m.includes('pdf') || ext === 'pdf') {
-    return { typeClass: 'bmd-pdf', typeLabel: 'PDF' };
+    return { typeClass: 'bmd-pdf', typeLabel: 'PDF' as FilterType };
   }
 
   // 2. PowerPoint (.pptx, .ppt, .pps, .ppsx)
@@ -62,7 +90,7 @@ function getDocTypeInfo(name: string, mime: string) {
     m.includes('powerpoint') ||
     ['ppt', 'pptx', 'pps', 'ppsx', 'pot', 'potx'].includes(ext)
   ) {
-    return { typeClass: 'bmd-ppt', typeLabel: 'PPT' };
+    return { typeClass: 'bmd-ppt', typeLabel: 'PPT' as FilterType };
   }
 
   // 3. Excel (.xlsx, .xls, .csv, spreadsheetml)
@@ -72,7 +100,7 @@ function getDocTypeInfo(name: string, mime: string) {
     m.includes('csv') ||
     ['xls', 'xlsx', 'csv', 'xlsm', 'xltx'].includes(ext)
   ) {
-    return { typeClass: 'bmd-xls', typeLabel: 'XLS' };
+    return { typeClass: 'bmd-xls', typeLabel: 'XLS' as FilterType };
   }
 
   // 4. Word (.docx, .doc, wordprocessingml)
@@ -81,7 +109,7 @@ function getDocTypeInfo(name: string, mime: string) {
     m.includes('wordprocessingml') ||
     ['doc', 'docx', 'rtf', 'dotx'].includes(ext)
   ) {
-    return { typeClass: 'bmd-doc', typeLabel: 'DOC' };
+    return { typeClass: 'bmd-doc', typeLabel: 'DOC' as FilterType };
   }
 
   // 5. Imágenes
@@ -89,15 +117,15 @@ function getDocTypeInfo(name: string, mime: string) {
     m.includes('image') ||
     ['png', 'jpg', 'jpeg', 'webp', 'gif', 'svg', 'bmp', 'tiff'].includes(ext)
   ) {
-    return { typeClass: 'bmd-img', typeLabel: 'IMG' };
+    return { typeClass: 'bmd-img', typeLabel: 'IMG' as FilterType };
   }
 
   // 6. Texto plano / código
   if (m.includes('text') || ['txt', 'json', 'md', 'js', 'py', 'ts', 'html', 'css'].includes(ext)) {
-    return { typeClass: 'bmd-txt', typeLabel: 'TXT' };
+    return { typeClass: 'bmd-txt', typeLabel: 'TXT' as FilterType };
   }
 
-  return { typeClass: 'bmd-file', typeLabel: 'FILE' };
+  return { typeClass: 'bmd-file', typeLabel: 'ALL' as FilterType };
 }
 
 function getPeekDocsForFolder(docsInFolder: DocumentSummary[], fileCount: number, folderId: string) {
@@ -124,7 +152,6 @@ function getPeekDocsForFolder(docsInFolder: DocumentSummary[], fileCount: number
     }));
   }
 
-  // Hash simple para semilla de aleatoriedad determinista
   let hash = 0;
   for (let i = 0; i < folderId.length; i++) {
     hash = (hash << 5) - hash + folderId.charCodeAt(i);
@@ -133,7 +160,6 @@ function getPeekDocsForFolder(docsInFolder: DocumentSummary[], fileCount: number
   const seed = Math.abs(hash);
   const count = items.length;
 
-  // Distribución amplia a lo largo de los 210px de la carpeta (no pegados)
   const baseSpans: Record<number, number[]> = {
     1: [0],
     2: [-34, 34],
@@ -148,15 +174,13 @@ function getPeekDocsForFolder(docsInFolder: DocumentSummary[], fileCount: number
   return items.map((doc, idx) => {
     const typeInfo = getDocTypeInfo(doc.name, doc.mime_type);
 
-    // Variaciones pseudo-aleatorias orgánicas por documento
     const r1 = Math.sin(seed + idx * 17.13) * 10000;
-    const rndRot = (r1 - Math.floor(r1)) * 26 - 13; // Entre -13° y +13°
+    const rndRot = (r1 - Math.floor(r1)) * 26 - 13;
 
     const r2 = Math.sin(seed + idx * 31.41) * 10000;
-    const rndXJitter = ((r2 - Math.floor(r2)) - 0.5) * 10; // Jitter de posición X
+    const rndXJitter = ((r2 - Math.floor(r2)) - 0.5) * 10;
 
     const r3 = Math.sin(seed + idx * 53.87) * 10000;
-    // Elevación para que se vea el 60% (~30px a 34px de altura sobre la solapa frontal)
     const rndY = -29 - (r3 - Math.floor(r3)) * 5;
 
     const baseX = xList[idx] ?? 0;
@@ -172,7 +196,9 @@ function getPeekDocsForFolder(docsInFolder: DocumentSummary[], fileCount: number
   });
 }
 
-/* ── Page ───────────────────────────────────────────────── */
+/* ════════════════════════════════════════════════════════════
+   Página Dashboard (Estilo Google Drive / Cloud 100% Responsivo)
+   ════════════════════════════════════════════════════════════ */
 export default function DashboardPage() {
   const [showWelcome, setShowWelcome] = useState(() => {
     return sessionStorage.getItem('clerkship_show_welcome') === 'true';
@@ -181,6 +207,13 @@ export default function DashboardPage() {
   const [sortOpen, setSortOpen] = useState(false);
   const [sortLabel, setSortLabel] = useState<SortOption>('Más reciente');
   const [newMenuOpen, setNewMenuOpen] = useState(false);
+
+  const [viewMode, setViewMode] = useState<'grid' | 'list'>(() => {
+    return (localStorage.getItem('clerkship_dash_view_mode') as 'grid' | 'list') || 'grid';
+  });
+
+  const [searchQuery, setSearchQuery] = useState('');
+  const [selectedFilter, setSelectedFilter] = useState<FilterType>('ALL');
 
   const [folders, setFolders] = useState<DocumentFolder[]>([]);
   const [recent, setRecent] = useState<DocumentSummary[]>([]);
@@ -203,11 +236,20 @@ export default function DashboardPage() {
   const [renameValue, setRenameValue] = useState('');
   const [busyId, setBusyId] = useState<string | null>(null);
   const [downloadingId, setDownloadingId] = useState<string | null>(null);
+  const [isDraggingOver, setIsDraggingOver] = useState(false);
+  const [isDropUploading, setIsDropUploading] = useState(false);
+
   const menuRef = useRef<HTMLDivElement>(null);
+  const dragCounterRef = useRef(0);
 
   function handleWelcomeComplete() {
     sessionStorage.removeItem('clerkship_show_welcome');
     setShowWelcome(false);
+  }
+
+  function handleSetViewMode(mode: 'grid' | 'list') {
+    setViewMode(mode);
+    localStorage.setItem('clerkship_dash_view_mode', mode);
   }
 
   async function refreshAll() {
@@ -216,7 +258,7 @@ export default function DashboardPage() {
     try {
       const [{ folders: f }, { documents: d }, { documents: fullDocs }] = await Promise.all([
         listFolders(),
-        listDocuments(undefined, 12),
+        listDocuments(undefined, 18),
         listDocuments(undefined, 300),
       ]);
       setFolders(f);
@@ -266,6 +308,19 @@ export default function DashboardPage() {
     } else {
       setOpenFolder(null);
       setFolderStack([]);
+    }
+  }
+
+  async function jumpToBreadcrumb(targetFolder: DocumentFolder | null, index?: number) {
+    if (!targetFolder) {
+      setOpenFolder(null);
+      setFolderStack([]);
+      return;
+    }
+    if (index !== undefined) {
+      const newStack = folderStack.slice(0, index);
+      setFolderStack(newStack);
+      await loadFolder(targetFolder);
     }
   }
 
@@ -330,14 +385,68 @@ export default function DashboardPage() {
       setRecent(prev => [document, ...prev]);
       setAllDocs(prev => [document, ...prev]);
     }
-    if (!folderId) setRecent(prev => prev.slice(0, 12));
+    if (!folderId) setRecent(prev => prev.slice(0, 18));
+  }
+
+  /* ── Drag and Drop Cloud Upload Handler ── */
+  function handleDragEnter(e: DragEvent<HTMLDivElement>) {
+    e.preventDefault();
+    e.stopPropagation();
+    dragCounterRef.current += 1;
+    if (e.dataTransfer?.items && e.dataTransfer.items.length > 0) {
+      setIsDraggingOver(true);
+    }
+  }
+
+  function handleDragLeave(e: DragEvent<HTMLDivElement>) {
+    e.preventDefault();
+    e.stopPropagation();
+    dragCounterRef.current -= 1;
+    if (dragCounterRef.current <= 0) {
+      dragCounterRef.current = 0;
+      setIsDraggingOver(false);
+    }
+  }
+
+  function handleDragOver(e: DragEvent<HTMLDivElement>) {
+    e.preventDefault();
+    e.stopPropagation();
+  }
+
+  async function handleDrop(e: DragEvent<HTMLDivElement>) {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDraggingOver(false);
+    dragCounterRef.current = 0;
+
+    const files = e.dataTransfer?.files;
+    if (!files || files.length === 0) return;
+
+    setIsDropUploading(true);
+    setError(null);
+    try {
+      for (let i = 0; i < files.length; i++) {
+        const file = files[i];
+        if (file.size > 11 * 1024 * 1024) {
+          setError(`El archivo "${file.name}" supera el límite de 11 MB.`);
+          continue;
+        }
+        const data = await readFileAsBase64(file);
+        await handleUpload({
+          name: file.name,
+          mime_type: file.type || 'application/octet-stream',
+          data,
+          size_bytes: file.size,
+        }, openFolder?.id ?? null);
+      }
+    } catch (err) {
+      setError(mainAuthErrorMessage(err));
+    } finally {
+      setIsDropUploading(false);
+    }
   }
 
   async function handleDownload(doc: DocumentSummary) {
-    // Trae el archivo completo (con los bytes) recién en este momento — el
-    // listado solo tiene metadata, así que esto tarda un par de segundos en
-    // archivos grandes. Sin el spinner se sentía como que el botón no hacía
-    // nada, o que estaba roto.
     setDownloadingId(doc.id);
     try {
       const { document } = await getDocument(doc.id);
@@ -384,7 +493,6 @@ export default function DashboardPage() {
     const newBase = renameValue.trim();
     setRenamingId(null);
     if (!newBase) return;
-    // La extensión nunca se toca — solo se deja editar el nombre.
     const newName = `${newBase}${ext}`;
     if (newName === doc.name) return;
     try {
@@ -400,16 +508,36 @@ export default function DashboardPage() {
     }
   }
 
-  const sortedFolders = useMemo(
-    () => sortFolders(folders.filter(f => !f.parent_folder_id), sortLabel),
-    [folders, sortLabel],
-  );
-  const sortedChildFolders = useMemo(
-    () => (openFolder ? sortFolders(folders.filter(f => f.parent_folder_id === openFolder.id), sortLabel) : []),
-    [folders, sortLabel, openFolder],
-  );
-  const sortedRecent = useMemo(() => sortDocs(recent, sortLabel), [recent, sortLabel]);
-  const sortedFolderDocs = useMemo(() => sortDocs(folderDocs, sortLabel), [folderDocs, sortLabel]);
+  /* ── Filtered & Sorted Data ── */
+  const cleanSearch = searchQuery.trim().toLowerCase();
+
+  const filteredFolders = useMemo(() => {
+    let list = openFolder
+      ? folders.filter(f => f.parent_folder_id === openFolder.id)
+      : folders.filter(f => !f.parent_folder_id);
+
+    if (cleanSearch) {
+      list = list.filter(f => f.name.toLowerCase().includes(cleanSearch));
+    }
+    return sortFolders(list, sortLabel);
+  }, [folders, openFolder, cleanSearch, sortLabel]);
+
+  const filteredDocs = useMemo(() => {
+    let list = openFolder ? folderDocs : (cleanSearch || selectedFilter !== 'ALL' ? allDocs : recent);
+
+    if (cleanSearch) {
+      list = list.filter(d => d.name.toLowerCase().includes(cleanSearch));
+    }
+
+    if (selectedFilter !== 'ALL') {
+      list = list.filter(d => {
+        const info = getDocTypeInfo(d.name, d.mime_type);
+        return info.typeLabel === selectedFilter;
+      });
+    }
+
+    return sortDocs(list, sortLabel);
+  }, [openFolder, folderDocs, allDocs, recent, cleanSearch, selectedFilter, sortLabel]);
 
   function getFileCardIcon(name: string, mime: string) {
     const info = getDocTypeInfo(name, mime);
@@ -442,12 +570,18 @@ export default function DashboardPage() {
     return { IconComponent, colorClass, label: info.typeLabel };
   }
 
+  function getFolderNameById(id: string | null | undefined): string {
+    if (!id) return 'Mi Unidad';
+    const match = folders.find(f => f.id === id);
+    return match ? match.name : 'Carpeta';
+  }
+
   function renderFolderCard(f: DocumentFolder) {
     const c = f.color || '#10B981';
     const docsInFolder = allDocs.filter(doc => doc.folder_id === f.id);
     const peekDocs = getPeekDocsForFolder(docsInFolder, f.file_count, f.id);
     const metaParts = [
-      f.subfolder_count > 0 ? `${f.subfolder_count} carpeta${f.subfolder_count === 1 ? '' : 's'}` : null,
+      f.subfolder_count > 0 ? `${f.subfolder_count} subcarpeta${f.subfolder_count === 1 ? '' : 's'}` : null,
       `${f.file_count} archivo${f.file_count === 1 ? '' : 's'}`,
       formatFileSize(f.total_size_bytes),
     ].filter(Boolean);
@@ -458,6 +592,7 @@ export default function DashboardPage() {
           type="button"
           className="bib2-folder-3d"
           onClick={() => openFolderView(f)}
+          title={`Abrir carpeta ${f.name}`}
         >
           <div
             className="bib2-folder-tab-shape"
@@ -467,7 +602,6 @@ export default function DashboardPage() {
             }}
           />
 
-          {/* Mini documentos que se asoman al hacer hover desde adentro de la carpeta */}
           {peekDocs.length > 0 && (
             <div className="bib2-folder-peek-container">
               {peekDocs.map((doc, idx) => (
@@ -498,7 +632,7 @@ export default function DashboardPage() {
           <div
             className="bib2-folder-front-flap"
             style={{
-              background: `linear-gradient(135deg, ${c}BF 0%, ${c}99 100%)`,
+              background: `linear-gradient(135deg, ${c}D9 0%, ${c}B3 100%)`,
               borderColor: `${c}E6`,
             }}
           >
@@ -510,7 +644,12 @@ export default function DashboardPage() {
         </button>
 
         <div className="bib2-file-kebab-wrap bib2-folder-kebab-wrap" ref={menuFor === f.id ? menuRef : undefined}>
-          <button type="button" className="bib2-file-kebab-btn bib2-folder-kebab-btn" onClick={() => setMenuFor(menuFor === f.id ? null : f.id)}>
+          <button
+            type="button"
+            className="bib2-file-kebab-btn bib2-folder-kebab-btn"
+            onClick={() => setMenuFor(menuFor === f.id ? null : f.id)}
+            aria-label="Opciones de carpeta"
+          >
             <MoreVertical size={15} color="#FFFFFF" />
           </button>
           {menuFor === f.id && (
@@ -574,6 +713,7 @@ export default function DashboardPage() {
             type="button"
             className="bib2-file-kebab-btn"
             onClick={() => setMenuFor(menuFor === doc.id ? null : doc.id)}
+            aria-label="Opciones de archivo"
           >
             {busyId === doc.id ? <Loader2 size={15} className="dfm-spin" /> : <MoreVertical size={15} />}
           </button>
@@ -602,10 +742,118 @@ export default function DashboardPage() {
     );
   }
 
+  function renderDocTableRow(doc: DocumentSummary, fromFolder: boolean) {
+    const isRenaming = renamingId === doc.id;
+    const { IconComponent, colorClass, label } = getFileCardIcon(doc.name, doc.mime_type);
+    const folderName = getFolderNameById(doc.folder_id);
+
+    return (
+      <tr key={doc.id} className="gdrive-table-row" onClick={() => !isRenaming && setPreviewDoc(doc)}>
+        <td className="gdrive-td-name">
+          <div className="gdrive-file-cell">
+            <div className={`bib2-file-icon gdrive-row-icon ${colorClass}`}>
+              <IconComponent size={16} strokeWidth={1.8} />
+              <span className={`bib2-file-icon-badge ${colorClass}`}>{label}</span>
+            </div>
+            {isRenaming ? (
+              <span className="dfm-rename-row" onClick={e => e.stopPropagation()}>
+                <input
+                  type="text"
+                  className="dfm-rename-input"
+                  value={renameValue}
+                  autoFocus
+                  onChange={e => setRenameValue(e.target.value)}
+                  onBlur={() => confirmRename(doc, fromFolder)}
+                  onKeyDown={e => { if (e.key === 'Enter') confirmRename(doc, fromFolder); if (e.key === 'Escape') setRenamingId(null); }}
+                />
+                {splitExtension(doc.name).ext && (
+                  <span className="dfm-rename-ext">{splitExtension(doc.name).ext}</span>
+                )}
+              </span>
+            ) : (
+              <span className="gdrive-file-title" title={doc.name}>{doc.name}</span>
+            )}
+          </div>
+        </td>
+        <td className="gdrive-td-folder">
+          <span className="gdrive-folder-pill">
+            <Folder size={12} /> {folderName}
+          </span>
+        </td>
+        <td className="gdrive-td-date">{formatDate(doc.created_at)}</td>
+        <td className="gdrive-td-size">{formatFileSize(doc.size_bytes)}</td>
+        <td className="gdrive-td-actions" onClick={e => e.stopPropagation()}>
+          <div className="gdrive-row-actions">
+            <button
+              type="button"
+              className="gdrive-action-icon-btn"
+              title="Vista previa"
+              onClick={() => setPreviewDoc(doc)}
+            >
+              <Eye size={15} />
+            </button>
+            <button
+              type="button"
+              className="gdrive-action-icon-btn"
+              title="Descargar"
+              onClick={() => handleDownload(doc)}
+              disabled={downloadingId === doc.id}
+            >
+              {downloadingId === doc.id ? <Loader2 size={15} className="dfm-spin" /> : <Download size={15} />}
+            </button>
+            <div className="bib2-file-kebab-wrap" ref={menuFor === doc.id ? menuRef : undefined}>
+              <button
+                type="button"
+                className="gdrive-action-icon-btn"
+                onClick={() => setMenuFor(menuFor === doc.id ? null : doc.id)}
+                aria-label="Más opciones"
+              >
+                <MoreVertical size={15} />
+              </button>
+              {menuFor === doc.id && (
+                <div className="bib2-file-menu gdrive-menu-fix">
+                  <button type="button" onClick={() => startRename(doc)}><Pencil size={13} /> Renombrar</button>
+                  <button type="button" className="danger" onClick={() => handleDeleteDocument(doc, fromFolder)}>
+                    <Trash2 size={13} /> Eliminar
+                  </button>
+                </div>
+              )}
+            </div>
+          </div>
+        </td>
+      </tr>
+    );
+  }
+
   return (
-    <div className="dash-root">
+    <div
+      className={`dash-root ${isDraggingOver ? 'is-dragging-active' : ''}`}
+      onDragEnter={handleDragEnter}
+      onDragLeave={handleDragLeave}
+      onDragOver={handleDragOver}
+      onDrop={handleDrop}
+    >
       {showWelcome && <WelcomeOverlay onComplete={handleWelcomeComplete} />}
       <Sidebar />
+
+      {/* ── Drag & Drop Cloud Overlay ── */}
+      <AnimatePresence>
+        {isDraggingOver && (
+          <motion.div
+            className="gdrive-drop-overlay"
+            initial={{ opacity: 0, scale: 0.98 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.98 }}
+            transition={{ duration: 0.15 }}
+          >
+            <div className="gdrive-drop-card">
+              <UploadCloud size={54} className="gdrive-drop-icon" />
+              <h3>Soltá tus archivos aquí</h3>
+              <p>Se subirán automáticamente a {openFolder ? `la carpeta "${openFolder.name}"` : 'tu Unidad'}</p>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       <div className={`bib2-body ${previewDoc ? 'is-preview-mode' : ''}`}>
         {previewDoc ? (
@@ -615,52 +863,94 @@ export default function DashboardPage() {
           />
         ) : (
           <>
-            {/* Header */}
-            <div className="bib2-header">
-              <h1 className="bib2-title">
-                {openFolder ? (
-                  <span className="bib2-folder-crumb">
-                    <button type="button" onClick={goBackFolder}><ArrowLeft size={18} /></button>
-                    {folderStack.length > 0
-                      ? `${folderStack.map(f => f.name).join(' / ')} / ${openFolder.name}`
-                      : openFolder.name}
-                  </span>
-                ) : 'Documentos'}
-              </h1>
-              <div className="bib2-actions">
+            {/* ── GOOGLE DRIVE / CLOUD TOP SEARCH & ACTION BAR ── */}
+            <div className="gdrive-top-bar">
+              <div className="gdrive-search-box">
+                <Search size={18} className="gdrive-search-icon" />
+                <input
+                  type="text"
+                  placeholder="Buscar en tu Unidad, carpetas o documentos..."
+                  value={searchQuery}
+                  onChange={e => setSearchQuery(e.target.value)}
+                  className="gdrive-search-input"
+                />
+                {searchQuery && (
+                  <button
+                    type="button"
+                    className="gdrive-search-clear"
+                    onClick={() => setSearchQuery('')}
+                    title="Limpiar búsqueda"
+                  >
+                    <X size={15} />
+                  </button>
+                )}
+              </div>
+
+              <div className="gdrive-top-right-actions">
+                {/* Botón Nuevo con Dropdown */}
                 <div className="bib2-sort-wrap">
-                  <button type="button" className="bib2-btn-new" onClick={() => setNewMenuOpen(v => !v)}>
-                    <Plus size={15} strokeWidth={2.5} /> Nuevo
+                  <button
+                    type="button"
+                    className="bib2-btn-new gdrive-btn-new-glow"
+                    onClick={() => setNewMenuOpen(v => !v)}
+                  >
+                    <Plus size={16} strokeWidth={2.5} />
+                    <span>Nuevo</span>
                   </button>
                   {newMenuOpen && (
-                    <div className="bib2-sort-dropdown">
+                    <div className="bib2-sort-dropdown gdrive-dropdown-modern">
                       <button
                         type="button"
                         className="bib2-sort-item"
                         onClick={() => { setFolderModal('create'); setNewMenuOpen(false); }}
                       >
-                        <FolderPlus size={14} /> Nueva carpeta
+                        <FolderPlus size={15} /> Nueva carpeta
                       </button>
                       <button
                         type="button"
                         className="bib2-sort-item"
                         onClick={() => { setUploadModalOpen(true); setNewMenuOpen(false); }}
                       >
-                        <UploadCloud size={14} /> Subir documento
+                        <UploadCloud size={15} /> Subir documento
                       </button>
                     </div>
                   )}
                 </div>
-                <button className="bib2-btn-outline" disabled title="Próximamente">
-                  <SlidersHorizontal size={14} strokeWidth={1.8} /> Filtros
-                </button>
+
+                {/* View Mode Toggle: Grid vs List */}
+                <div className="gdrive-view-mode-toggle">
+                  <button
+                    type="button"
+                    className={`gdrive-toggle-btn ${viewMode === 'grid' ? 'active' : ''}`}
+                    onClick={() => handleSetViewMode('grid')}
+                    title="Vista en cuadrícula"
+                    aria-label="Vista en cuadrícula"
+                  >
+                    <LayoutGrid size={16} />
+                  </button>
+                  <button
+                    type="button"
+                    className={`gdrive-toggle-btn ${viewMode === 'list' ? 'active' : ''}`}
+                    onClick={() => handleSetViewMode('list')}
+                    title="Vista en lista"
+                    aria-label="Vista en lista"
+                  >
+                    <List size={16} />
+                  </button>
+                </div>
+
+                {/* Dropdown de Ordenamiento */}
                 <div className="bib2-sort-wrap">
-                  <button type="button" className="bib2-btn-outline" onClick={() => setSortOpen(v => !v)}>
+                  <button
+                    type="button"
+                    className="bib2-btn-outline gdrive-btn-sort"
+                    onClick={() => setSortOpen(v => !v)}
+                  >
                     <ArrowUpDown size={14} strokeWidth={1.8} />
-                    Ordenar: {sortLabel}
+                    <span className="gdrive-sort-label">{sortLabel}</span>
                   </button>
                   {sortOpen && (
-                    <div className="bib2-sort-dropdown">
+                    <div className="bib2-sort-dropdown gdrive-dropdown-modern">
                       {SORT_OPTIONS.map(opt => (
                         <button
                           key={opt}
@@ -668,6 +958,7 @@ export default function DashboardPage() {
                           className={`bib2-sort-item${sortLabel === opt ? ' active' : ''}`}
                           onClick={() => { setSortLabel(opt); setSortOpen(false); }}
                         >
+                          {sortLabel === opt && <Check size={13} className="gdrive-check-icon" />}
                           {opt}
                         </button>
                       ))}
@@ -677,67 +968,184 @@ export default function DashboardPage() {
               </div>
             </div>
 
-            <div className="bib2-divider" />
+            {/* ── QUICK FILTER CHIPS (TIPO DE ARCHIVO) ── */}
+            <div className="gdrive-filter-scroll-row">
+              <div className="gdrive-filter-chips">
+                {FILTER_CHIPS.map(chip => {
+                  const active = selectedFilter === chip.id;
+                  return (
+                    <button
+                      key={chip.id}
+                      type="button"
+                      className={`gdrive-filter-chip ${active ? 'active' : ''}`}
+                      onClick={() => setSelectedFilter(chip.id)}
+                    >
+                      {chip.color && (
+                        <span className="gdrive-chip-dot" style={{ background: chip.color }} />
+                      )}
+                      <span>{chip.label}</span>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
 
-            {error && <p className="dfm-page-error">{error}</p>}
-            {loading && <div className="bib2-loading"><Loader2 size={22} className="dfm-spin" /></div>}
+            {/* ── BREADCRUMB TRAIL (GOOGLE DRIVE STYLE) ── */}
+            <div className="gdrive-breadcrumb-bar">
+              <div className="gdrive-breadcrumbs">
+                <button
+                  type="button"
+                  className={`gdrive-crumb-item ${!openFolder ? 'active' : ''}`}
+                  onClick={() => jumpToBreadcrumb(null)}
+                >
+                  <HardDrive size={15} />
+                  <span>Mi Unidad</span>
+                </button>
 
-            {!loading && !openFolder && (
-              <>
-                {/* Folders */}
-                <section className="bib2-section">
-                  <h2 className="bib2-section-title">Carpetas</h2>
-                  {sortedFolders.length === 0 ? (
-                    <p className="bib2-empty-note">No tenés carpetas todavía — creá una con "Nuevo".</p>
-                  ) : (
-                    <div className="bib2-folders-row">
-                      {sortedFolders.map(f => renderFolderCard(f))}
-                    </div>
-                  )}
-                </section>
+                {folderStack.map((sf, idx) => (
+                  <div key={sf.id} className="gdrive-crumb-group">
+                    <span className="gdrive-crumb-sep">/</span>
+                    <button
+                      type="button"
+                      className="gdrive-crumb-item"
+                      onClick={() => jumpToBreadcrumb(sf, idx)}
+                    >
+                      <Folder size={14} style={{ color: sf.color || '#10B981' }} />
+                      <span>{sf.name}</span>
+                    </button>
+                  </div>
+                ))}
 
-                {/* Recent */}
-                <section className="bib2-section">
-                  <h2 className="bib2-section-title">Recientes</h2>
-                  {sortedRecent.length === 0 ? (
-                    <p className="bib2-empty-note">Todavía no subiste ningún documento.</p>
-                  ) : (
-                    <div className="bib2-recent-row">
-                      {sortedRecent.map(doc => renderDocCard(doc, false))}
-                    </div>
-                  )}
-                </section>
-              </>
+                {openFolder && (
+                  <div className="gdrive-crumb-group">
+                    <span className="gdrive-crumb-sep">/</span>
+                    <span className="gdrive-crumb-item active">
+                      <Folder size={14} style={{ color: openFolder.color || '#10B981' }} />
+                      <span>{openFolder.name}</span>
+                    </span>
+                  </div>
+                )}
+              </div>
+
+              {openFolder && (
+                <button
+                  type="button"
+                  className="gdrive-back-folder-btn"
+                  onClick={goBackFolder}
+                  title="Volver a la carpeta anterior"
+                >
+                  <ArrowLeft size={14} /> Volver
+                </button>
+              )}
+            </div>
+
+            {error && (
+              <div className="gdrive-error-banner">
+                <p>{error}</p>
+                <button type="button" onClick={() => setError(null)}><X size={14} /></button>
+              </div>
             )}
 
-            {!loading && openFolder && (
-              <>
-                {sortedChildFolders.length > 0 && (
-                  <section className="bib2-section">
-                    <h2 className="bib2-section-title">Carpetas</h2>
-                    <div className="bib2-folders-row">
-                      {sortedChildFolders.map(f => renderFolderCard(f))}
-                    </div>
-                  </section>
-                )}
+            {isDropUploading && (
+              <div className="gdrive-uploading-banner">
+                <Loader2 size={16} className="dfm-spin" /> Subiendo archivos a tu unidad...
+              </div>
+            )}
 
-                <section className="bib2-section">
-                  {folderDocsLoading ? (
-                    <div className="bib2-loading"><Loader2 size={22} className="dfm-spin" /></div>
-                  ) : sortedFolderDocs.length === 0 && sortedChildFolders.length === 0 ? (
-                    <p className="bib2-empty-note">Esta carpeta está vacía — subí un documento o creá una subcarpeta con "Nuevo".</p>
-                  ) : sortedFolderDocs.length === 0 ? null : (
-                    <div className="bib2-recent-row">
-                      {sortedFolderDocs.map(doc => renderDocCard(doc, true))}
+            {loading && (
+              <div className="bib2-loading">
+                <Loader2 size={24} className="dfm-spin" />
+                <span>Cargando tu almacenamiento en la nube...</span>
+              </div>
+            )}
+
+            {!loading && !openFolder && !cleanSearch && selectedFilter === 'ALL' && (
+              <InfoCards />
+            )}
+
+            {/* ── SECCIÓN DE CARPETAS ── */}
+            {!loading && (
+              <section className="bib2-section gdrive-section">
+                <div className="gdrive-section-header">
+                  <h2 className="bib2-section-title gdrive-title-clean">
+                    {openFolder ? 'Subcarpetas' : 'Carpetas'}
+                  </h2>
+                  <span className="gdrive-section-badge">
+                    {filteredFolders.length}
+                  </span>
+                </div>
+
+                {filteredFolders.length === 0 ? (
+                  !openFolder && cleanSearch ? null : (
+                    <div className="gdrive-empty-folder-box">
+                      <FolderPlus size={24} />
+                      <p>{openFolder ? 'No hay subcarpetas creadas.' : 'No tenés carpetas todavía — creá una con "+ Nuevo".'}</p>
                     </div>
-                  )}
-                </section>
-              </>
+                  )
+                ) : (
+                  <div className="bib2-folders-row gdrive-folders-grid">
+                    {filteredFolders.map(f => renderFolderCard(f))}
+                  </div>
+                )}
+              </section>
+            )}
+
+            {/* ── SECCIÓN DE ARCHIVOS Y DOCUMENTOS (GRID / LIST VIEW) ── */}
+            {!loading && (
+              <section className="bib2-section gdrive-section">
+                <div className="gdrive-section-header">
+                  <h2 className="bib2-section-title gdrive-title-clean">
+                    {openFolder
+                      ? 'Archivos en esta carpeta'
+                      : (cleanSearch || selectedFilter !== 'ALL' ? 'Resultados de archivos' : 'Archivos recientes')}
+                  </h2>
+                  <span className="gdrive-section-badge">
+                    {filteredDocs.length}
+                  </span>
+                </div>
+
+                {folderDocsLoading ? (
+                  <div className="bib2-loading">
+                    <Loader2 size={20} className="dfm-spin" />
+                  </div>
+                ) : filteredDocs.length === 0 ? (
+                  <div className="gdrive-empty-files-box">
+                    <UploadCloud size={28} />
+                    <p>
+                      {cleanSearch || selectedFilter !== 'ALL'
+                        ? 'No se encontraron archivos que coincidan con la búsqueda o filtro.'
+                        : 'No hay documentos en esta ubicación — arrastrá archivos aquí o hacé clic en "+ Nuevo".'}
+                    </p>
+                  </div>
+                ) : viewMode === 'grid' ? (
+                  <div className="bib2-recent-row gdrive-files-grid">
+                    {filteredDocs.map(doc => renderDocCard(doc, !!openFolder))}
+                  </div>
+                ) : (
+                  <div className="gdrive-table-container">
+                    <table className="gdrive-table">
+                      <thead>
+                        <tr>
+                          <th className="gdrive-th-name">Nombre</th>
+                          <th className="gdrive-th-folder">Ubicación</th>
+                          <th className="gdrive-th-date">Fecha de subida</th>
+                          <th className="gdrive-th-size">Tamaño</th>
+                          <th className="gdrive-th-actions">Acciones</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {filteredDocs.map(doc => renderDocTableRow(doc, !!openFolder))}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
+              </section>
             )}
           </>
         )}
       </div>
 
+      {/* ── Modales de Creación, Subida y Confirmación ── */}
       <AnimatePresence>
         {folderModal && (
           <FolderModal
