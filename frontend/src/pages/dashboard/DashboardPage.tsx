@@ -570,7 +570,7 @@ export default function DashboardPage() {
   }, [folders, openFolder, cleanSearch, selectedFilter, sortLabel]);
 
   const filteredDocs = useMemo(() => {
-    let list = openFolder ? folderDocs : (cleanSearch || selectedFilter !== 'ALL' ? universeDocs : recent);
+    let list = openFolder ? folderDocs : universeDocs;
 
     if (cleanSearch) {
       list = list.filter(d => d.name.toLowerCase().includes(cleanSearch));
@@ -584,7 +584,7 @@ export default function DashboardPage() {
     }
 
     return sortDocs(list, sortLabel);
-  }, [openFolder, folderDocs, universeDocs, recent, cleanSearch, selectedFilter, sortLabel]);
+  }, [openFolder, folderDocs, universeDocs, cleanSearch, selectedFilter, sortLabel]);
 
   function getFileCardIcon(name: string, mime: string) {
     const info = getDocTypeInfo(name, mime);
@@ -1030,7 +1030,13 @@ export default function DashboardPage() {
                       key={chip.id}
                       type="button"
                       className={`gdrive-filter-chip ${active ? 'active' : ''}`}
-                      onClick={() => setSelectedFilter(prev => prev === chip.id ? 'ALL' : chip.id)}
+                      onClick={() => {
+                        if (chip.id === 'ALL') {
+                          setSelectedFilter('ALL');
+                        } else {
+                          setSelectedFilter(prev => prev === chip.id ? 'ALL' : chip.id);
+                        }
+                      }}
                     >
                       {chip.color && (
                         <span className="gdrive-chip-dot" style={{ background: chip.color }} />
