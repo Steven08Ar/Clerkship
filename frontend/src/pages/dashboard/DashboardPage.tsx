@@ -6,12 +6,13 @@ import {
   Presentation, Image as ImageIcon, FileCode, File,
   MoreVertical, Pencil, Trash2, ArrowLeft, FolderPlus, UploadCloud, Loader2, Download, Eye,
   LayoutGrid, List, Search, X, Folder, HardDrive, Check,
-  ClipboardList, GraduationCap, Mail, ChevronRight
+  ClipboardList, GraduationCap, Mail, ChevronRight, Share2
 } from 'lucide-react';
 import Sidebar from '../../components/shared/Sidebar';
 import WelcomeOverlay from '../../components/shared/WelcomeOverlay';
 import FolderModal from '../../components/dashboard/FolderModal';
 import UploadDocumentModal from '../../components/dashboard/UploadDocumentModal';
+import ShareDocumentModal from '../../components/dashboard/ShareDocumentModal';
 import DocumentPreviewView from '../../components/dashboard/DocumentPreviewView';
 import { formatFileSize, readFileAsBase64 } from '../../utils/fileUpload';
 import { mainAuthErrorMessage } from '../../data/mainAuth';
@@ -240,6 +241,7 @@ export default function DashboardPage() {
   const [uploadModalOpen, setUploadModalOpen] = useState(false);
   const [confirmDeleteFolder, setConfirmDeleteFolder] = useState<DocumentFolder | null>(null);
   const [previewDoc, setPreviewDoc] = useState<DocumentSummary | null>(null);
+  const [shareDoc, setShareDoc] = useState<DocumentSummary | null>(null);
 
   const [openFolder, setOpenFolder] = useState<DocumentFolder | null>(null);
   const [folderStack, setFolderStack] = useState<DocumentFolder[]>([]);
@@ -617,10 +619,12 @@ export default function DashboardPage() {
     return { IconComponent, colorClass, label: info.typeLabel };
   }
 
-  function getFolderNameById(id: string | null | undefined): string {
-    if (!id) return 'Mi Unidad';
+  function getFolderInfoById(id: string | null | undefined): { name: string; color: string; isRoot: boolean } {
+    if (!id) return { name: 'Mi Unidad', color: '#6366F1', isRoot: true };
     const match = folders.find(f => f.id === id);
-    return match ? match.name : 'Carpeta';
+    return match
+      ? { name: match.name, color: match.color || '#10B981', isRoot: false }
+      : { name: 'Carpeta', color: '#10B981', isRoot: false };
   }
 
   /* ── Cálculos de Almacenamiento ── */
@@ -783,6 +787,7 @@ export default function DashboardPage() {
                   <><Download size={13} /> Descargar</>
                 )}
               </button>
+              <button type="button" onClick={() => { setShareDoc(doc); setMenuFor(null); }}><Share2 size={13} /> Compartir</button>
               <button type="button" onClick={() => startRename(doc)}><Pencil size={13} /> Renombrar</button>
               <button type="button" className="danger" onClick={() => handleDeleteDocument(doc, fromFolder)}>
                 <Trash2 size={13} /> Eliminar
@@ -797,7 +802,7 @@ export default function DashboardPage() {
   function renderDocTableRow(doc: DocumentSummary, fromFolder: boolean) {
     const isRenaming = renamingId === doc.id;
     const { IconComponent, colorClass, label } = getFileCardIcon(doc.name, doc.mime_type);
-    const folderName = getFolderNameById(doc.folder_id);
+    const folderInfo = getFolderInfoById(doc.folder_id);
 
     return (
       <tr key={doc.id} className="gdrive-table-row" onClick={() => !isRenaming && setPreviewDoc(doc)}>
@@ -831,8 +836,21 @@ export default function DashboardPage() {
           </div>
         </td>
         <td className="gdrive-td-folder">
-          <span className="gdrive-folder-pill">
-            <Folder size={12} /> {folderName}
+          <span
+            className="gdrive-folder-pill"
+            style={{
+              borderColor: `${folderInfo.color}35`,
+              backgroundColor: `${folderInfo.color}10`,
+            }}
+          >
+            {folderInfo.isRoot ? (
+              <HardDrive size={13} style={{ color: folderInfo.color }} />
+            ) : (
+              <Folder size={13} style={{ color: folderInfo.color }} fill={`${folderInfo.color}30`} />
+            )}
+            <span className="gdrive-folder-pill-name" style={{ color: folderInfo.color }}>
+              {folderInfo.name}
+            </span>
           </span>
         </td>
         <td className="gdrive-td-date">{formatDate(doc.created_at)}</td>
@@ -867,6 +885,7 @@ export default function DashboardPage() {
               </button>
               {menuFor === doc.id && (
                 <div className="bib2-file-menu gdrive-menu-fix">
+                  <button type="button" onClick={() => { setShareDoc(doc); setMenuFor(null); }}><Share2 size={13} /> Compartir</button>
                   <button type="button" onClick={() => startRename(doc)}><Pencil size={13} /> Renombrar</button>
                   <button type="button" className="danger" onClick={() => handleDeleteDocument(doc, fromFolder)}>
                     <Trash2 size={13} /> Eliminar
@@ -1403,6 +1422,12 @@ export default function DashboardPage() {
             defaultFolderId={openFolder?.id}
             onClose={() => setUploadModalOpen(false)}
             onUpload={handleUpload}
+          />
+        )}
+        {shareDoc && (
+          <ShareDocumentModal
+            document={shareDoc}
+            onClose={() => setShareDoc(null)}
           />
         )}
         {confirmDeleteFolder && (

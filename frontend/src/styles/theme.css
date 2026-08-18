@@ -2551,9 +2551,8 @@ html.theme-animating .crono-gantt-card {
 }
 
 [data-theme="dark"] .gdrive-folder-pill {
-  background: #0F172A !important;
-  border-color: rgba(255, 255, 255, 0.1) !important;
-  color: #CBD5E1 !important;
+  background: rgba(15, 23, 42, 0.7) !important;
+  border-color: rgba(255, 255, 255, 0.08) !important;
 }
 
 [data-theme="dark"] .gdrive-td-date,
