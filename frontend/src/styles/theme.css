@@ -1218,6 +1218,36 @@ html.theme-animating .crono-gantt-card {
   background: rgba(30, 41, 59, 0.8) !important;
   color: #94A3B8 !important;
 }
+[data-theme="dark"] .bib2-file-icon.fi-pdf {
+  background: rgba(239, 68, 68, 0.2) !important;
+  color: #F87171 !important;
+  border-color: rgba(239, 68, 68, 0.4) !important;
+}
+[data-theme="dark"] .bib2-file-icon.fi-doc {
+  background: rgba(37, 99, 235, 0.2) !important;
+  color: #60A5FA !important;
+  border-color: rgba(37, 99, 235, 0.4) !important;
+}
+[data-theme="dark"] .bib2-file-icon.fi-xls {
+  background: rgba(16, 185, 129, 0.2) !important;
+  color: #34D399 !important;
+  border-color: rgba(16, 185, 129, 0.4) !important;
+}
+[data-theme="dark"] .bib2-file-icon.fi-ppt {
+  background: rgba(249, 115, 22, 0.2) !important;
+  color: #FB923C !important;
+  border-color: rgba(249, 115, 22, 0.4) !important;
+}
+[data-theme="dark"] .bib2-file-icon.fi-img {
+  background: rgba(147, 51, 234, 0.2) !important;
+  color: #C084FC !important;
+  border-color: rgba(147, 51, 234, 0.4) !important;
+}
+[data-theme="dark"] .bib2-file-icon.fi-txt {
+  background: rgba(2, 132, 199, 0.2) !important;
+  color: #38BDF8 !important;
+  border-color: rgba(2, 132, 199, 0.4) !important;
+}
 
 /* Pestaña de Biblioteca (/biblioteca) */
 [data-theme="dark"] .bib-body {
@@ -1875,11 +1905,25 @@ html.theme-animating .crono-gantt-card {
   background: rgba(30, 41, 59, 0.95) !important;
   border-color: rgba(56, 189, 248, 0.3) !important;
 }
+[data-theme="dark"] .chats-item.unread {
+  background: rgba(56, 189, 248, 0.16) !important;
+}
+[data-theme="dark"] .chats-item.unread:hover {
+  background: rgba(56, 189, 248, 0.22) !important;
+}
+[data-theme="dark"] .chats-item.unread .chats-item-preview {
+  color: #E2E8F0 !important;
+}
 
 [data-theme="dark"] .chats-bubble.contact {
   background: rgba(30, 41, 59, 0.95) !important;
   color: #F8FAFC !important;
   border-color: rgba(255, 255, 255, 0.12) !important;
+}
+[data-theme="dark"] .chats-bubble.contact {
+  background: rgba(30, 41, 59, 0.50) !important;
+  color: #F8FAFC !important;
+  border: 1px solid rgba(255, 255, 255, 0.20) !important;
 }
 [data-theme="dark"] .chats-bubble.contact .chats-bubble-text {
   color: #F8FAFC !important;
@@ -1897,14 +1941,27 @@ html.theme-animating .crono-gantt-card {
   background: #94A3B8 !important;
 }
 
+/* Chulo de "leído": verde-azul neón con resplandor, solo en modo oscuro
+   (en modo claro es --p-dk, el azul oscuro del sistema — ver dashboard.css). */
+[data-theme="dark"] .chats-check-icon.read {
+  color: #1AFFC4 !important;
+  filter: drop-shadow(0 0 3px rgba(26, 255, 196, 0.85));
+}
+
 [data-theme="dark"] .chats-bubble.user {
-  background: linear-gradient(135deg, #2563EB 0%, #1D4ED8 100%) !important;
+  background: rgba(37, 99, 235, 0.75) !important;
   color: #FFFFFF !important;
+  border: 1px solid rgba(37, 99, 235, 0.85) !important;
 }
 [data-theme="dark"] .chats-bubble.user .chats-bubble-text {
   color: #FFFFFF !important;
   font-weight: 500 !important;
 }
+[data-theme="dark"] .voice-player.user .voice-player-play-btn { background: rgba(255, 255, 255, 0.25) !important; color: #ffffff !important; }
+[data-theme="dark"] .voice-player.user .voice-player-bar { background: rgba(255, 255, 255, 0.35) !important; }
+[data-theme="dark"] .voice-player.user .voice-player-bar.played { background: #ffffff !important; }
+[data-theme="dark"] .voice-player.user .voice-player-speed-btn { background: rgba(255, 255, 255, 0.2) !important; color: #ffffff !important; }
+[data-theme="dark"] .voice-player.user .voice-player-time { color: #ffffff !important; }
 [data-theme="dark"] .chats-bubble.user .chats-bubble-meta span {
   color: rgba(255, 255, 255, 0.92) !important;
 }
@@ -1973,7 +2030,7 @@ html.theme-animating .crono-gantt-card {
 }
 
 [data-theme="dark"] .chats-dropzone-embed-box {
-  background: rgba(2, 132, 199, 0.1) !important;
+  background: rgba(15, 23, 42, 0.85) !important;
   border-color: rgba(56, 189, 248, 0.35) !important;
 }
 [data-theme="dark"] .chats-dz-title {
@@ -1998,4 +2055,359 @@ html.theme-animating .crono-gantt-card {
 [data-theme="dark"] .chats-nav-icon-btn.active {
   color: #60A5FA !important;
   background: rgba(59, 130, 246, 0.2) !important;
+}
+
+[data-theme="dark"] .sb-unified {
+  background: #0F172A !important;
+  border-color: rgba(255, 255, 255, 0.10) !important;
+}
+[data-theme="dark"] .sb-u-header {
+  border-bottom-color: rgba(255, 255, 255, 0.08) !important;
+}
+[data-theme="dark"] .sb-u-title {
+  color: #F8FAFC !important;
+}
+[data-theme="dark"] .sb-u-toggle-btn {
+  background: rgba(255, 255, 255, 0.06) !important;
+  border-color: rgba(255, 255, 255, 0.12) !important;
+  color: #94A3B8 !important;
+}
+[data-theme="dark"] .sb-u-toggle-btn:hover {
+  background: rgba(255, 255, 255, 0.12) !important;
+  color: #FFFFFF !important;
+}
+[data-theme="dark"] .sb-u-item,
+[data-theme="dark"] .sb-u-sub-item,
+[data-theme="dark"] .sb-u-footer-btn {
+  color: #94A3B8 !important;
+}
+[data-theme="dark"] .sb-u-item:hover,
+[data-theme="dark"] .sb-u-sub-item:hover,
+[data-theme="dark"] .sb-u-footer-btn:hover,
+[data-theme="dark"] .sb-u-rail-icon-btn:hover {
+  background: rgba(255, 255, 255, 0.06) !important;
+  color: #F8FAFC !important;
+}
+[data-theme="dark"] .sb-u-accordion-head.head-open {
+  background: rgba(255, 255, 255, 0.06) !important;
+  color: #F8FAFC !important;
+}
+[data-theme="dark"] .sb-u-sub-item.active-sub,
+[data-theme="dark"] .sb-u-item.active-parent,
+[data-theme="dark"] .sb-u-rail-icon-btn.active {
+  background: #2563EB !important;
+  color: #FFFFFF !important;
+}
+[data-theme="dark"] .sb-u-tree-line {
+  background: rgba(255, 255, 255, 0.15) !important;
+}
+[data-theme="dark"] .sb-u-sub-badge,
+[data-theme="dark"] .sb-u-badge {
+  background: rgba(255, 255, 255, 0.08) !important;
+  color: #94A3B8 !important;
+}
+[data-theme="dark"] .sb-u-sub-badge.badge-active {
+  background: rgba(255, 255, 255, 0.22) !important;
+  color: #FFFFFF !important;
+}
+[data-theme="dark"] .sb-u-footer {
+  border-top-color: rgba(255, 255, 255, 0.08) !important;
+}
+[data-theme="dark"] .sb-u-user-card {
+  background: rgba(255, 255, 255, 0.04) !important;
+  border-color: rgba(255, 255, 255, 0.08) !important;
+}
+[data-theme="dark"] .sb-u-user-name {
+  color: #F8FAFC !important;
+}
+
+[data-theme="dark"] .bib2-folder-card-minimal {
+  background: #0F172A !important;
+  border-color: rgba(255, 255, 255, 0.08) !important;
+}
+[data-theme="dark"] .bib2-folder-card-minimal:hover {
+  background: #1E293B !important;
+  border-color: rgba(56, 189, 248, 0.4) !important;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3) !important;
+}
+[data-theme="dark"] .bib2-folder-minimal-name {
+  color: #F8FAFC !important;
+}
+[data-theme="dark"] .bib2-folder-minimal-meta {
+  color: #94A3B8 !important;
+}
+
+[data-theme="dark"] .doc-preview-modal {
+  background: #0F172A !important;
+  border-color: rgba(255, 255, 255, 0.12) !important;
+}
+[data-theme="dark"] .doc-preview-header {
+  background: #0B1120 !important;
+  border-bottom-color: rgba(255, 255, 255, 0.08) !important;
+}
+[data-theme="dark"] .doc-preview-file-name {
+  color: #F8FAFC !important;
+}
+[data-theme="dark"] .doc-preview-tool-btn,
+[data-theme="dark"] .doc-preview-zoom-group,
+[data-theme="dark"] .doc-preview-close-btn {
+  background: #1E293B !important;
+  border-color: rgba(255, 255, 255, 0.12) !important;
+  color: #CBD5E1 !important;
+}
+[data-theme="dark"] .doc-preview-tool-btn:hover {
+  background: #334155 !important;
+  color: #FFFFFF !important;
+}
+[data-theme="dark"] .doc-preview-zoom-label {
+  color: #F8FAFC !important;
+}
+
+[data-theme="dark"] .doc-fulltab-view {
+  background: #0F172A !important;
+  border-color: rgba(255, 255, 255, 0.1) !important;
+}
+[data-theme="dark"] .doc-fulltab-header {
+  background: #0B1120 !important;
+  border-bottom-color: rgba(255, 255, 255, 0.08) !important;
+}
+[data-theme="dark"] .doc-fulltab-back-btn {
+  background: #1E293B !important;
+  border-color: rgba(255, 255, 255, 0.12) !important;
+  color: #F8FAFC !important;
+}
+[data-theme="dark"] .doc-fulltab-back-btn:hover {
+  background: var(--p, #4F46E5) !important;
+  color: #FFFFFF !important;
+}
+[data-theme="dark"] .doc-fulltab-file-name {
+  color: #F8FAFC !important;
+}
+[data-theme="dark"] .doc-fulltab-divider {
+  background: rgba(255, 255, 255, 0.12) !important;
+}
+[data-theme="dark"] .bib2-body.is-preview-mode {
+  background: #0B1120 !important;
+}
+
+/* ── Dark Mode: Visores de Documentos e Interfaz Propia ── */
+[data-theme="dark"] .doc-fulltab-body {
+  background: #0B1120 !important;
+}
+
+/* CPV (Visor PDF Propio) en Dark Mode */
+[data-theme="dark"] .cpv-root {
+  background: #0B1120 !important;
+  color: #F8FAFC !important;
+}
+[data-theme="dark"] .cpv-toolbar {
+  background: #1E293B !important;
+  border-bottom-color: rgba(255, 255, 255, 0.08) !important;
+  color: #CBD5E1 !important;
+}
+[data-theme="dark"] .cpv-btn-tool {
+  background: rgba(255, 255, 255, 0.05) !important;
+  border-color: rgba(255, 255, 255, 0.1) !important;
+  color: #E2E8F0 !important;
+}
+[data-theme="dark"] .cpv-btn-tool:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.15) !important;
+  color: #FFFFFF !important;
+}
+[data-theme="dark"] .cpv-btn-tool.is-active {
+  background: #4F46E5 !important;
+  color: #FFFFFF !important;
+  border-color: #4F46E5 !important;
+}
+[data-theme="dark"] .cpv-divider {
+  background: rgba(255, 255, 255, 0.12) !important;
+}
+[data-theme="dark"] .cpv-page-badge {
+  background: rgba(0, 0, 0, 0.3) !important;
+  border-color: rgba(255, 255, 255, 0.1) !important;
+  color: #94A3B8 !important;
+}
+[data-theme="dark"] .cpv-page-input {
+  color: #FFFFFF !important;
+}
+[data-theme="dark"] .cpv-page-total {
+  color: #94A3B8 !important;
+}
+[data-theme="dark"] .cpv-zoom-select-wrap select {
+  background: rgba(0, 0, 0, 0.3) !important;
+  border-color: rgba(255, 255, 255, 0.1) !important;
+  color: #FFFFFF !important;
+}
+[data-theme="dark"] .cpv-zoom-select-wrap select option {
+  background: #1E293B !important;
+  color: #FFFFFF !important;
+}
+[data-theme="dark"] .cpv-viewmode-pills {
+  background: rgba(0, 0, 0, 0.3) !important;
+  border-color: rgba(255, 255, 255, 0.1) !important;
+}
+[data-theme="dark"] .cpv-pill {
+  color: #94A3B8 !important;
+}
+[data-theme="dark"] .cpv-pill.is-active {
+  background: #4F46E5 !important;
+  color: #FFFFFF !important;
+}
+[data-theme="dark"] .cpv-sidebar {
+  background: #0B1120 !important;
+  border-right-color: rgba(255, 255, 255, 0.08) !important;
+}
+[data-theme="dark"] .cpv-sidebar-header {
+  color: #94A3B8 !important;
+  border-bottom-color: rgba(255, 255, 255, 0.06) !important;
+}
+[data-theme="dark"] .cpv-thumb-item:hover {
+  background: rgba(255, 255, 255, 0.05) !important;
+}
+[data-theme="dark"] .cpv-thumb-item.is-active {
+  border-color: #4F46E5 !important;
+  background: rgba(79, 70, 229, 0.15) !important;
+}
+[data-theme="dark"] .cpv-thumb-box {
+  background: #1E293B !important;
+  border-color: rgba(255, 255, 255, 0.08) !important;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3) !important;
+}
+[data-theme="dark"] .cpv-thumb-num {
+  color: #CBD5E1 !important;
+}
+[data-theme="dark"] .cpv-stage {
+  background: #090D16 !important;
+}
+
+/* Word en Dark Mode (El escenario se vuelve oscuro, pero la hoja del documento permanece intacta en blanco) */
+[data-theme="dark"] .doc-preview-word-wrap {
+  background: #0B1120 !important;
+}
+
+/* PowerPoint en Dark Mode */
+[data-theme="dark"] .doc-preview-ppt-wrap {
+  background: #0B1120 !important;
+}
+[data-theme="dark"] .doc-ppt-sidebar {
+  background: #0F172A !important;
+  border-right-color: rgba(255, 255, 255, 0.08) !important;
+}
+[data-theme="dark"] .doc-ppt-thumb-btn:hover {
+  background: rgba(255, 255, 255, 0.05) !important;
+}
+[data-theme="dark"] .doc-ppt-thumb-preview {
+  background: #1E293B !important;
+  border-color: rgba(255, 255, 255, 0.08) !important;
+}
+[data-theme="dark"] .ppt-mini-line {
+  background: rgba(255, 255, 255, 0.2) !important;
+}
+[data-theme="dark"] .doc-ppt-stage {
+  background: #0B1120 !important;
+}
+
+/* Excel en Dark Mode */
+[data-theme="dark"] .doc-preview-excel-wrap {
+  background: #0B1120 !important;
+}
+[data-theme="dark"] .doc-excel-formula-bar {
+  background: #1E293B !important;
+  border-bottom-color: rgba(255, 255, 255, 0.08) !important;
+  color: #CBD5E1 !important;
+}
+[data-theme="dark"] .doc-excel-formula-text {
+  color: #94A3B8 !important;
+}
+[data-theme="dark"] .doc-excel-table th {
+  background: #1E293B !important;
+  color: #CBD5E1 !important;
+  border-color: rgba(255, 255, 255, 0.1) !important;
+}
+[data-theme="dark"] .doc-excel-table td {
+  background: #0F172A !important;
+  color: #F8FAFC !important;
+  border-color: rgba(255, 255, 255, 0.08) !important;
+}
+[data-theme="dark"] .doc-excel-table .doc-excel-row-num {
+  background: #1E293B !important;
+  color: #94A3B8 !important;
+  border-color: rgba(255, 255, 255, 0.1) !important;
+}
+[data-theme="dark"] .doc-excel-table tr.doc-excel-header-row td {
+  background: rgba(16, 185, 129, 0.15) !important;
+  color: #34D399 !important;
+}
+[data-theme="dark"] .doc-excel-tabs {
+  background: #0F172A !important;
+  border-top-color: rgba(255, 255, 255, 0.08) !important;
+}
+[data-theme="dark"] .doc-excel-tab-btn {
+  background: #1E293B !important;
+  border-color: rgba(255, 255, 255, 0.1) !important;
+  color: #94A3B8 !important;
+}
+[data-theme="dark"] .doc-excel-tab-btn.is-active {
+  background: #10B981 !important;
+  color: #FFFFFF !important;
+  border-color: #10B981 !important;
+}
+
+/* Imágenes y Texto en Dark Mode */
+[data-theme="dark"] .doc-preview-image-wrap {
+  background: #0B1120 !important;
+}
+[data-theme="dark"] .doc-preview-text-wrap {
+  background: #0B1120 !important;
+}
+[data-theme="dark"] .doc-text-topbar {
+  background: #1E293B !important;
+  border-bottom-color: rgba(255, 255, 255, 0.08) !important;
+  color: #CBD5E1 !important;
+}
+[data-theme="dark"] .doc-text-copy-btn {
+  background: rgba(255, 255, 255, 0.08) !important;
+  border-color: rgba(255, 255, 255, 0.12) !important;
+  color: #FFFFFF !important;
+}
+[data-theme="dark"] .doc-text-code-view {
+  background: #0B1120 !important;
+  color: #F8FAFC !important;
+}
+
+[data-theme="dark"] .doc-preview-center-msg {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  color: #CBD5E1 !important;
+}
+
+[data-theme="dark"] .doc-preview-center-msg p {
+  color: #94A3B8 !important;
+}
+
+[data-theme="dark"] .doc-preview-center-msg strong {
+  color: #F8FAFC !important;
+}
+
+[data-theme="dark"] .doc-preview-center-msg.doc-preview-error {
+  background: rgba(239, 68, 68, 0.1) !important;
+  border: 1px solid rgba(239, 68, 68, 0.25) !important;
+  border-radius: 12px !important;
+  padding: 24px 32px !important;
+}
+
+[data-theme="dark"] .doc-preview-center-msg.doc-preview-error p {
+  color: #F87171 !important;
+}
+
+[data-theme="dark"] .cpv-thumb-box {
+  background: #1E293B !important;
+  border-color: rgba(255, 255, 255, 0.1) !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4) !important;
+}
+
+[data-theme="dark"] .cpv-thumb-skeleton {
+  background: rgba(255, 255, 255, 0.02) !important;
+  color: #94A3B8 !important;
 }
