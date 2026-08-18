@@ -20,7 +20,7 @@ export interface FileAttachmentData {
   data: string;
 }
 
-function readFileAsDataUrl(file: File): Promise<string> {
+export function readFileAsDataUrl(file: File): Promise<string> {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
     reader.onloadend = () => resolve(reader.result as string);
@@ -29,11 +29,16 @@ function readFileAsDataUrl(file: File): Promise<string> {
   });
 }
 
-function dataUrlToBase64(dataUrl: string): string {
+export function dataUrlToBase64(dataUrl: string): string {
   return dataUrl.split(',')[1] || '';
 }
 
-function base64ByteLength(base64: string): number {
+export async function readFileAsBase64(file: File): Promise<string> {
+  const dataUrl = await readFileAsDataUrl(file);
+  return dataUrlToBase64(dataUrl);
+}
+
+export function base64ByteLength(base64: string): number {
   return Math.floor((base64.length * 3) / 4);
 }
 
