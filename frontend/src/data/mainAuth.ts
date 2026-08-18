@@ -20,6 +20,8 @@ export interface MainUser {
   last_name: string;
   email: string;
   role: 'STUDENT' | 'TEACHER';
+  email_verified?: boolean;
+  avatar_svg?: string | null;
 }
 
 interface AuthResponse {
@@ -55,6 +57,20 @@ function persistSession(data: AuthResponse) {
   window.dispatchEvent(new Event(MAIN_AUTH_CHANGED_EVENT));
 }
 
+/** Se tira cuando el login es válido pero el correo todavía no fue
+ *  verificado — a diferencia de un error normal, ESTO sí deja la sesión
+ *  guardada (el backend manda tokens igual) para poder llamar a
+ *  verifyEmailCode()/resendVerificationCode() y llevar al usuario directo a
+ *  la pantalla de verificación en vez de rebotarlo sin explicación. */
+export class EmailNotVerifiedError extends Error {
+  user: MainUser;
+  constructor(user: MainUser) {
+    super('Tu correo todavía no está verificado.');
+    this.name = 'EmailNotVerifiedError';
+    this.user = user;
+  }
+}
+
 export async function loginWithEmailPassword(email: string, password: string): Promise<MainUser> {
   const res = await fetch(`${API_BASE_URL}/api/auth/login`, {
     method: 'POST',
@@ -63,6 +79,11 @@ export async function loginWithEmailPassword(email: string, password: string): P
   });
 
   const data = await res.json().catch(() => null);
+
+  if (res.status === 403 && data?.error === 'email_not_verified') {
+    persistSession(data as AuthResponse);
+    throw new EmailNotVerifiedError((data as AuthResponse).user);
+  }
 
   if (!res.ok) {
     throw new Error(data?.error || 'No se pudo iniciar sesión.');
@@ -136,6 +157,60 @@ export function clearMainAuthSession() {
   localStorage.removeItem(STORAGE_KEYS.refreshToken);
   localStorage.removeItem(STORAGE_KEYS.user);
   window.dispatchEvent(new Event(MAIN_AUTH_CHANGED_EVENT));
+}
+
+function authedHeaders(): HeadersInit {
+  const token = getAccessToken();
+  return {
+    'Content-Type': 'application/json',
+    ...(token ? { Authorization: `Bearer ${token}` } : {}),
+  };
+}
+
+/** Actualiza solo el usuario guardado en localStorage (sin tocar los tokens)
+ *  — lo usan verifyEmailCode()/saveAvatarSvg() para reflejar el cambio ya. */
+function updateStoredUser(user: MainUser) {
+  localStorage.setItem(STORAGE_KEYS.user, JSON.stringify(user));
+  window.dispatchEvent(new Event(MAIN_AUTH_CHANGED_EVENT));
+}
+
+export async function verifyEmailCode(code: string): Promise<MainUser> {
+  const res = await fetch(`${API_BASE_URL}/api/auth/verify-email`, {
+    method: 'POST',
+    headers: authedHeaders(),
+    body: JSON.stringify({ code }),
+  });
+  const data = await res.json().catch(() => null);
+  if (!res.ok) {
+    throw new Error(data?.error || 'No se pudo verificar el código.');
+  }
+  updateStoredUser(data.user as MainUser);
+  return data.user as MainUser;
+}
+
+export async function resendVerificationCode(): Promise<void> {
+  const res = await fetch(`${API_BASE_URL}/api/auth/resend-code`, {
+    method: 'POST',
+    headers: authedHeaders(),
+  });
+  const data = await res.json().catch(() => null);
+  if (!res.ok) {
+    throw new Error(data?.error || 'No se pudo reenviar el código.');
+  }
+}
+
+export async function saveAvatarSvg(avatarSvg: string): Promise<MainUser> {
+  const res = await fetch(`${API_BASE_URL}/api/auth/avatar`, {
+    method: 'POST',
+    headers: authedHeaders(),
+    body: JSON.stringify({ avatar_svg: avatarSvg }),
+  });
+  const data = await res.json().catch(() => null);
+  if (!res.ok) {
+    throw new Error(data?.error || 'No se pudo guardar el avatar.');
+  }
+  updateStoredUser(data.user as MainUser);
+  return data.user as MainUser;
 }
 
 export function mainAuthErrorMessage(err: unknown): string {

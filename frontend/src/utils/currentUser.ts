@@ -23,6 +23,17 @@ function initialsFrom(name: string): string {
   return (parts[0][0] + (parts[1]?.[0] || '')).toUpperCase();
 }
 
+/** Convierte el SVG guardado (texto real, ver auth.py /avatar) en un data
+ *  URI usable directo en <img src>, sin tener que tocar cada lugar que ya
+ *  usa avatarUrl como string. Si el usuario todavía no eligió avatar (cuenta
+ *  vieja, o se lo saltó), cae al DiceBear-por-seed de siempre. */
+function resolveAvatarUrl(user: MainUser): string {
+  if (user.avatar_svg) {
+    return `data:image/svg+xml,${encodeURIComponent(user.avatar_svg)}`;
+  }
+  return generatedAvatarUrl(user.email);
+}
+
 function buildUserInfo(user: MainUser | null): CurrentUserInfo | null {
   if (!user) return null;
 
@@ -34,7 +45,7 @@ function buildUserInfo(user: MainUser | null): CurrentUserInfo | null {
     initials: initialsFrom(name),
     role: ROLE_LABELS[user.role] || 'Cuenta Clerkship',
     color: '#0284C7',
-    avatarUrl: generatedAvatarUrl(user.email),
+    avatarUrl: resolveAvatarUrl(user),
   };
 }
 
