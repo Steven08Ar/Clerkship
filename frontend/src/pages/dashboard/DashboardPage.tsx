@@ -1203,12 +1203,10 @@ export default function DashboardPage() {
             {!loading && (
               <section className="bib2-section gdrive-section">
                 <div className="gdrive-section-header">
-                  <h2 className="bib2-section-title gdrive-title-clean">
-                    {openFolder ? 'Subcarpetas' : 'Carpetas'}
+                  <h2 className="gdrive-section-title">
+                    <span>{openFolder ? 'Subcarpetas' : 'Carpetas'}</span>
+                    <span className="gdrive-section-badge">{filteredFolders.length}</span>
                   </h2>
-                  <span className="gdrive-section-badge">
-                    {filteredFolders.length}
-                  </span>
                 </div>
 
                 {filteredFolders.length === 0 ? (
@@ -1230,14 +1228,14 @@ export default function DashboardPage() {
             {!loading && (
               <section className="bib2-section gdrive-section">
                 <div className="gdrive-section-header">
-                  <h2 className="bib2-section-title gdrive-title-clean">
-                    {openFolder
-                      ? 'Archivos en esta carpeta'
-                      : (cleanSearch || selectedFilter !== 'ALL' ? 'Resultados de archivos' : 'Archivos recientes')}
+                  <h2 className="gdrive-section-title">
+                    <span>
+                      {openFolder
+                        ? 'Archivos en esta carpeta'
+                        : (cleanSearch || selectedFilter !== 'ALL' ? 'Resultados de archivos' : 'Archivos recientes')}
+                    </span>
+                    <span className="gdrive-section-badge">{filteredDocs.length}</span>
                   </h2>
-                  <span className="gdrive-section-badge">
-                    {filteredDocs.length}
-                  </span>
                 </div>
 
                 {folderDocsLoading ? (
