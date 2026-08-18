@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import './styles/landing.css';
 import './styles/auth.css';
 import './styles/inner.css';
@@ -25,6 +25,8 @@ import SimulacionPage from './pages/simulacion/SimulacionPage';
 import CasosPage from './pages/simulacion/CasosPage';
 import HistorialPage from './pages/simulacion/HistorialPage';
 import ChatsPage from './pages/chats/ChatsPage';
+import MailboxPage from './pages/mailbox/MailboxPage';
+import TerminosBuzonPage from './pages/mailbox/TerminosBuzonPage';
 import CuestionarioPage from './pages/cuestionario/CuestionarioPage';
 import CronogramaPage from './pages/cronograma/CronogramaPage';
 import DesarrolloPage from './pages/desarrollo/DesarrolloPage';
@@ -66,6 +68,16 @@ function ConsentRoute({ children }: { children: React.ReactNode }) {
   return <>{children}</>;
 }
 
+/** Rutas cuyas páginas ya traen su propio <Sidebar/> con toggle de tema en
+ *  el riel — ahí el botón flotante global queda de más. */
+const SIDEBAR_ROUTE_PREFIXES = ['/dashboard', '/biblioteca', '/casos', '/historial', '/chats', '/buzon', '/desarrollo'];
+
+function GlobalThemeToggle() {
+  const { pathname } = useLocation();
+  if (SIDEBAR_ROUTE_PREFIXES.some(p => pathname.startsWith(p))) return null;
+  return <ThemeToggleFloating />;
+}
+
 /**
  * 🔒 Guard para Páginas Públicas de Autenticación (/login, /register)
  * Si el usuario ya está autenticado, no lo deja volver a login/register:
@@ -86,8 +98,9 @@ function PublicAuthRoute({ children }: { children: React.ReactNode }) {
 export default function App() {
   return (
     <BrowserRouter>
-      {/* Botón Flotante Fijo a la Derecha en TODAS las Pestañas */}
-      <ThemeToggleFloating />
+      {/* Botón Flotante Fijo a la Derecha — solo en páginas sin Sidebar propio
+          (el Sidebar ya trae su propio toggle de tema en el riel). */}
+      <GlobalThemeToggle />
 
       <Routes>
         {/* Landing Public Pages */}
@@ -115,6 +128,8 @@ export default function App() {
         <Route path="/casos"                  element={<ProtectedRoute><CasosPage /></ProtectedRoute>} />
         <Route path="/historial"              element={<ProtectedRoute><HistorialPage /></ProtectedRoute>} />
         <Route path="/chats"                  element={<ProtectedRoute><ChatsPage /></ProtectedRoute>} />
+        <Route path="/buzon"                  element={<ProtectedRoute><MailboxPage /></ProtectedRoute>} />
+        <Route path="/buzon/terminos"         element={<ProtectedRoute><TerminosBuzonPage /></ProtectedRoute>} />
 
         {/* Informative Pages */}
         <Route path="/equipo/desarrolladores" element={<DesarrolladoresPage />} />
