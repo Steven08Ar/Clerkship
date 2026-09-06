@@ -13,7 +13,7 @@ services:
       - ../.env
 
     ports:
-      - "${POSTGRES_PORT}:5432"
+      - "${POSTGRES_PORT:-5432}:5432"
 
     volumes:
       - ../database/postgres/data:/var/lib/postgresql/data
@@ -34,7 +34,7 @@ services:
       - ../.env
   
     ports:
-      - "${MONGO_PORT}:27017"
+      - "${MONGO_PORT:-27017}:27017"
   
     environment:
       MONGO_INITDB_ROOT_USERNAME: ${MONGO_INITDB_ROOT_USERNAME}
