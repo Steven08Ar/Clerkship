@@ -104,6 +104,9 @@ def create_app():
     from app.routes.articulos import articulos_bp
     from app.routes.comunidad import comunidad_bp
     from app.routes.documentos import documentos_bp
+    from app.routes.consultas import consultas_bp
+    from app.routes.historial import historial_bp
+    from app.routes.email import email_bp
 
     app.register_blueprint(auth_bp, url_prefix="/api/auth")
     app.register_blueprint(usuarios_bp, url_prefix="/api/usuarios")
@@ -111,7 +114,8 @@ def create_app():
     app.register_blueprint(articulos_bp, url_prefix="/api/articulos")
     app.register_blueprint(comunidad_bp, url_prefix="/api/comunidad")
     app.register_blueprint(documentos_bp, url_prefix="/api/documentos")
-    # Chats (/api/chats) y Buzon (/api/mailbox) se archivaron — ver
-    # archivado_buzon_chats/ en la raiz del repo, ya no se usan en el proyecto.
+    app.register_blueprint(consultas_bp, url_prefix="/api/consultas")
+    app.register_blueprint(historial_bp, url_prefix="/api/historial")
+    app.register_blueprint(email_bp, url_prefix="/api/email")
 
     return app
