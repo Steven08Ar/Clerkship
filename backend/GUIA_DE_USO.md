@@ -156,3 +156,27 @@ Respuesta esperada con código HTTP `404`:
 - [x] La consola muestra `Running on http://127.0.0.1:5000`.
 - [x] La petición a `/api/health` devuelve código `200 OK` con JSON estructurado.
 - [x] Respuestas de error devuelven formato JSON estándar (`400`, `404`, `405`, `500`).
+- [x] La documentación Swagger UI carga en `http://localhost:5000/api/docs` o `http://localhost:5000/docs`.
+
+---
+
+## Documentación Interactiva de la API (Swagger UI / OpenAPI)
+
+El backend incorpora **Swagger UI** interactivo para explorar los 37 endpoints, consultar esquemas de datos y probar solicitudes en vivo:
+
+### 1. Acceso a la interfaz gráfica
+Con el servidor Flask encendido (`python app.py`), abre en tu navegador:
+* **URL principal**: [http://localhost:5000/api/docs](http://localhost:5000/api/docs) (o [http://localhost:5000/docs](http://localhost:5000/docs))
+
+### 2. Cómo probar endpoints protegidos (Autenticación JWT)
+1. En Swagger UI, despliega el módulo **Autenticación** y ejecuta `POST /api/auth/login` con tus credenciales.
+2. Copia el valor del campo `access_token` de la respuesta.
+3. Sube a la parte superior de la página y haz clic en el botón **Authorize 🔓**.
+4. En el campo de texto ingresa tu token (puedes ingresarlo directamente o anteponiendo `Bearer <tu_token>`).
+5. Haz clic en **Authorize** y luego en **Close**.
+6. Ahora todos los endpoints que requieran autenticación (Cursos, Biblioteca, Consultas, etc.) se ejecutarán incluyendo automáticamente la cabecera `Authorization: Bearer <token>`.
+
+### 3. Archivos del Contrato OpenAPI
+Para compartir, entregar o importar en herramientas como **Postman**, **Insomnia** o **SwaggerHub**, se disponen de los siguientes archivos:
+* **YAML centralizado**: [`backend/docs/openapi.yaml`](docs/openapi.yaml) (o vía web en `http://localhost:5000/api/openapi.yaml`)
+* **JSON exportable**: [`backend/docs/openapi.json`](docs/openapi.json) (o vía web en `http://localhost:5000/api/openapi.json`)
