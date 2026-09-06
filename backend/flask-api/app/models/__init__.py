@@ -12,6 +12,8 @@ from app.models.community_post import CommunityPost
 from app.models.community_comment import CommunityComment
 from app.models.community_like import CommunityLike
 from app.models.document_folder import DocumentFolder
+from app.models.consultation import Consultation
+from app.models.ai_evaluation import AiEvaluation
 
 __all__ = [
     "User",
@@ -26,4 +28,6 @@ __all__ = [
     "CommunityComment",
     "CommunityLike",
     "DocumentFolder",
+    "Consultation",
+    "AiEvaluation",
 ]
