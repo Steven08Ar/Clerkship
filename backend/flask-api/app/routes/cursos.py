@@ -3,6 +3,7 @@ from flask_jwt_extended import jwt_required
 
 from app import db
 from app.models import Course, StudentCourse
+from app.schemas import CourseResponse, CreateCourseRequest, EnrollmentResponse, validate_body
 from app.utils import get_current_user, role_required
 
 cursos_bp = Blueprint("cursos", __name__)
@@ -12,7 +13,7 @@ cursos_bp = Blueprint("cursos", __name__)
 @jwt_required()
 def listar():
     courses = Course.query.order_by(Course.created_at.desc()).all()
-    return jsonify({"courses": [c.to_dict() for c in courses]}), 200
+    return jsonify([c.to_dict() for c in courses]), 200
 
 
 @cursos_bp.get("/mios")
@@ -29,28 +30,25 @@ def listar_mios():
             .all()
         )
 
-    return jsonify({"courses": [c.to_dict() for c in courses]}), 200
+    return jsonify([c.to_dict() for c in courses]), 200
 
 
 @cursos_bp.post("")
 @role_required("TEACHER")
-def crear():
+@validate_body(CreateCourseRequest)
+def crear(validated_body: CreateCourseRequest):
     user = get_current_user()
-    data = request.get_json(silent=True) or {}
-
-    if not data.get("name"):
-        return jsonify({"error": "name es requerido"}), 400
 
     course = Course(
         teacher_id=user.id,
-        name=data["name"].strip(),
-        description=data.get("description"),
-        academic_period=data.get("academic_period"),
+        name=validated_body.name.strip(),
+        description=validated_body.description,
+        academic_period=validated_body.academic_period,
     )
     db.session.add(course)
     db.session.commit()
 
-    return jsonify({"course": course.to_dict()}), 201
+    return jsonify(course.to_dict()), 201
 
 
 @cursos_bp.get("/<course_id>")
@@ -58,8 +56,12 @@ def crear():
 def obtener(course_id):
     course = Course.query.get(course_id)
     if course is None:
-        return jsonify({"error": "Curso no encontrado"}), 404
-    return jsonify({"course": course.to_dict()}), 200
+        return jsonify({
+            "error": "Not Found",
+            "message": "Curso no encontrado",
+            "status_code": 404
+        }), 404
+    return jsonify(course.to_dict()), 200
 
 
 @cursos_bp.post("/<course_id>/matricular")
@@ -68,15 +70,27 @@ def matricular(course_id):
     user = get_current_user()
 
     if Course.query.get(course_id) is None:
-        return jsonify({"error": "Curso no encontrado"}), 404
+        return jsonify({
+            "error": "Not Found",
+            "message": "Curso no encontrado",
+            "status_code": 404
+        }), 404
 
     if StudentCourse.query.filter_by(student_id=user.id, course_id=course_id).first() is not None:
-        return jsonify({"error": "Ya estás matriculado en este curso"}), 409
+        return jsonify({
+            "error": "Conflict",
+            "message": "Ya estás matriculado en este curso",
+            "status_code": 409
+        }), 409
 
     db.session.add(StudentCourse(student_id=user.id, course_id=course_id))
     db.session.commit()
 
-    return jsonify({"message": "Matrícula registrada"}), 201
+    return jsonify({
+        "message": "Matrícula registrada exitosamente",
+        "course_id": str(course_id),
+        "student_id": str(user.id),
+    }), 201
 
 
 @cursos_bp.delete("/<course_id>/matricular")
@@ -86,9 +100,14 @@ def desmatricular(course_id):
 
     enrollment = StudentCourse.query.filter_by(student_id=user.id, course_id=course_id).first()
     if enrollment is None:
-        return jsonify({"error": "No estás matriculado en este curso"}), 404
+        return jsonify({
+            "error": "Not Found",
+            "message": "No estás matriculado en este curso",
+            "status_code": 404
+        }), 404
 
     db.session.delete(enrollment)
     db.session.commit()
 
-    return jsonify({"message": "Matrícula eliminada"}), 200
+    return jsonify({"message": "Matrícula eliminada exitosamente"}), 200
+

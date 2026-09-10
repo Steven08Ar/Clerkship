@@ -4,6 +4,7 @@ from flask import Blueprint, current_app, jsonify, request
 from flask_jwt_extended import jwt_required
 
 from app.config import Config
+from app.schemas import EmailNotificationResponse, EmailStatusResponse, SendNotificationRequest, validate_body
 from app.utils import get_current_user
 
 logger = logging.getLogger(__name__)
@@ -25,17 +26,14 @@ def email_status():
 
 @email_bp.route("/notificar", methods=["POST"])
 @jwt_required()
-def enviar_notificacion():
+@validate_body(SendNotificationRequest)
+def enviar_notificacion(validated_body: SendNotificationRequest):
     """Enviar notificación por correo a un destinatario."""
     current_user = get_current_user()
-    data = request.get_json() or {}
 
-    to_email = data.get("to")
-    subject = data.get("subject")
-    text_content = data.get("text")
-
-    if not to_email or not subject or not text_content:
-        return jsonify({"error": "Los campos 'to', 'subject' y 'text' son obligatorios"}), 400
+    to_email = validated_body.to
+    subject = validated_body.subject.strip()
+    text_content = validated_body.text.strip()
 
     api_key = current_app.config.get("MAILGUN_API_KEY")
     domain = current_app.config.get("MAILGUN_DOMAIN")
