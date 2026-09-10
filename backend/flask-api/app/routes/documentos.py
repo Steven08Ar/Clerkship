@@ -15,6 +15,14 @@ from flask_jwt_extended import jwt_required
 
 from app import db, get_mongo_db
 from app.models import DocumentFolder
+from app.schemas import (
+    CreateFolderRequest,
+    DocumentFileResponse,
+    DocumentFolderResponse,
+    UpdateFolderRequest,
+    UploadDocumentRequest,
+    validate_body,
+)
 from app.utils import get_current_user
 
 documentos_bp = Blueprint("documentos", __name__)
@@ -95,62 +103,72 @@ def listar_carpetas():
 
 @documentos_bp.post("/carpetas")
 @jwt_required()
-def crear_carpeta():
+@validate_body(CreateFolderRequest)
+def crear_carpeta(validated_body: CreateFolderRequest):
     user = get_current_user()
-    data = request.get_json(silent=True) or {}
-    name = (data.get("name") or "").strip()
-    color = (data.get("color") or "#0284C7").strip()
-    parent_folder_id = data.get("parent_folder_id")
+    name = validated_body.name.strip()
+    color = (validated_body.color or "#10B981").strip()
 
-    if not name:
-        return jsonify({"error": "name es requerido"}), 400
-    if len(name) > 150:
-        return jsonify({"error": "El nombre es demasiado largo"}), 400
-    if not color.startswith("#") or len(color) != 7:
-        return jsonify({"error": "color debe ser un hex válido, ej. #0284C7"}), 400
+    data = request.get_json(silent=True) or {}
+    parent_folder_id = data.get("parent_folder_id")
 
     if parent_folder_id:
         parent = DocumentFolder.query.filter_by(id=parent_folder_id, owner_user_id=user.id).first()
         if parent is None:
-            return jsonify({"error": "Carpeta padre no encontrada"}), 404
+            return jsonify({
+                "error": "Not Found",
+                "message": "Carpeta padre no encontrada",
+                "status_code": 404
+            }), 404
 
     folder = DocumentFolder(owner_user_id=user.id, name=name, color=color, parent_folder_id=parent_folder_id or None)
     db.session.add(folder)
     db.session.commit()
 
-    return jsonify({"folder": _folder_dict_with_counts(folder, {})}), 201
+    return jsonify({"folder": _folder_dict_with_counts(folder, {}), **_folder_dict_with_counts(folder, {})}), 201
 
 
 @documentos_bp.patch("/carpetas/<folder_id>")
 @jwt_required()
-def actualizar_carpeta(folder_id):
+@validate_body(UpdateFolderRequest)
+def actualizar_carpeta(folder_id, validated_body: UpdateFolderRequest):
     user = get_current_user()
     folder = DocumentFolder.query.filter_by(id=folder_id, owner_user_id=user.id).first()
     if folder is None:
-        return jsonify({"error": "Carpeta no encontrada"}), 404
+        return jsonify({
+            "error": "Not Found",
+            "message": "Carpeta no encontrada",
+            "status_code": 404
+        }), 404
+
+    if validated_body.name:
+        folder.name = validated_body.name.strip()
+    if validated_body.color:
+        folder.color = validated_body.color.strip()
 
     data = request.get_json(silent=True) or {}
-    if "name" in data:
-        name = (data["name"] or "").strip()
-        if not name:
-            return jsonify({"error": "name no puede quedar vacío"}), 400
-        folder.name = name
-    if "color" in data:
-        color = (data["color"] or "").strip()
-        if not color.startswith("#") or len(color) != 7:
-            return jsonify({"error": "color debe ser un hex válido, ej. #0284C7"}), 400
-        folder.color = color
     if "parent_folder_id" in data:
         parent_folder_id = data["parent_folder_id"]
         if parent_folder_id:
             if parent_folder_id == str(folder.id):
-                return jsonify({"error": "Una carpeta no puede ser su propia carpeta padre"}), 400
+                return jsonify({
+                    "error": "Bad Request",
+                    "message": "Una carpeta no puede ser su propia carpeta padre",
+                    "status_code": 400
+                }), 400
             parent = DocumentFolder.query.filter_by(id=parent_folder_id, owner_user_id=user.id).first()
             if parent is None:
-                return jsonify({"error": "Carpeta padre no encontrada"}), 404
-            # No dejar mover una carpeta dentro de una de sus propias subcarpetas (ciclo).
+                return jsonify({
+                    "error": "Not Found",
+                    "message": "Carpeta padre no encontrada",
+                    "status_code": 404
+                }), 404
             if parent_folder_id in _descendant_ids(user.id, str(folder.id)):
-                return jsonify({"error": "No se puede mover una carpeta dentro de su propia subcarpeta"}), 400
+                return jsonify({
+                    "error": "Bad Request",
+                    "message": "No se puede mover una carpeta dentro de su propia subcarpeta",
+                    "status_code": 400
+                }), 400
         folder.parent_folder_id = parent_folder_id or None
 
     folder.updated_at = datetime.now(timezone.utc)
@@ -212,24 +230,38 @@ def listar_documentos():
 @documentos_bp.post("/documentos")
 @documentos_bp.post("/archivos")
 @jwt_required()
-def subir_documento():
+@validate_body(UploadDocumentRequest)
+def subir_documento(validated_body: UploadDocumentRequest):
     user = get_current_user()
-    data = request.get_json(silent=True) or {}
-    name = (data.get("name") or "").strip()
-    mime_type = (data.get("mime_type") or "application/octet-stream").strip()
-    file_data = data.get("data") or ""
-    folder_id = data.get("folder_id")
+    name = validated_body.name.strip()
+    mime_type = (validated_body.mime_type or "application/octet-stream").strip()
+    file_data = validated_body.get_content()
+    folder_id = validated_body.folder_id
 
-    if not name or not file_data:
-        return jsonify({"error": "name y data son requeridos"}), 400
+    if not file_data:
+        return jsonify({
+            "error": "Bad Request",
+            "message": "Se requiere el contenido del archivo en 'file_base64' o 'data'",
+            "status_code": 400
+        }), 400
+
     if len(file_data) > MAX_DOCUMENT_BASE64_CHARS:
-        return jsonify({"error": "El documento es demasiado pesado"}), 413
+        return jsonify({
+            "error": "Payload Too Large",
+            "message": "El documento es demasiado pesado",
+            "status_code": 413
+        }), 413
 
     if folder_id:
         folder = DocumentFolder.query.filter_by(id=folder_id, owner_user_id=user.id).first()
         if folder is None:
-            return jsonify({"error": "Carpeta no encontrada"}), 404
+            return jsonify({
+                "error": "Not Found",
+                "message": "Carpeta no encontrada",
+                "status_code": 404
+            }), 404
 
+    data = request.get_json(silent=True) or {}
     doc = {
         "owner_user_id": str(user.id),
         "folder_id": folder_id,
@@ -242,7 +274,7 @@ def subir_documento():
     result = get_mongo_db().documents.insert_one(doc)
     doc["_id"] = result.inserted_id
 
-    return jsonify({"document": _document_dict(doc)}), 201
+    return jsonify({"document": _document_dict(doc), **_document_dict(doc)}), 201
 
 
 @documentos_bp.get("/documentos/<document_id>")

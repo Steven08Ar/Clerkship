@@ -252,6 +252,7 @@ backend/
         ├── test_contract_spec.py
         ├── test_contract_coverage.py
         ├── test_contract_schemas.py
-        └── test_schemas.py
+        ├── test_schemas.py
+        └── test_endpoints_structure.py
 ```
 

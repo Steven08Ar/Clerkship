@@ -241,7 +241,28 @@ Para ejecutar exclusivamente las pruebas de validación de modelos Pydantic:
 ```powershell
 pytest tests/test_schemas.py -v
 ```
-O para correr la suite completa (contratos + esquemas):
+O para correr la suite completa (contratos + esquemas + endpoints):
 ```powershell
 pytest tests/ -v
+```
+
+---
+
+## Estructura de Endpoints y Pruebas de Integración
+
+Todos los Blueprints del backend implementan una estructura consistente:
+1. **Validación Automática**: Los endpoints que mutan estado (`POST`, `PATCH`) utilizan `@validate_body(Schema)` para interceptar errores de validación y retornar `400 Bad Request` con el arreglo `"details"`.
+2. **Seguridad y Roles (RBAC)**: Endpoints protegidos aplican `@jwt_required()` y los endpoints con privilegios específicos aplican `@role_required("TEACHER")` o `@role_required("STUDENT")`.
+3. **Códigos de Estado Homogéneos**:
+   - `200 OK`: Consultas exitosas y actualizaciones.
+   - `201 Created`: Recursos creados (usuarios, cursos, carpetas, publicaciones, consultas).
+   - `400 Bad Request`: Datos de solicitud inválidos o malformados.
+   - `401 Unauthorized`: Token JWT ausente o inválido.
+   - `403 Forbidden`: Rol insuficiente para realizar la acción.
+   - `404 Not Found`: Recurso no encontrado.
+   - `409 Conflict`: Conflictos de unicidad (correo duplicado, auto-matrícula repetida).
+
+### Ejecutar pruebas de estructura e integración de endpoints:
+```powershell
+pytest tests/test_endpoints_structure.py -v
 ```

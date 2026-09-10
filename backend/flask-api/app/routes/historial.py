@@ -17,7 +17,11 @@ def obtener_historial():
     """Listar el historial de consultas completadas del estudiante."""
     current_user = get_current_user()
     if not current_user:
-        return jsonify({"error": "Usuario no encontrado"}), 404
+        return jsonify({
+            "error": "Not Found",
+            "message": "Usuario no encontrado",
+            "status_code": 404
+        }), 404
 
     query = Consultation.query.filter_by(status="COMPLETED")
 
@@ -43,14 +47,26 @@ def obtener_retroalimentacion(consultation_id):
     try:
         cons_uuid = uuid.UUID(consultation_id)
     except ValueError:
-        return jsonify({"error": "ID de consulta inválido"}), 400
+        return jsonify({
+            "error": "Bad Request",
+            "message": "ID de consulta inválido",
+            "status_code": 400
+        }), 400
 
     consultation = Consultation.query.get(cons_uuid)
     if not consultation:
-        return jsonify({"error": "Consulta no encontrada"}), 404
+        return jsonify({
+            "error": "Not Found",
+            "message": "Consulta no encontrada",
+            "status_code": 404
+        }), 404
 
     if current_user.role == "STUDENT" and consultation.student_id != current_user.id:
-        return jsonify({"error": "No tienes acceso a esta consulta"}), 403
+        return jsonify({
+            "error": "Forbidden",
+            "message": "No tienes acceso a esta consulta",
+            "status_code": 403
+        }), 403
 
     # Buscar evaluación en PostgreSQL
     evaluation = AiEvaluation.query.filter_by(consultation_id=cons_uuid).first()

@@ -14,6 +14,15 @@ from werkzeug.security import check_password_hash, generate_password_hash
 from app import db
 from app.mailer import send_verification_email
 from app.models import Student, Teacher, User
+from app.schemas import (
+    ChangePasswordRequest,
+    LoginRequest,
+    RegisterRequest,
+    ResendCodeRequest,
+    UpdateAvatarRequest,
+    VerifyEmailRequest,
+    validate_body,
+)
 
 auth_bp = Blueprint("auth", __name__)
 
@@ -50,96 +59,108 @@ def _generate_and_send_code(user: User):
 
 
 @auth_bp.post("/register")
-def register():
-    data = request.get_json(silent=True) or {}
-
-    required = ["first_name", "last_name", "email", "password", "role"]
-    missing = [field for field in required if not data.get(field)]
-    if missing:
-        return jsonify({"error": f"Campos requeridos faltantes: {', '.join(missing)}"}), 400
-
-    email = data["email"].strip().lower()
-    role = data["role"].strip().upper()
-    password = data["password"]
-
-    if role not in ("STUDENT", "TEACHER"):
-        return jsonify({"error": "role debe ser STUDENT o TEACHER"}), 400
-
-    if len(password) < 8:
-        return jsonify({"error": "La contraseña debe tener al menos 8 caracteres"}), 400
-
-    if User.query.filter_by(email=email).first() is not None:
-        return jsonify({"error": "Ya existe una cuenta con ese correo"}), 409
+@validate_body(RegisterRequest)
+def register(validated_body: RegisterRequest):
+    email = validated_body.email.strip().lower()
+    role = validated_body.role
+    password = validated_body.password
+    student_code = validated_body.student_code
 
     if role == "STUDENT":
-        student_code = (data.get("student_code") or "").strip()
-        if not student_code:
-            return jsonify({"error": "student_code es requerido para el rol STUDENT"}), 400
+        if not student_code or not student_code.strip():
+            return jsonify({
+                "error": "Bad Request",
+                "message": "student_code es requerido para el rol STUDENT",
+                "status_code": 400
+            }), 400
+        student_code = student_code.strip()
         if not student_code.upper().startswith("U00"):
-            return jsonify({"error": 'El código de estudiante debe empezar con "U00"'}), 400
+            return jsonify({
+                "error": "Bad Request",
+                "message": 'El código de estudiante debe empezar con "U00"',
+                "status_code": 400
+            }), 400
+
+    if User.query.filter_by(email=email).first() is not None:
+        return jsonify({
+            "error": "Conflict",
+            "message": "Ya existe una cuenta con ese correo",
+            "status_code": 409
+        }), 409
 
     user = User(
         username=_build_username(email),
-        first_name=data["first_name"].strip(),
-        last_name=data["last_name"].strip(),
+        first_name=validated_body.first_name.strip(),
+        last_name=validated_body.last_name.strip(),
         email=email,
         password_hash=generate_password_hash(password),
         role=role,
     )
     db.session.add(user)
-    db.session.flush()  # asigna user.id (uuid_generate_v4) antes del commit
+    db.session.flush()
 
     if role == "STUDENT":
         db.session.add(Student(
             user_id=user.id,
             student_code=student_code,
-            semester=data.get("semester"),
         ))
     else:
         db.session.add(Teacher(
             user_id=user.id,
-            department=data.get("department"),
         ))
 
     db.session.commit()
-
-    # El registro no queda "listo" todavía: falta verificar el correo y (en
-    # el frontend) elegir avatar. Se emiten tokens igual porque el resto del
-    # flujo (verify-email, guardar avatar) también necesita sesión — pero el
-    # login de una cuenta ya existente sin verificar queda bloqueado (ver
-    # login() más abajo), así nadie se salta la verificación por error.
     _generate_and_send_code(user)
 
-    return jsonify({"user": user.to_dict(), **_issue_tokens(user)}), 201
+    return jsonify({
+        "message": "Usuario creado. Se envió un código de verificación al correo.",
+        "user_id": str(user.id),
+        "email": user.email,
+        "username": user.username,
+        "user": user.to_dict(),
+        **_issue_tokens(user),
+    }), 201
 
 
 @auth_bp.post("/verify-email")
 @jwt_required()
-def verify_email():
+@validate_body(VerifyEmailRequest)
+def verify_email(validated_body: VerifyEmailRequest):
     user = User.query.get(get_jwt_identity())
     if user is None:
-        return jsonify({"error": "Usuario no encontrado"}), 404
+        return jsonify({"error": "Not Found", "message": "Usuario no encontrado", "status_code": 404}), 404
     if user.email_verified:
-        return jsonify({"user": user.to_dict()}), 200
+        return jsonify({"message": "Correo ya verificado", "user": user.to_dict()}), 200
 
-    data = request.get_json(silent=True) or {}
-    code = (data.get("code") or "").strip()
+    code = validated_body.code.strip()
 
     if user.verification_attempts >= MAX_VERIFICATION_ATTEMPTS:
-        return jsonify({"error": "Demasiados intentos. Pedí un código nuevo."}), 429
+        return jsonify({
+            "error": "Too Many Requests",
+            "message": "Demasiados intentos. Solicita un código nuevo.",
+            "status_code": 429
+        }), 429
 
     if (
         not user.verification_code
         or not user.verification_code_expires_at
         or datetime.now(timezone.utc) > user.verification_code_expires_at.replace(tzinfo=timezone.utc)
     ):
-        return jsonify({"error": "El código venció. Pedí uno nuevo."}), 400
+        return jsonify({
+            "error": "Bad Request",
+            "message": "El código venció. Solicita uno nuevo.",
+            "status_code": 400
+        }), 400
 
     if code != user.verification_code:
         user.verification_attempts += 1
         db.session.commit()
         restantes = MAX_VERIFICATION_ATTEMPTS - user.verification_attempts
-        return jsonify({"error": f"Código incorrecto. Te quedan {max(restantes, 0)} intentos."}), 400
+        return jsonify({
+            "error": "Bad Request",
+            "message": f"Código incorrecto. Te quedan {max(restantes, 0)} intentos.",
+            "status_code": 400
+        }), 400
 
     user.email_verified = True
     user.verification_code = None
@@ -147,70 +168,78 @@ def verify_email():
     user.verification_attempts = 0
     db.session.commit()
 
-    return jsonify({"user": user.to_dict()}), 200
+    return jsonify({
+        "message": "Correo verificado exitosamente",
+        "user": user.to_dict(),
+        **_issue_tokens(user),
+    }), 200
 
 
 @auth_bp.post("/resend-code")
-@jwt_required()
-def resend_code():
-    user = User.query.get(get_jwt_identity())
-    if user is None:
-        return jsonify({"error": "Usuario no encontrado"}), 404
-    if user.email_verified:
-        return jsonify({"error": "Este correo ya está verificado"}), 400
+@jwt_required(optional=True)
+@validate_body(ResendCodeRequest)
+def resend_code(validated_body: ResendCodeRequest):
+    identity = get_jwt_identity()
+    if identity:
+        user = User.query.get(identity)
+    else:
+        user = User.query.filter_by(email=validated_body.email.strip().lower()).first()
 
-    # Throttle simple: si el código actual todavía tiene casi todo su tiempo
-    # de vida restante, es que se pidió hace menos de RESEND_COOLDOWN_SECONDS.
+    if user is None:
+        return jsonify({"error": "Not Found", "message": "Usuario no encontrado", "status_code": 404}), 404
+    if user.email_verified:
+        return jsonify({"error": "Bad Request", "message": "Este correo ya está verificado", "status_code": 400}), 400
+
     if user.verification_code_expires_at:
         expires_at = user.verification_code_expires_at.replace(tzinfo=timezone.utc)
         seconds_left = (expires_at - datetime.now(timezone.utc)).total_seconds()
         elapsed = VERIFICATION_CODE_TTL_MINUTES * 60 - seconds_left
         if elapsed < RESEND_COOLDOWN_SECONDS:
-            return jsonify({"error": f"Esperá {int(RESEND_COOLDOWN_SECONDS - elapsed)}s antes de reenviar"}), 429
+            return jsonify({
+                "error": "Too Many Requests",
+                "message": f"Espera {int(RESEND_COOLDOWN_SECONDS - elapsed)}s antes de reenviar",
+                "status_code": 429
+            }), 429
 
     _generate_and_send_code(user)
-    return jsonify({"ok": True}), 200
+    return jsonify({"message": "Código de verificación reenviado", "ok": True}), 200
 
 
 @auth_bp.post("/avatar")
 @jwt_required()
-def guardar_avatar():
+@validate_body(UpdateAvatarRequest)
+def guardar_avatar(validated_body: UpdateAvatarRequest):
     user = User.query.get(get_jwt_identity())
     if user is None:
-        return jsonify({"error": "Usuario no encontrado"}), 404
+        return jsonify({"error": "Not Found", "message": "Usuario no encontrado", "status_code": 404}), 404
 
-    data = request.get_json(silent=True) or {}
-    svg = (data.get("avatar_svg") or "").strip()
-    if not svg.startswith("<svg"):
-        return jsonify({"error": "avatar_svg debe ser un SVG válido"}), 400
+    svg = validated_body.avatar_svg.strip()
+    if not (svg.startswith("<svg") or svg.startswith("data:image/svg+xml") or svg.startswith("http")):
+        return jsonify({"error": "Bad Request", "message": "avatar_svg debe ser un SVG o URL válida", "status_code": 400}), 400
     if len(svg) > 100_000:
-        return jsonify({"error": "El avatar es demasiado pesado"}), 413
+        return jsonify({"error": "Payload Too Large", "message": "El avatar es demasiado pesado", "status_code": 413}), 413
 
     user.avatar_svg = svg
     db.session.commit()
-    return jsonify({"user": user.to_dict()}), 200
+    return jsonify({"message": "Avatar actualizado exitosamente", "user": user.to_dict()}), 200
 
 
 @auth_bp.post("/login")
-def login():
-    data = request.get_json(silent=True) or {}
-    email = (data.get("email") or "").strip().lower()
-    password = data.get("password") or ""
-
-    if not email or not password:
-        return jsonify({"error": "email y password son requeridos"}), 400
+@validate_body(LoginRequest)
+def login(validated_body: LoginRequest):
+    email = validated_body.email.strip().lower()
+    password = validated_body.password
 
     user = User.query.filter_by(email=email).first()
     if user is None or not check_password_hash(user.password_hash, password):
-        return jsonify({"error": "Credenciales inválidas"}), 401
+        return jsonify({"error": "Unauthorized", "message": "Credenciales inválidas", "status_code": 401}), 401
 
     if not user.email_verified:
-        # Le mandamos un código nuevo (por si el anterior venció hace rato) y
-        # tokens igual, para que el frontend pueda mandarlo directo a la
-        # pantalla de verificación en vez de rebotarlo sin explicación.
         _generate_and_send_code(user)
         return jsonify({
-            "error": "email_not_verified",
+            "error": "Forbidden",
+            "message": "Correo no verificado. Se ha enviado un nuevo código a tu correo.",
+            "status_code": 403,
             "user": user.to_dict(),
             **_issue_tokens(user),
         }), 403
@@ -222,14 +251,9 @@ def login():
 @jwt_required(refresh=True)
 def refresh():
     identity = get_jwt_identity()
-    # NOTA (corregido): antes se leía el rol de get_jwt().get("role"), pero
-    # el refresh_token nunca llevó ese claim (solo el access_token lo tiene,
-    # ver _issue_tokens) — siempre daba None y el access_token renovado
-    # quedaba con role=null, rompiendo silenciosamente @role_required en
-    # cualquier ruta después de un refresh. Se busca el rol real en la BD.
     user = User.query.get(identity)
     if user is None:
-        return jsonify({"error": "Usuario no encontrado"}), 404
+        return jsonify({"error": "Not Found", "message": "Usuario no encontrado", "status_code": 404}), 404
 
     return jsonify({
         "access_token": create_access_token(identity=identity, additional_claims={"role": user.role}),
@@ -241,25 +265,23 @@ def refresh():
 def me():
     user = User.query.get(get_jwt_identity())
     if user is None:
-        return jsonify({"error": "Usuario no encontrado"}), 404
-    return jsonify({"user": user.to_dict()}), 200
+        return jsonify({"error": "Not Found", "message": "Usuario no encontrado", "status_code": 404}), 404
+    return jsonify(user.to_dict()), 200
 
 
 @auth_bp.post("/change-password")
 @jwt_required()
-def change_password():
-    data = request.get_json(silent=True) or {}
-    current_password = data.get("current_password") or ""
-    new_password = data.get("new_password") or ""
-
-    if len(new_password) < 8:
-        return jsonify({"error": "La nueva contraseña debe tener al menos 8 caracteres"}), 400
+@validate_body(ChangePasswordRequest)
+def change_password(validated_body: ChangePasswordRequest):
+    current_password = validated_body.current_password
+    new_password = validated_body.new_password
 
     user = User.query.get(get_jwt_identity())
     if user is None or not check_password_hash(user.password_hash, current_password):
-        return jsonify({"error": "Contraseña actual incorrecta"}), 401
+        return jsonify({"error": "Unauthorized", "message": "Contraseña actual incorrecta", "status_code": 401}), 401
 
     user.password_hash = generate_password_hash(new_password)
     db.session.commit()
 
-    return jsonify({"message": "Contraseña actualizada"}), 200
+    return jsonify({"message": "Contraseña actualizada con éxito"}), 200
+

@@ -36,7 +36,12 @@ class UploadDocumentRequest(BaseSchema):
     folder_id: Optional[str] = Field(None, description="ID de la carpeta contenedora si aplica")
     name: str = Field(..., min_length=1, max_length=255, description="Nombre del archivo con extensión")
     mime_type: Optional[str] = Field("application/pdf", description="Tipo MIME del documento")
-    file_base64: str = Field(..., min_length=1, description="Contenido en Base64")
+    file_base64: Optional[str] = Field(None, description="Contenido en Base64")
+    data: Optional[str] = Field(None, description="Alias para file_base64")
+
+    def get_content(self) -> str:
+        return self.file_base64 or self.data or ""
+
 
 
 class DocumentFileResponse(BaseSchema):

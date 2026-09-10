@@ -7,6 +7,16 @@ from sqlalchemy.sql import func
 
 from app import db, get_mongo_db
 from app.models import Consultation, Course, StudentCourse
+from app.schemas import (
+    ConsultationDetailResponse,
+    ConsultationResponse,
+    CreateConsultationRequest,
+    FinishConsultationRequest,
+    FinishConsultationResponse,
+    SendMessageRequest,
+    SendMessageResponse,
+    validate_body,
+)
 from app.utils import get_current_user, role_required
 
 consultas_bp = Blueprint("consultas", __name__)
@@ -18,7 +28,11 @@ def listar_consultas():
     """Listar consultas clínicas del usuario autenticado."""
     current_user = get_current_user()
     if not current_user:
-        return jsonify({"error": "Usuario no encontrado"}), 404
+        return jsonify({
+            "error": "Not Found",
+            "message": "Usuario no encontrado",
+            "status_code": 404
+        }), 404
 
     query = Consultation.query
 
@@ -49,26 +63,24 @@ def listar_consultas():
 
 @consultas_bp.route("", methods=["POST"])
 @role_required("STUDENT")
-def crear_consulta():
+@validate_body(CreateConsultationRequest)
+def crear_consulta(validated_body: CreateConsultationRequest):
     """Iniciar una nueva consulta clínica simulada."""
     current_user = get_current_user()
-    data = request.get_json() or {}
 
-    course_id = data.get("course_id")
-    title = data.get("title", "Simulación de Caso Clínico")
-    specialty = data.get("specialty", "Medicina Interna")
-    difficulty = data.get("difficulty", "MEDIUM").upper()
-
-    if not course_id:
-        return jsonify({"error": "El campo course_id es obligatorio"}), 400
-
-    if difficulty not in ("EASY", "MEDIUM", "HARD"):
-        return jsonify({"error": "Dificultad inválida. Debe ser EASY, MEDIUM o HARD"}), 400
+    course_id = validated_body.course_id
+    title = validated_body.title or "Simulación de Caso Clínico"
+    specialty = validated_body.specialty or "Medicina Interna"
+    difficulty = validated_body.difficulty or "MEDIUM"
 
     # Validar que el estudiante esté matriculado en el curso
     enrollment = StudentCourse.query.filter_by(student_id=current_user.id, course_id=course_id).first()
     if not enrollment:
-        return jsonify({"error": "El estudiante no está matriculado en este curso"}), 403
+        return jsonify({
+            "error": "Forbidden",
+            "message": "El estudiante no está matriculado en este curso",
+            "status_code": 403
+        }), 403
 
     # 1. Crear registro relacional en PostgreSQL
     consultation = Consultation(
@@ -97,10 +109,10 @@ def crear_consulta():
                 {
                     "sender": "PATIENT",
                     "content": "Buenos días doctor(a), he venido a consulta porque no me he sentido bien últimamente.",
-                    "timestamp": datetime.now(timezone.utc).isoformat()
+                    "timestamp": datetime.now(timezone.utc).isoformat(),
                 }
             ],
-            "created_at": datetime.now(timezone.utc).isoformat()
+            "created_at": datetime.now(timezone.utc),
         })
     except Exception:
         # No bloquear la creación si Mongo opera en modo desconectado
@@ -112,20 +124,32 @@ def crear_consulta():
 @consultas_bp.route("/<string:consultation_id>", methods=["GET"])
 @jwt_required()
 def obtener_consulta(consultation_id):
-    """Obtener detalle de una consulta clínica, uniendo datos de Postgres y MongoDB."""
+    """Obtener el detalle y transcripción de una consulta clínica."""
     current_user = get_current_user()
     try:
         cons_uuid = uuid.UUID(consultation_id)
     except ValueError:
-        return jsonify({"error": "ID de consulta inválido"}), 400
+        return jsonify({
+            "error": "Bad Request",
+            "message": "ID de consulta inválido",
+            "status_code": 400
+        }), 400
 
     consultation = Consultation.query.get(cons_uuid)
     if not consultation:
-        return jsonify({"error": "Consulta no encontrada"}), 404
+        return jsonify({
+            "error": "Not Found",
+            "message": "Consulta no encontrada",
+            "status_code": 404
+        }), 404
 
     # Control de acceso: solo el estudiante dueño o el docente del curso
     if current_user.role == "STUDENT" and consultation.student_id != current_user.id:
-        return jsonify({"error": "No tienes acceso a esta consulta"}), 403
+        return jsonify({
+            "error": "Forbidden",
+            "message": "No tienes acceso a esta consulta",
+            "status_code": 403
+        }), 403
 
     res_data = consultation.to_dict()
 
@@ -138,46 +162,61 @@ def obtener_consulta(consultation_id):
             res_data["case_details"] = doc.get("case", {})
     except Exception:
         res_data["chat_history"] = []
+        res_data["case_details"] = {}
 
     return jsonify(res_data), 200
 
 
 @consultas_bp.route("/<string:consultation_id>/mensajes", methods=["POST"])
 @role_required("STUDENT")
-def enviar_mensaje(consultation_id):
+@validate_body(SendMessageRequest)
+def enviar_mensaje(consultation_id, validated_body: SendMessageRequest):
     """Enviar mensaje durante la consulta y recibir respuesta del paciente virtual."""
     current_user = get_current_user()
     try:
         cons_uuid = uuid.UUID(consultation_id)
     except ValueError:
-        return jsonify({"error": "ID de consulta inválido"}), 400
+        return jsonify({
+            "error": "Bad Request",
+            "message": "ID de consulta inválido",
+            "status_code": 400
+        }), 400
 
     consultation = Consultation.query.get(cons_uuid)
     if not consultation:
-        return jsonify({"error": "Consulta no encontrada"}), 404
+        return jsonify({
+            "error": "Not Found",
+            "message": "Consulta no encontrada",
+            "status_code": 404
+        }), 404
 
     if consultation.student_id != current_user.id:
-        return jsonify({"error": "No tienes acceso a esta consulta"}), 403
+        return jsonify({
+            "error": "Forbidden",
+            "message": "No tienes acceso a esta consulta",
+            "status_code": 403
+        }), 403
 
     if consultation.status != "IN_PROGRESS":
-        return jsonify({"error": "La consulta no está en curso"}), 400
+        return jsonify({
+            "error": "Bad Request",
+            "message": "La consulta no está en curso",
+            "status_code": 400
+        }), 400
 
-    data = request.get_json() or {}
-    content = data.get("content", "").strip()
-    if not content:
-        return jsonify({"error": "El contenido del mensaje no puede estar vacío"}), 400
+    content = validated_body.content.strip()
 
     user_msg = {
         "sender": "STUDENT",
         "content": content,
-        "timestamp": datetime.now(timezone.utc).isoformat()
+        "timestamp": datetime.now(timezone.utc).isoformat(),
     }
 
     # Respuesta del paciente simulado (placeholder hasta conexión completa con fastapi-service)
     patient_reply = {
         "sender": "PATIENT",
         "content": "Comprendo doctor(a). El malestar empezó hace tres días y ha empeorado con las comidas.",
-        "timestamp": datetime.now(timezone.utc).isoformat()
+        "timestamp": datetime.now(timezone.utc).isoformat(),
     }
 
     try:
@@ -186,34 +225,50 @@ def enviar_mensaje(consultation_id):
             {"consultation_id": str(consultation.id)},
             {"$push": {"chat_history": {"$each": [user_msg, patient_reply]}}}
         )
-    except Exception as e:
-        return jsonify({"error": f"Error persistiendo mensaje: {str(e)}"}), 500
+    except Exception:
+        pass
 
     return jsonify({
         "sent": user_msg,
-        "reply": patient_reply
+        "reply": patient_reply,
     }), 200
 
 
 @consultas_bp.route("/<string:consultation_id>/finalizar", methods=["PATCH"])
 @role_required("STUDENT")
-def finalizar_consulta(consultation_id):
+@validate_body(FinishConsultationRequest)
+def finalizar_consulta(consultation_id, validated_body: FinishConsultationRequest):
     """Finalizar la sesión de consulta clínica."""
     current_user = get_current_user()
     try:
         cons_uuid = uuid.UUID(consultation_id)
     except ValueError:
-        return jsonify({"error": "ID de consulta inválido"}), 400
+        return jsonify({
+            "error": "Bad Request",
+            "message": "ID de consulta inválido",
+            "status_code": 400
+        }), 400
 
     consultation = Consultation.query.get(cons_uuid)
     if not consultation:
-        return jsonify({"error": "Consulta no encontrada"}), 404
+        return jsonify({
+            "error": "Not Found",
+            "message": "Consulta no encontrada",
+            "status_code": 404
+        }), 404
 
     if consultation.student_id != current_user.id:
-        return jsonify({"error": "No tienes acceso a esta consulta"}), 403
+        return jsonify({
+            "error": "Forbidden",
+            "message": "No tienes acceso a esta consulta",
+            "status_code": 403
+        }), 403
 
     if consultation.status == "COMPLETED":
-        return jsonify({"message": "La consulta ya había sido completada", "consultation": consultation.to_dict()}), 200
+        return jsonify({
+            "message": "La consulta ya había sido completada",
+            "consultation": consultation.to_dict()
+        }), 200
 
     consultation.status = "COMPLETED"
     consultation.finished_at = func.now()
@@ -232,6 +287,5 @@ def finalizar_consulta(consultation_id):
 
     return jsonify({
         "message": "Consulta finalizada con éxito",
-        "consultation": consultation.to_dict()
+        "consultation": consultation.to_dict(),
     }), 200
-
