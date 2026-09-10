@@ -201,3 +201,47 @@ pytest tests/ -v
 ### 3. Reporte de Validación
 El informe técnico detallado de resultados y métricas se encuentra disponible en:
 📄 [`backend/docs/REPORTE_VALIDACION_CONTRATOS.md`](docs/REPORTE_VALIDACION_CONTRATOS.md)
+
+---
+
+## Modelos Request/Response en Python (Pydantic v2)
+
+El backend incorpora una capa de transferencia y validación de datos (**DTOs**) en `app/schemas/` construida con **Pydantic v2** y **email-validator**. Esta capa desacopla los modelos de base de datos (`app/models/`) de las entradas y salidas de la API, garantizando contratos estrictos de tipo.
+
+### 1. Organización del paquete `app/schemas/`:
+* **`base.py`**: `BaseSchema`, `ErrorResponse`, `HealthResponse` y el decorador de ruta `@validate_body(Schema)`.
+* **`auth.py`**: `RegisterRequest`, `LoginRequest`, `VerifyEmailRequest`, `AuthTokensResponse`, etc.
+* **`usuarios.py`**: `UserResponse`, `UserSummary`, `UpdateUserRequest`, `StorageUsageResponse`.
+* **`cursos.py`**: `CreateCourseRequest`, `CourseResponse`, `EnrollmentResponse`.
+* **`articulos.py`**: `CreateArticleRequest`, `ArticleResponse`, `UpdateShelfRequest`, `StudentShelfItem`.
+* **`documentos.py`**: `CreateFolderRequest`, `UploadDocumentRequest`, `DocumentFolderResponse`, etc.
+* **`comunidad.py`**: `CreatePostRequest`, `CreateCommentRequest`, `CommunityPostResponse`, `LikeResponse`.
+* **`consultas.py`**: `CreateConsultationRequest`, `SendMessageRequest`, `ConsultationDetailResponse`, etc.
+* **`historial.py`**: `AiEvaluationSummary`, `FeedbackResponse`, `StudentStatisticsResponse`.
+* **`email.py`**: `SendNotificationRequest`, `EmailStatusResponse`, `EmailNotificationResponse`.
+
+### 2. Cómo usar el decorador `@validate_body`:
+```python
+from flask import Blueprint, jsonify
+from app.schemas import RegisterRequest, validate_body
+
+auth_bp = Blueprint("auth", __name__)
+
+@auth_bp.post("/register")
+@validate_body(RegisterRequest)
+def register(validated_body: RegisterRequest):
+    # validated_body es una instancia tipada de RegisterRequest con datos 100% validados
+    email = validated_body.email
+    password = validated_body.password
+    ...
+```
+
+### 3. Ejecución de pruebas unitarias de modelos:
+Para ejecutar exclusivamente las pruebas de validación de modelos Pydantic:
+```powershell
+pytest tests/test_schemas.py -v
+```
+O para correr la suite completa (contratos + esquemas):
+```powershell
+pytest tests/ -v
+```

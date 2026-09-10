@@ -41,7 +41,13 @@ graph TD
         HLT["/api/health"]
     end
 
-    subgraph Capa_Logica ["2. Capa de Lógica y Seguridad (Middleware / Services)"]
+    subgraph Capa_Validacion ["2. Capa de Validación y DTOs (Pydantic v2)"]
+        VAL_DEC["@validate_body(Schema)"]
+        REQ_MOD["Modelos Request (Auth, Cursos, Consultas...)"]
+        RES_MOD["Modelos Response (OpenAPI 3 Parity)"]
+    end
+
+    subgraph Capa_Logica ["3. Capa de Lógica y Seguridad (Middleware / Services)"]
         JWT_MNG[Flask-JWT-Extended]
         RBAC["@role_required(STUDENT, TEACHER)"]
         MAILER[Mailer Service - Mailgun]
@@ -49,19 +55,20 @@ graph TD
         ERR_HND[Manejadores Globales de Error JSON]
     end
 
-    subgraph Capa_Datos ["3. Capa de Acceso a Datos (ORM / ODM)"]
+    subgraph Capa_Datos ["4. Capa de Acceso a Datos (ORM / ODM)"]
         ORM[SQLAlchemy ORM - 14 Modelos]
         ODM[PyMongo Driver - MongoDB Client]
     end
 
-    subgraph Capa_Persistencia ["4. Capa de Persistencia Políglota"]
+    subgraph Capa_Persistencia ["5. Capa de Persistencia Políglota"]
         PG[(PostgreSQL - Supabase / Docker)]
         MG[(MongoDB - Atlas / Docker)]
     end
 
     FE --> Capa_Presentacion
     SW --> Capa_Presentacion
-    Capa_Presentacion --> Capa_Logica
+    Capa_Presentacion --> Capa_Validacion
+    Capa_Validacion --> Capa_Logica
     Capa_Logica --> Capa_Datos
     ORM --> PG
     ODM --> MG
@@ -71,10 +78,15 @@ graph TD
 
 1. **Capa de Presentación (Rutas / Blueprints)**:
    - Recibe solicitudes HTTP (`GET`, `POST`, `PATCH`, `DELETE`).
-   - Valida la presencia y estructura de los datos entrantes (`request.get_json()`).
+   - Delega la validación de payloads y serialización de respuestas a la capa de esquemas.
    - Retorna respuestas homogéneas en formato `application/json` con los códigos de estado HTTP apropiados (`200`, `201`, `400`, `401`, `403`, `404`, `500`).
 
-2. **Capa de Lógica y Seguridad**:
+2. **Capa de Validación y DTOs (Pydantic v2 - `app/schemas/`)**:
+   - Modela tipadamente cada petición entrante y respuesta saliente alineada 1:1 con la especificación OpenAPI 3.0.3.
+   - Valida formatos (email, UUID, longitudes mínimas/máximas, expresiones regulares, enums de dominio) antes de que la petición ingrese a la lógica de negocio.
+   - Proporciona el decorador `@validate_body` para interceptar datos no conformes devolviendo respuestas de error estándar `400 Bad Request`.
+
+3. **Capa de Lógica y Seguridad**:
    - **Control de Acceso**: Validación de identidad con `@jwt_required()` e inspección de privilegios mediante `@role_required(*roles)`.
    - **Manejo de Errores Global**: Captura excepciones estándar (`400`, `404`, `405`, `500`) retornando estructuras JSON estandarizadas en lugar de HTML.
    - **Servicios Auxiliares**: Integración con Mailgun para envío de códigos de verificación y notificaciones.
@@ -206,6 +218,17 @@ backend/
         ├── utils.py            # Helpers get_current_user y @role_required
         ├── mailer.py           # Integración con Mailgun
         ├── email_templates.py  # Plantillas HTML de correo
+        ├── schemas/            # Esquemas Request / Response con Pydantic v2
+        │   ├── base.py         # BaseSchema, ErrorResponse, HealthResponse, @validate_body
+        │   ├── auth.py         # Register, Login, VerifyEmail, Tokens
+        │   ├── usuarios.py     # UserResponse, UserSummary, StorageUsage
+        │   ├── cursos.py       # CreateCourse, CourseResponse
+        │   ├── articulos.py    # CreateArticle, Shelf
+        │   ├── documentos.py   # Folders y Files
+        │   ├── comunidad.py    # Posts, Comments, Likes
+        │   ├── consultas.py    # Simulation, ChatMessages
+        │   ├── historial.py    # Feedback, Statistics
+        │   └── email.py        # SendNotification, EmailStatus
         ├── models/             # Modelos SQLAlchemy
         │   ├── user.py, student.py, teacher.py
         │   ├── course.py, student_course.py
@@ -222,6 +245,13 @@ backend/
             ├── comunidad.py
             ├── consultas.py
             ├── historial.py
+            ├── docs.py
             └── email.py
+    └── tests/                  # Suite automatizada de pruebas (Pytest)
+        ├── conftest.py
+        ├── test_contract_spec.py
+        ├── test_contract_coverage.py
+        ├── test_contract_schemas.py
+        └── test_schemas.py
 ```
 
