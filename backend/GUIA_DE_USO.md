@@ -180,3 +180,24 @@ Con el servidor Flask encendido (`python app.py`), abre en tu navegador:
 Para compartir, entregar o importar en herramientas como **Postman**, **Insomnia** o **SwaggerHub**, se disponen de los siguientes archivos:
 * **YAML centralizado**: [`backend/docs/openapi.yaml`](docs/openapi.yaml) (o vía web en `http://localhost:5000/api/openapi.yaml`)
 * **JSON exportable**: [`backend/docs/openapi.json`](docs/openapi.json) (o vía web en `http://localhost:5000/api/openapi.json`)
+
+---
+
+## Validación de Contratos de API (Pytest + OpenAPI Validator)
+
+El proyecto cuenta con una suite completa de pruebas automatizadas para verificar que la implementación en Flask y la especificación OpenAPI 3.0.3 coincidan al 100%:
+
+### 1. Ejecutar todas las pruebas de contrato
+Con el entorno virtual activado en `backend/flask-api/`, ejecuta:
+```powershell
+pytest tests/ -v
+```
+
+### 2. Qué valida la suite:
+* **`test_contract_spec.py`**: Valida formalmente el estándar OpenAPI 3.0.3 con `openapi-spec-validator` y la integridad de referencias `$ref`.
+* **`test_contract_coverage.py`**: Comprueba la paridad 1:1 entre las rutas implementadas en Flask y las documentadas en OpenAPI.
+* **`test_contract_schemas.py`**: Verifica que las respuestas de los endpoints en ejecución respeten los esquemas de `components.schemas` (casos de éxito, error 401, error 404 y 405).
+
+### 3. Reporte de Validación
+El informe técnico detallado de resultados y métricas se encuentra disponible en:
+📄 [`backend/docs/REPORTE_VALIDACION_CONTRATOS.md`](docs/REPORTE_VALIDACION_CONTRATOS.md)

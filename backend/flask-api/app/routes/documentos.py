@@ -189,6 +189,7 @@ def borrar_carpeta(folder_id):
 
 
 @documentos_bp.get("/documentos")
+@documentos_bp.get("/archivos")
 @jwt_required()
 def listar_documentos():
     user = get_current_user()
@@ -209,6 +210,7 @@ def listar_documentos():
 
 
 @documentos_bp.post("/documentos")
+@documentos_bp.post("/archivos")
 @jwt_required()
 def subir_documento():
     user = get_current_user()
@@ -244,6 +246,7 @@ def subir_documento():
 
 
 @documentos_bp.get("/documentos/<document_id>")
+@documentos_bp.get("/archivos/<document_id>")
 @jwt_required()
 def obtener_documento(document_id):
     user = get_current_user()
@@ -260,6 +263,7 @@ def obtener_documento(document_id):
 
 
 @documentos_bp.patch("/documentos/<document_id>")
+@documentos_bp.patch("/archivos/<document_id>")
 @jwt_required()
 def actualizar_documento(document_id):
     user = get_current_user()
@@ -300,6 +304,7 @@ def actualizar_documento(document_id):
 
 
 @documentos_bp.delete("/documentos/<document_id>")
+@documentos_bp.delete("/archivos/<document_id>")
 @jwt_required()
 def borrar_documento(document_id):
     user = get_current_user()

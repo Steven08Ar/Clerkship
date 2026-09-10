@@ -467,7 +467,8 @@
                   "$ref": "#/components/schemas/UserResponse"
                 }
               }
-            }
+            },
+            "description": "Información pública del usuario obtenida con éxito"
           },
           "404": {
             "$ref": "#/components/responses/NotFoundError"
@@ -525,6 +526,55 @@
         }
       }
     },
+    "/api/usuarios/uso-almacenamiento": {
+      "get": {
+        "tags": [
+          "Usuarios"
+        ],
+        "summary": "Consultar métricas de almacenamiento de usuario",
+        "description": "Retorna el uso de almacenamiento en bytes para documentos y límites establecidos.",
+        "operationId": "getStorageUsage",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Estadísticas de almacenamiento obtenidas con éxito",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "used_bytes": {
+                      "type": "integer",
+                      "example": 1048576
+                    },
+                    "limit_bytes": {
+                      "type": "integer",
+                      "example": 5368709120
+                    },
+                    "breakdown": {
+                      "type": "object",
+                      "properties": {
+                        "documentos": {
+                          "type": "integer",
+                          "example": 1048576
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          }
+        }
+      }
+    },
     "/api/cursos": {
       "get": {
         "tags": [
@@ -549,7 +599,8 @@
                   }
                 }
               }
-            }
+            },
+            "description": "Lista de cursos obtenida con éxito"
           }
         }
       },
@@ -616,7 +667,8 @@
                   }
                 }
               }
-            }
+            },
+            "description": "Cursos del usuario obtenidos con éxito"
           }
         }
       }
@@ -652,7 +704,8 @@
                   "$ref": "#/components/schemas/CourseResponse"
                 }
               }
-            }
+            },
+            "description": "Detalle del curso obtenido con éxito"
           },
           "404": {
             "$ref": "#/components/responses/NotFoundError"
@@ -773,7 +826,8 @@
                   }
                 }
               }
-            }
+            },
+            "description": "Artículos médicos encontrados con éxito"
           }
         }
       },
@@ -807,7 +861,8 @@
                   "$ref": "#/components/schemas/ArticleResponse"
                 }
               }
-            }
+            },
+            "description": "Artículo publicado con éxito"
           },
           "403": {
             "$ref": "#/components/responses/ForbiddenError"
@@ -846,7 +901,8 @@
                   "$ref": "#/components/schemas/ArticleResponse"
                 }
               }
-            }
+            },
+            "description": "Detalle del artículo médico obtenido con éxito"
           },
           "404": {
             "$ref": "#/components/responses/NotFoundError"
@@ -878,7 +934,8 @@
                   }
                 }
               }
-            }
+            },
+            "description": "Estante de lectura personal obtenido con éxito"
           }
         }
       }
@@ -987,7 +1044,8 @@
                   }
                 }
               }
-            }
+            },
+            "description": "Carpetas del usuario obtenidas con éxito"
           }
         }
       },
@@ -1020,7 +1078,8 @@
                   "$ref": "#/components/schemas/DocumentFolderResponse"
                 }
               }
-            }
+            },
+            "description": "Carpeta creada exitosamente"
           }
         }
       }
@@ -1076,7 +1135,8 @@
                   "$ref": "#/components/schemas/DocumentFolderResponse"
                 }
               }
-            }
+            },
+            "description": "Carpeta actualizada exitosamente"
           }
         }
       },
@@ -1143,7 +1203,8 @@
                   }
                 }
               }
-            }
+            },
+            "description": "Documentos obtenidos con éxito"
           }
         }
       },
@@ -1177,7 +1238,8 @@
                   "$ref": "#/components/schemas/DocumentFileResponse"
                 }
               }
-            }
+            },
+            "description": "Documento subido y procesado exitosamente"
           }
         }
       }
@@ -1212,7 +1274,8 @@
                   "$ref": "#/components/schemas/DocumentFileResponse"
                 }
               }
-            }
+            },
+            "description": "Contenido y metadatos del documento obtenidos con éxito"
           }
         }
       },
@@ -1267,7 +1330,8 @@
                   }
                 }
               }
-            }
+            },
+            "description": "Publicaciones de la comunidad obtenidas con éxito"
           }
         }
       },
@@ -1300,7 +1364,8 @@
                   "$ref": "#/components/schemas/CommunityPostResponse"
                 }
               }
-            }
+            },
+            "description": "Publicación creada exitosamente"
           }
         }
       }
@@ -1369,7 +1434,8 @@
                   }
                 }
               }
-            }
+            },
+            "description": "Comentarios de la publicación obtenidos con éxito"
           }
         }
       },
@@ -1422,7 +1488,8 @@
                   "$ref": "#/components/schemas/CommunityCommentResponse"
                 }
               }
-            }
+            },
+            "description": "Comentario agregado exitosamente"
           }
         }
       }
@@ -1468,7 +1535,8 @@
                   }
                 }
               }
-            }
+            },
+            "description": "Estado de reacción actualizado exitosamente"
           }
         }
       }
@@ -1526,7 +1594,8 @@
                   }
                 }
               }
-            }
+            },
+            "description": "Lista de consultas clínicas obtenida con éxito"
           }
         }
       },
@@ -1604,7 +1673,8 @@
                   "$ref": "#/components/schemas/ConsultationDetailResponse"
                 }
               }
-            }
+            },
+            "description": "Detalle y transcripción de la consulta clínica obtenidos con éxito"
           },
           "403": {
             "$ref": "#/components/responses/ForbiddenError"
@@ -1764,7 +1834,8 @@
                   }
                 }
               }
-            }
+            },
+            "description": "Historial de consultas finalizadas obtenido con éxito"
           }
         }
       }
@@ -1801,7 +1872,8 @@
                   "$ref": "#/components/schemas/FeedbackResponse"
                 }
               }
-            }
+            },
+            "description": "Evaluación y retroalimentación formativa de la consulta"
           },
           "404": {
             "$ref": "#/components/responses/NotFoundError"
@@ -1830,7 +1902,8 @@
                   "$ref": "#/components/schemas/StudentStatisticsResponse"
                 }
               }
-            }
+            },
+            "description": "Estadísticas de rendimiento del estudiante obtenidas con éxito"
           },
           "403": {
             "$ref": "#/components/responses/ForbiddenError"
@@ -1880,7 +1953,8 @@
                   }
                 }
               }
-            }
+            },
+            "description": "Estado de configuración del servicio de correo"
           }
         }
       }
