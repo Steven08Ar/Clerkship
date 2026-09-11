@@ -168,3 +168,7 @@ def test_public_endpoints_accessible_without_auth(client):
     res_openapi = client.get("/api/openapi.json")
     assert res_openapi.status_code == 200
 
+    res_simulador = client.get("/simulador")
+    assert res_simulador.status_code == 200
+    assert "ClinicAI UNAB" in res_simulador.get_data(as_text=True)
+

@@ -16,7 +16,7 @@ def _normalize_path(path: str) -> str:
 def _get_flask_routes(app):
     """Extrae el mapeo de rutas y métodos soportados por Flask (excluyendo estáticos y docs internos)."""
     routes = {}
-    doc_paths = {"/docs", "/api", "/api/docs", "/api/openapi.json", "/api/openapi.yaml"}
+    doc_paths = {"/docs", "/api", "/api/docs", "/api/openapi.json", "/api/openapi.yaml", "/simulador"}
 
     for rule in app.url_map.iter_rules():
         if rule.endpoint == "static":
