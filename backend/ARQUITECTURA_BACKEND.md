@@ -228,7 +228,14 @@ backend/
         │   ├── comunidad.py    # Posts, Comments, Likes
         │   ├── consultas.py    # Simulation, ChatMessages
         │   ├── historial.py    # Feedback, Statistics
-        │   └── email.py        # SendNotification, EmailStatus
+        │   ├── email.py        # SendNotification, EmailStatus
+        │   └── agentes.py      # Case vignettes, Patient Chat, Evaluator rubric
+        ├── services/           # Servicios de negocio y proveedores de IA
+        │   └── agents/         # Subsistema de Agentes Cognitivos
+        │       ├── base.py                 # Interfaces abstractas (ABC)
+        │       ├── clinical_cases_data.py  # Dataset gastrointestinal y Ground Truth
+        │       ├── mock_agents.py          # Implementaciones deterministas mock
+        │       └── __init__.py             # Factory de proveedores (Mock / OpenAI / Gemini)
         ├── models/             # Modelos SQLAlchemy
         │   ├── user.py, student.py, teacher.py
         │   ├── course.py, student_course.py
@@ -245,6 +252,7 @@ backend/
             ├── comunidad.py
             ├── consultas.py
             ├── historial.py
+            ├── agentes.py      # Endpoints de los 3 Agentes de IA
             ├── docs.py
             └── email.py
     └── tests/                  # Suite automatizada de pruebas (Pytest)
@@ -253,6 +261,79 @@ backend/
         ├── test_contract_coverage.py
         ├── test_contract_schemas.py
         ├── test_schemas.py
-        └── test_endpoints_structure.py
+        ├── test_endpoints_structure.py
+        └── test_ai_agents.py   # Pruebas integrales de agentes y sesgos cognitivos
 ```
+
+---
+
+## 8. Arquitectura del Subsistema de Agentes de IA (ClinicAI UNAB)
+
+El núcleo pedagógico de Clerkship reside en su subsistema de **Agentes de Inteligencia Artificial Cognitiva**, diseñado para emular la interacción clínica y evaluar formativamente el razonamiento diagnóstico en estudiantes de medicina.
+
+```mermaid
+sequenceDiagram
+    autonumber
+    actor Estudiante as Estudiante Médico
+    participant API as Backend Flask (/api/agentes)
+    participant Agente1 as Agente 1: Generador de Casos
+    participant Agente2 as Agente 2: Paciente Virtual
+    participant Agente3 as Agente 3: Evaluador Clínico
+    participant KB as Knowledge Base (Ground Truth)
+
+    Note over Estudiante,Agente1: Fase 1: Inicio y Presentación del Caso
+    Estudiante->>API: POST /api/agentes/caso (specialty, difficulty)
+    API->>Agente1: generate_case(criteria)
+    Agente1->>KB: Consulta viñeta clínica estructurada
+    KB-->>Agente1: Datos + Ground Truth de referencia
+    Agente1-->>API: GeneratedCaseResponse
+    API-->>Estudiante: Viñeta (Motivo, Historia, Signos Vitales, Examen Físico)
+
+    Note over Estudiante,Agente2: Fase 2: Anamnesis e Interrogatorio Clínico
+    loop Diálogo Anamnésico
+        Estudiante->>API: POST /api/agentes/paciente/chat (pregunta)
+        API->>Agente2: respond_to_student(query, history)
+        Agente2-->>API: PatientChatResponse (lenguaje coloquial, afecto, escala dolor)
+        API-->>Estudiante: Respuesta en personaje del paciente
+    end
+
+    Note over Estudiante,Agente3: Fase 3: Evaluación y Metacognición
+    Estudiante->>API: POST /api/agentes/evaluar (pruebas, diferenciales, diagnóstico)
+    API->>Agente3: evaluate_session(request)
+    Agente3->>KB: Compara contra Ground Truth de referencia
+    Agente3->>Agente3: Aplica Teoría de Procesamiento Dual (Sistema 1 vs 2)
+    Agente3->>Agente3: Detecta sesgos cognitivos (anclaje, cierre prematuro, confirmación)
+    Agente3-->>API: EvaluationResultResponse (Rúbrica 0-100, fortalezas, mejoras)
+    API-->>Estudiante: Rúbrica formativa cuantitativa y cualitativa
+```
+
+### 8.1 Los Tres Agentes Especializados
+
+1. **Agente 1 — Generador / Presentador de Casos Clínicos (`/api/agentes/caso`)**:
+   - Genera viñetas estructuradas que cubren: datos demográficos, motivo de consulta, enfermedad actual, antecedentes personales y familiares, signos vitales y examen físico por sistemas.
+   - Preserva de forma segura el **Ground Truth** (diagnóstico estándar de oro, paraclínicos indispensables, diferenciales aceptables y resumen fisiopatológico).
+   - Especialización inicial en patologías gastrointestinales: *Pancreatitis Aguda Litiásica*, *Apendicitis Aguda*, *HDA por Úlcera Péptica* y *Colecistitis Aguda*.
+
+2. **Agente 2 — Paciente Virtual Estandarizado (`/api/agentes/paciente/chat` y `/api/consultas/<id>/mensajes`)**:
+   - Asume el rol del paciente en primera persona con modismos y expresiones coloquiales realistas en español latinoamericano.
+   - Responde consistentemente a preguntas de dolor (localización, irradiación, intensidad, tipo), cronología, factores agravantes/atenuantes, síntomas asociados, hábitos y antecedentes.
+   - Refleja estado emocional dinámico (`ansioso`, `quejumbrosa`, `somnoliento`) y dolor en escala de 1 a 10.
+
+3. **Agente 3 — Tutor Evaluador de Razonamiento Clínico (`/api/agentes/evaluar`)**:
+   - **Rúbrica Cuantitativa por Dominios (0 a 100)**:
+     - *Anamnesis*: Calidad, completitud y sistematicidad del interrogatorio.
+     - *Exámenes Diagnósticos*: Pertinencia y costo-efectividad de los paraclínicos solicitados frente a las guías de práctica clínica.
+     - *Hipótesis Diferenciales*: Amplitud del diagnóstico diferencial planteado.
+     - *Diagnóstico Final*: Acierto frente al estándar de oro.
+   - **Detección de Sesgos Cognitivos (Teoría de Procesamiento Dual)**:
+     - *Sesgo de Anclaje*: Fijación en la impresión inicial sin considerar alternativas plausibles.
+     - *Cierre Prematuro*: Conclusión precipitada sin indagar suficientes datos anamnésicos o paraclínicos esenciales.
+     - *Sesgo de Confirmación*: Solicitud selectiva de pruebas exclusivamente orientadas a ratificar una única sospecha preconcebida.
+   - **Retroalimentación Formativa**: Resumen cualitativo, fortalezas y áreas prioritarias de mejora para cultivar el razonamiento analítico (Sistema 2).
+
+### 8.2 Patrón de Diseño Proveedor / Adaptador (Provider-Agnostic)
+
+La arquitectura desacopla estrictamente los endpoints HTTP y las interfaces de servicio (`BaseCaseGeneratorAgent`, `BaseVirtualPatientAgent`, `BaseClinicalEvaluatorAgent`) de las implementaciones subyacentes:
+- **Fase Actual (Mock Providers)**: Implementación determinista de alta fidelidad clínica con base de conocimiento estructurada y cobertura de pruebas unitarias al 100%.
+- **Transición a Modelos Comerciales (OpenAI / Gemini)**: Mediante la variable de entorno `AI_AGENT_PROVIDER` (`mock`, `gemini`, `openai`), la capa `app/services/agents/` permite conectar los SDKs oficiales de LLM comerciales sin modificar una sola línea de código en las rutas, esquemas ni frontend.
 

@@ -13,10 +13,12 @@ from app.schemas import (
     CreateConsultationRequest,
     FinishConsultationRequest,
     FinishConsultationResponse,
+    PatientChatRequest,
     SendMessageRequest,
     SendMessageResponse,
     validate_body,
 )
+from app.services.agents import get_virtual_patient_agent
 from app.utils import get_current_user, role_required
 
 consultas_bp = Blueprint("consultas", __name__)
@@ -212,11 +214,19 @@ def enviar_mensaje(consultation_id, validated_body: SendMessageRequest):
         "timestamp": datetime.now(timezone.utc).isoformat(),
     }
 
-    # Respuesta del paciente simulado (placeholder hasta conexión completa con fastapi-service)
+    # Generar respuesta dinámica del Agente 2 (Paciente Virtual)
+    patient_agent = get_virtual_patient_agent()
+    simulated_resp = patient_agent.respond_to_student(
+        PatientChatRequest(
+            consultation_id=str(consultation.id),
+            message=content,
+        )
+    )
+
     patient_reply = {
         "sender": "PATIENT",
-        "content": "Comprendo doctor(a). El malestar empezó hace tres días y ha empeorado con las comidas.",
-        "timestamp": datetime.now(timezone.utc).isoformat(),
+        "content": simulated_resp.reply,
+        "timestamp": simulated_resp.timestamp,
     }
 
     try:

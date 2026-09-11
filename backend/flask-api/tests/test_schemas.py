@@ -43,6 +43,17 @@ from app.schemas import (
     UserSummary,
     VerifyEmailRequest,
     validate_body,
+    CognitiveBias,
+    DomainScores,
+    EvaluateSessionRequest,
+    EvaluationResultResponse,
+    GenerateCaseRequest,
+    GeneratedCaseResponse,
+    GroundTruth,
+    PatientChatRequest,
+    PatientChatResponse,
+    PatientDemographics,
+    VitalSigns,
 )
 
 
@@ -302,4 +313,74 @@ def test_validate_body_decorator_in_flask():
     # Case 3: Empty body when required -> 400 Bad Request
     res_empty = client.post("/test-register", json={})
     assert res_empty.status_code == 400
+
+
+def test_ai_agents_schemas():
+    """Test AI Agents Request and Response schemas."""
+    # Case Generator
+    case_req = GenerateCaseRequest(difficulty="HARD", condition="Hemorragia")
+    assert case_req.difficulty == "HARD"
+    assert case_req.condition == "Hemorragia"
+
+    demo = PatientDemographics(age=45, gender="M", occupation="Docente")
+    vitals = VitalSigns(
+        blood_pressure="120/80",
+        heart_rate=80,
+        respiratory_rate=16,
+        temperature=36.8,
+        oxygen_saturation=98,
+    )
+    gt = GroundTruth(
+        definitive_diagnosis="Pancreatitis",
+        key_diagnostic_tests=["Amilasa"],
+        acceptable_differentials=["Colecistitis"],
+        clinical_summary="Fisiopatología",
+    )
+    case_resp = GeneratedCaseResponse(
+        case_id="C1",
+        title="Caso Prueba",
+        specialty="Gastro",
+        difficulty="MEDIUM",
+        demographics=demo,
+        chief_complaint="Dolor",
+        present_illness="Enfermedad actual",
+        vital_signs=vitals,
+        ground_truth=gt,
+    )
+    assert case_resp.case_id == "C1"
+    assert case_resp.ground_truth.definitive_diagnosis == "Pancreatitis"
+
+    # Virtual Patient
+    chat_req = PatientChatRequest(message="¿Cómo está?")
+    assert chat_req.message == "¿Cómo está?"
+    with pytest.raises(ValidationError):
+        PatientChatRequest(message="")
+
+    chat_resp = PatientChatResponse(
+        reply="Me siento mal",
+        emotional_state="ansioso",
+        pain_scale_reported=8,
+        timestamp="2026-09-10T20:00:00Z",
+    )
+    assert chat_resp.pain_scale_reported == 8
+
+    # Clinical Evaluator
+    eval_req = EvaluateSessionRequest(final_diagnosis="Pancreatitis")
+    assert eval_req.final_diagnosis == "Pancreatitis"
+
+    scores = DomainScores(
+        anamnesis=85.0,
+        diagnostic_tests=90.0,
+        differential_hypotheses=75.0,
+        final_diagnosis=95.0,
+    )
+    bias = CognitiveBias(bias_name="Anclaje", detected=False)
+    eval_resp = EvaluationResultResponse(
+        final_score=86.5,
+        domain_scores=scores,
+        detected_biases=[bias],
+        feedback_summary="Buen desempeño",
+    )
+    assert eval_resp.final_score == 86.5
+    assert len(eval_resp.detected_biases) == 1
 
