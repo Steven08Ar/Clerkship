@@ -328,3 +328,148 @@ def test_endpoint_agentes_validation_errors(client, auth_headers):
     assert res_eval.status_code == 400
     assert "details" in res_eval.get_json()
 
+
+# =============================================================================
+# 5. REAL LLM ADAPTERS & RESILIENCE TESTS (Gemini & OpenAI / ChatGPT)
+# =============================================================================
+
+from unittest.mock import MagicMock
+import json
+from app.services.agents.gemini_agents import (
+    GeminiCaseGeneratorAgent,
+    GeminiClinicalEvaluatorAgent,
+)
+from app.services.agents.openai_agents import (
+    OpenAIVirtualPatientAgent,
+)
+
+
+def test_gemini_case_generator_fallback_without_key():
+    """Gemini Case Generator safely falls back to Mock when no API key is provided."""
+    agent = GeminiCaseGeneratorAgent(api_key="")
+    response = agent.generate_case(GenerateCaseRequest(specialty="Gastroenterología"))
+    assert isinstance(response, GeneratedCaseResponse)
+    assert response.case_id == "CASE-GI-001"
+
+
+def test_gemini_case_generator_with_mocked_gemini_client():
+    """Gemini Case Generator parses structured output from Gemini model."""
+    agent = GeminiCaseGeneratorAgent(api_key="fake-key-for-test")
+    mock_client = MagicMock()
+    mock_case_payload = {
+        "case_id": "CASE-GI-999",
+        "title": "Caso Simulado Gemini",
+        "specialty": "Gastroenterología",
+        "difficulty": "HARD",
+        "demographics": {"age": 50, "gender": "F", "occupation": "Docente"},
+        "chief_complaint": "Dolor severo",
+        "present_illness": "Dolor abdominal de 24 horas",
+        "medical_history": {"pathological": "Gastritis"},
+        "vital_signs": {
+            "blood_pressure": "120/80",
+            "heart_rate": 88,
+            "respiratory_rate": 18,
+            "temperature": 37.2,
+            "oxygen_saturation": 98,
+        },
+        "physical_exam": {"abdomen": "Dolor en epigastrio"},
+        "ground_truth": {
+            "definitive_diagnosis": "Úlcera gástrica",
+            "key_diagnostic_tests": ["Endoscopia"],
+            "acceptable_differentials": ["Gastritis aguda"],
+            "clinical_summary": "Caso de úlcera",
+        },
+    }
+    mock_response = MagicMock()
+    mock_response.text = json.dumps(mock_case_payload)
+    mock_client.models.generate_content.return_value = mock_response
+    agent._client = mock_client
+
+    result = agent.generate_case(GenerateCaseRequest(specialty="Gastroenterología"))
+    assert result.case_id == "CASE-GI-999"
+    assert result.title == "Caso Simulado Gemini"
+    assert result.ground_truth.definitive_diagnosis == "Úlcera gástrica"
+
+
+def test_gemini_case_generator_fallback_on_exception():
+    """Gemini Case Generator gracefully falls back to Mock on API error."""
+    agent = GeminiCaseGeneratorAgent(api_key="fake-key-for-test")
+    mock_client = MagicMock()
+    mock_client.models.generate_content.side_effect = RuntimeError("Rate limit 429 exceeded")
+    agent._client = mock_client
+
+    result = agent.generate_case(GenerateCaseRequest(specialty="Gastroenterología"))
+    assert isinstance(result, GeneratedCaseResponse)
+    assert result.case_id == "CASE-GI-001"
+
+
+def test_openai_virtual_patient_fallback_without_key():
+    """OpenAI Virtual Patient safely falls back to Mock when no API key is provided."""
+    agent = OpenAIVirtualPatientAgent(api_key="")
+    response = agent.respond_to_student(PatientChatRequest(message="¿Dónde le duele?"))
+    assert isinstance(response, PatientChatResponse)
+    assert len(response.reply) > 0
+
+
+def test_openai_virtual_patient_with_mocked_openai_client():
+    """OpenAI Virtual Patient parses chat completion output from ChatGPT."""
+    agent = OpenAIVirtualPatientAgent(api_key="fake-openai-key")
+    mock_client = MagicMock()
+    mock_choice = MagicMock()
+    mock_choice.message.content = json.dumps({
+        "reply": "Doctor, me duele intensamente en la boca del estómago y me da náuseas.",
+        "pain_scale_reported": 9,
+        "emotional_state": "angustiado",
+    })
+    mock_completion = MagicMock()
+    mock_completion.choices = [mock_choice]
+    mock_client.chat.completions.create.return_value = mock_completion
+    agent._client = mock_client
+
+    result = agent.respond_to_student(PatientChatRequest(message="¿Qué siente?"))
+    assert "boca del estómago" in result.reply
+    assert result.pain_scale_reported == 9
+    assert result.emotional_state == "angustiado"
+
+
+def test_openai_virtual_patient_fallback_on_exception():
+    """OpenAI Virtual Patient gracefully falls back to Mock on API error."""
+    agent = OpenAIVirtualPatientAgent(api_key="fake-openai-key")
+    mock_client = MagicMock()
+    mock_client.chat.completions.create.side_effect = RuntimeError("OpenAI quota exceeded")
+    agent._client = mock_client
+
+    result = agent.respond_to_student(PatientChatRequest(message="¿Tiene fiebre?"))
+    assert isinstance(result, PatientChatResponse)
+    assert len(result.reply) > 0
+
+
+def test_gemini_clinical_evaluator_fallback_without_key():
+    """Gemini Evaluator safely falls back to Mock when no API key is provided."""
+    agent = GeminiClinicalEvaluatorAgent(api_key="")
+    response = agent.evaluate_session(
+        EvaluateSessionRequest(
+            case_id="CASE-GI-001",
+            final_diagnosis="Pancreatitis aguda litiásica",
+        )
+    )
+    assert isinstance(response, EvaluationResultResponse)
+    assert response.final_score > 0
+
+
+def test_gemini_clinical_evaluator_fallback_on_exception():
+    """Gemini Evaluator gracefully falls back to Mock on API error."""
+    agent = GeminiClinicalEvaluatorAgent(api_key="fake-key-for-test")
+    mock_client = MagicMock()
+    mock_client.models.generate_content.side_effect = RuntimeError("Gemini server error 503")
+    agent._client = mock_client
+
+    result = agent.evaluate_session(
+        EvaluateSessionRequest(
+            case_id="CASE-GI-001",
+            final_diagnosis="Pancreatitis aguda",
+        )
+    )
+    assert isinstance(result, EvaluationResultResponse)
+    assert result.final_score > 0
+

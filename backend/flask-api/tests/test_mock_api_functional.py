@@ -240,7 +240,10 @@ def test_comunidad_posts_and_comments(client, student_auth):
     res_create_post = client.post(
         "/api/comunidad/posts",
         headers=student_auth["headers"],
-        json={"content": "Pregunta de caso: ¿Cuál es el momento idóneo para realizar EDA en hemorragia digestiva alta no variceal?"},
+        json={
+            "title": "Manejo de Hemorragia Digestiva Alta",
+            "content": "Pregunta de caso: ¿Cuál es el momento idóneo para realizar EDA en hemorragia digestiva alta no variceal?",
+        },
     )
     assert res_create_post.status_code == 201
     new_post_id = res_create_post.get_json()["id"]
@@ -274,21 +277,41 @@ def test_comunidad_posts_and_comments(client, student_auth):
 
 def test_simulacion_clinica_flow(client, student_auth):
     """Tests the clinical simulation lifecycle: start, chat with virtual patient, and finish."""
-    # List consultations
+    # 1. List consultations
     res_consultas = client.get("/api/consultas", headers=student_auth["headers"])
     assert res_consultas.status_code == 200
     consultas = res_consultas.get_json()
     assert len(consultas) >= 1
 
-    # Get active consultation
-    in_progress = next((c for c in consultas if c["status"] == "IN_PROGRESS"), consultas[0])
-    cid = in_progress["id"]
+    # 2. Get student's enrolled course to launch a new simulation
+    res_courses = client.get("/api/cursos/mios", headers=student_auth["headers"])
+    assert res_courses.status_code == 200
+    my_courses = res_courses.get_json()
+    assert len(my_courses) >= 1
+    course_id = my_courses[0]["id"]
 
-    # Fetch consultation details
+    # 3. Start a fresh simulated consultation
+    res_start = client.post(
+        "/api/consultas",
+        headers=student_auth["headers"],
+        json={
+            "course_id": course_id,
+            "title": "Simulación Interactiva: Dolor Epigástrico Agudo",
+            "specialty": "Gastroenterología",
+            "difficulty": "MEDIUM",
+        },
+    )
+    assert res_start.status_code == 201
+    new_cons = res_start.get_json()
+    cid = new_cons["id"]
+    assert new_cons["status"] == "IN_PROGRESS"
+
+    # 4. Fetch consultation details
     res_detail = client.get(f"/api/consultas/{cid}", headers=student_auth["headers"])
     assert res_detail.status_code == 200
+    assert res_detail.get_json()["id"] == cid
 
-    # Interrogate virtual patient
+    # 5. Interrogate virtual patient
     res_msg = client.post(
         f"/api/consultas/{cid}/mensajes",
         headers=student_auth["headers"],
@@ -301,7 +324,7 @@ def test_simulacion_clinica_flow(client, student_auth):
     assert msg_data["reply"]["sender"] == "PATIENT"
     assert len(msg_data["reply"]["content"]) > 5
 
-    # Conclude consultation
+    # 6. Conclude consultation
     res_finish = client.patch(
         f"/api/consultas/{cid}/finalizar",
         headers=student_auth["headers"],
@@ -377,11 +400,15 @@ def test_agentes_api_complete_lifecycle(client, student_auth):
         json={
             "case_id": "CASE-GI-001",
             "chat_history": [
-                {"sender": "doctor", "message": "¿Dónde le duele?"},
-                {"sender": "patient", "message": "En la boca del estómago."},
+                {"sender": "doctor", "message": "¿Dónde le duele exactamente y desde qué horas inició el dolor?"},
+                {"sender": "patient", "message": "En la boca del estómago y se me pasa a la espalda."},
+                {"sender": "doctor", "message": "¿Ha tenido vómitos, náuseas o fiebre?"},
+                {"sender": "patient", "message": "Muchos vómitos de color amarillo y náuseas intensas."},
+                {"sender": "doctor", "message": "¿Tiene antecedentes de cálculos biliares o toma medicamentos?"},
+                {"sender": "patient", "message": "Sí, me diagnosticaron colelitiasis el año pasado."},
             ],
-            "requested_tests": ["Lipasa sérica", "Ecografía"],
-            "differential_diagnoses": ["Colecistitis"],
+            "requested_tests": ["Lipasa sérica", "Amilasa sérica", "Ecografía abdominal"],
+            "differential_diagnoses": ["Colecistitis aguda", "Úlcera péptica perforada"],
             "final_diagnosis": "Pancreatitis aguda de origen litiásico",
         },
     )
