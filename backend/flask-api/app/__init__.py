@@ -107,6 +107,7 @@ def create_app():
     from app.routes.consultas import consultas_bp
     from app.routes.historial import historial_bp
     from app.routes.email import email_bp
+    from app.routes.agentes import agentes_bp
     from app.routes.docs import docs_bp, swagger_ui
 
     app.register_blueprint(auth_bp, url_prefix="/api/auth")
@@ -118,6 +119,7 @@ def create_app():
     app.register_blueprint(consultas_bp, url_prefix="/api/consultas")
     app.register_blueprint(historial_bp, url_prefix="/api/historial")
     app.register_blueprint(email_bp, url_prefix="/api/email")
+    app.register_blueprint(agentes_bp, url_prefix="/api/agentes")
     app.register_blueprint(docs_bp, url_prefix="/api")
 
     # Acceso directo en /docs también

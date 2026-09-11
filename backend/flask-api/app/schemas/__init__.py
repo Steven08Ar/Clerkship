@@ -71,6 +71,19 @@ from app.schemas.email import (
     EmailStatusResponse,
     SendNotificationRequest,
 )
+from app.schemas.agentes import (
+    CognitiveBias,
+    DomainScores,
+    EvaluateSessionRequest,
+    EvaluationResultResponse,
+    GenerateCaseRequest,
+    GeneratedCaseResponse,
+    GroundTruth,
+    PatientChatRequest,
+    PatientChatResponse,
+    PatientDemographics,
+    VitalSigns,
+)
 
 __all__ = [
     # Base
@@ -132,5 +145,17 @@ __all__ = [
     "SendNotificationRequest",
     "EmailStatusResponse",
     "EmailNotificationResponse",
+    # Agentes
+    "PatientDemographics",
+    "VitalSigns",
+    "GroundTruth",
+    "GenerateCaseRequest",
+    "GeneratedCaseResponse",
+    "PatientChatRequest",
+    "PatientChatResponse",
+    "CognitiveBias",
+    "DomainScores",
+    "EvaluateSessionRequest",
+    "EvaluationResultResponse",
 ]
 

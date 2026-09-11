@@ -266,3 +266,81 @@ Todos los Blueprints del backend implementan una estructura consistente:
 ```powershell
 pytest tests/test_endpoints_structure.py -v
 ```
+
+---
+
+## Endpoints Mock para los Agentes de IA (ClinicAI UNAB)
+
+El backend expone 3 endpoints especializados bajo el prefijo `/api/agentes` para dar soporte al simulador clínico mediante los tres agentes pedagógicos:
+
+### 1. Agente 1: Generador de Casos Clínicos (`POST /api/agentes/caso`)
+Genera una viñeta clínica estructurada en Gastroenterología con perfil demográfico, signos vitales basales, motivo de consulta, enfermedad actual, antecedentes, examen físico y estándar de referencia *Ground Truth*.
+
+**Ejemplo cURL:**
+```bash
+curl -X POST http://localhost:5000/api/agentes/caso \
+  -H "Authorization: Bearer <TOKEN_JWT>" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "specialty": "Gastroenterología",
+    "difficulty": "MEDIUM",
+    "condition": "Pancreatitis Aguda"
+  }'
+```
+
+### 2. Agente 2: Paciente Virtual Estandarizado (`POST /api/agentes/paciente/chat`)
+Interroga al paciente virtual durante la anamnesis recibiendo respuestas coherentes en lenguaje natural coloquial, con estado afectivo y escala de dolor reportada.
+
+**Ejemplo cURL:**
+```bash
+curl -X POST http://localhost:5000/api/agentes/paciente/chat \
+  -H "Authorization: Bearer <TOKEN_JWT>" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "case_id": "CASE-GI-001",
+    "message": "¿En qué parte siente el dolor y hacia dónde se irradia?"
+  }'
+```
+
+### 3. Agente 3: Tutor Evaluador de Razonamiento Clínico (`POST /api/agentes/evaluar`)
+Evalúa la sesión completa contra el *Ground Truth*, calcula puntajes cuantitativos por 4 dominios (0 a 100), detecta sesgos cognitivos (*Anclaje*, *Cierre Prematuro*, *Confirmación*) según la Teoría de Procesamiento Dual y emite retroalimentación formativa.
+
+**Ejemplo cURL:**
+```bash
+curl -X POST http://localhost:5000/api/agentes/evaluar \
+  -H "Authorization: Bearer <TOKEN_JWT>" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "case_id": "CASE-GI-001",
+    "chat_history": [
+      {"sender": "doctor", "message": "¿Dónde le duele y desde cuándo?"},
+      {"sender": "patient", "message": "En la boca del estómago desde anoche."},
+      {"sender": "doctor", "message": "¿Ha tenido vómitos?"},
+      {"sender": "patient", "message": "Sí, 5 vómitos amargos."}
+    ],
+    "requested_tests": ["Lipasa sérica", "Ecografía hepatobiliar"],
+    "differential_diagnoses": ["Colecistitis aguda", "Úlcera péptica"],
+    "final_diagnosis": "Pancreatitis aguda litiásica"
+  }'
+```
+
+### 4. Ejecución de Pruebas Automatizadas de los Agentes
+Para ejecutar exclusivamente la suite de pruebas unitarias e integración de los agentes:
+```powershell
+pytest tests/test_ai_agents.py -v
+```
+
+Para ejecutar toda la suite de pruebas del backend (50 pruebas pasando al 100%):
+```powershell
+pytest tests/ -v
+```
+
+### 5. Configuración Futura para Modelos Comerciales (OpenAI / Gemini)
+El sistema utiliza el patrón Adapter desacoplado (`BaseAgentProvider`). Actualmente opera con el proveedor `mock` de alta fidelidad. Cuando se configuren las credenciales en `.env`:
+```env
+# Proveedor activo: mock | gemini | openai
+AI_AGENT_PROVIDER=mock
+OPENAI_API_KEY=sk-...
+GEMINI_API_KEY=AIzaSy...
+```
+El factory `app.services.agents.get_*_agent()` instanciará los clientes de OpenAI o Gemini de forma transparente sin alterar rutas, contratos ni frontend.
