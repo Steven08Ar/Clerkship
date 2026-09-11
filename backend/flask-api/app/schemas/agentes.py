@@ -61,6 +61,11 @@ class GeneratedCaseResponse(BaseSchema):
     vital_signs: VitalSigns
     physical_exam: Dict[str, str] = Field(default_factory=dict)
     ground_truth: Optional[GroundTruth] = None
+    provider_used: Optional[str] = Field(default="Google Gemini", description="Proveedor de IA utilizado o Mock")
+    model_used: Optional[str] = Field(default=None, description="Modelo de lenguaje utilizado")
+    is_mock: bool = Field(default=False, description="Indica si la respuesta fue provista por el fallback Mock")
+    error_details: Optional[str] = Field(default=None, description="Detalle del error técnico si se activó fallback")
+    latency_ms: Optional[float] = Field(default=None, description="Latencia en milisegundos de la llamada")
 
 
 # ---------------------------------------------------------
@@ -83,6 +88,11 @@ class PatientChatResponse(BaseSchema):
     emotional_state: str = Field("ansioso", description="Estado emocional del paciente virtual")
     pain_scale_reported: Optional[int] = Field(None, description="Intensidad de dolor percibida en escala 1-10")
     timestamp: str
+    provider_used: Optional[str] = Field(default="OpenAI ChatGPT", description="Proveedor de IA utilizado o Mock")
+    model_used: Optional[str] = Field(default=None, description="Modelo de lenguaje utilizado")
+    is_mock: bool = Field(default=False, description="Indica si la respuesta fue provista por el fallback Mock")
+    error_details: Optional[str] = Field(default=None, description="Detalle del error técnico si se activó fallback")
+    latency_ms: Optional[float] = Field(default=None, description="Latencia en milisegundos de la llamada")
 
 
 # ---------------------------------------------------------
@@ -128,4 +138,9 @@ class EvaluationResultResponse(BaseSchema):
     strengths: List[str] = Field(default_factory=list)
     areas_for_improvement: List[str] = Field(default_factory=list)
     comparison_with_ground_truth: Dict[str, Any] = Field(default_factory=dict)
+    provider_used: Optional[str] = Field(default="Google Gemini", description="Proveedor de IA utilizado o Mock")
+    model_used: Optional[str] = Field(default=None, description="Modelo de lenguaje utilizado")
+    is_mock: bool = Field(default=False, description="Indica si la respuesta fue provista por el fallback Mock")
+    error_details: Optional[str] = Field(default=None, description="Detalle del error técnico si se activó fallback")
+    latency_ms: Optional[float] = Field(default=None, description="Latencia en milisegundos de la llamada")
 

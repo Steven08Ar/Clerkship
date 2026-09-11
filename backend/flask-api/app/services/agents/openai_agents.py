@@ -13,6 +13,7 @@ from datetime import datetime, timezone
 import json
 import logging
 import os
+import time
 from typing import Optional
 
 from app.schemas.agentes import (
@@ -36,7 +37,7 @@ class OpenAIVirtualPatientAgent(BaseVirtualPatientAgent):
     """
 
     def __init__(self, api_key: Optional[str] = None, model: Optional[str] = None):
-        self.api_key = (api_key or os.getenv("OPENAI_API_KEY", "")).strip()
+        self.api_key = (api_key if api_key is not None else os.getenv("OPENAI_API_KEY", "")).strip()
         self.model_name = model or os.getenv("OPENAI_MODEL", "gpt-4o-mini")
         self._fallback_agent = MockVirtualPatientAgent()
         self._client = None
@@ -52,9 +53,17 @@ class OpenAIVirtualPatientAgent(BaseVirtualPatientAgent):
 
     def respond_to_student(self, request: PatientChatRequest) -> PatientChatResponse:
         """Genera la respuesta del paciente virtual en lenguaje natural o recurre al Mock de respaldo."""
+        start_time = time.perf_counter()
+
         if not self._client:
             logger.info("OPENAI_API_KEY no configurada. Utilizando Agente 2 Mock de respaldo.")
-            return self._fallback_agent.respond_to_student(request)
+            res = self._fallback_agent.respond_to_student(request)
+            res.is_mock = True
+            res.provider_used = "Mock (OPENAI_API_KEY no configurada)"
+            res.model_used = None
+            res.error_details = "OPENAI_API_KEY no está configurada en el archivo .env del backend."
+            res.latency_ms = round((time.perf_counter() - start_time) * 1000, 1)
+            return res
 
         # Contexto clínico del paciente a partir del caso seleccionado
         case_id = request.case_id or "CASE-GI-001"
@@ -117,9 +126,20 @@ REGLAS DE ACTUACIÓN Y COMPORTAMIENTO:
                 pain_scale_reported=int(pain) if isinstance(pain, (int, float)) else 8,
                 emotional_state=emotion,
                 timestamp=datetime.now(timezone.utc).isoformat(),
+                provider_used="OpenAI ChatGPT",
+                model_used=self.model_name,
+                is_mock=False,
+                error_details=None,
+                latency_ms=round((time.perf_counter() - start_time) * 1000, 1),
             )
 
         except Exception as exc:
             logger.error("Error al invocar OpenAI / ChatGPT en Agente 2 (Paciente Virtual): %s. Activando fallback a Mock.", exc)
-            return self._fallback_agent.respond_to_student(request)
+            res = self._fallback_agent.respond_to_student(request)
+            res.is_mock = True
+            res.provider_used = "Mock (Fallback por Error en OpenAI)"
+            res.model_used = None
+            res.error_details = str(exc)
+            res.latency_ms = round((time.perf_counter() - start_time) * 1000, 1)
+            return res
 

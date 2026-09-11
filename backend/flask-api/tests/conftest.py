@@ -1,4 +1,6 @@
 import os
+os.environ["AI_AGENT_PROVIDER"] = "mock"
+
 import pytest
 import yaml
 from openapi_schema_validator import validate as validate_schema
