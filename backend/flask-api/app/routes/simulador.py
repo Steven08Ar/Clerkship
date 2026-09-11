@@ -8,6 +8,7 @@ of the complete 3-step clinical reasoning workflow:
 3. Agente 3 (Tutor Evaluador - Google Gemini)
 """
 
+import os
 from flask import Blueprint, render_template_string
 
 simulador_bp = Blueprint("simulador", __name__)
@@ -53,16 +54,36 @@ SIMULADOR_HTML = """<!DOCTYPE html>
 
       <!-- Auth and Provider Badges -->
       <div class="flex items-center space-x-3">
-        <div class="hidden md:flex items-center space-x-2 text-xs">
-          <span class="px-2.5 py-1 rounded-md bg-blue-50 text-blue-700 border border-blue-200 font-medium flex items-center gap-1">
-            <span class="w-2 h-2 rounded-full bg-blue-500"></span> Agente 1: Gemini
+        <div class="hidden lg:flex items-center space-x-2 text-xs">
+          {% if gemini_key %}
+          <span class="px-2.5 py-1 rounded-md bg-blue-50 text-blue-800 border border-blue-200 font-medium flex items-center gap-1.5" title="Google Gemini configurado en .env">
+            <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span> Agente 1: Gemini ({{ gemini_model }})
           </span>
-          <span class="px-2.5 py-1 rounded-md bg-emerald-50 text-emerald-700 border border-emerald-200 font-medium flex items-center gap-1">
-            <span class="w-2 h-2 rounded-full bg-emerald-500"></span> Agente 2: ChatGPT
+          {% else %}
+          <span class="px-2.5 py-1 rounded-md bg-amber-50 text-amber-800 border border-amber-200 font-medium flex items-center gap-1.5" title="Sin clave GEMINI_API_KEY en .env">
+            <span class="w-2 h-2 rounded-full bg-amber-500"></span> Agente 1: Mock (Sin Key)
           </span>
-          <span class="px-2.5 py-1 rounded-md bg-purple-50 text-purple-700 border border-purple-200 font-medium flex items-center gap-1">
-            <span class="w-2 h-2 rounded-full bg-purple-500"></span> Agente 3: Gemini
+          {% endif %}
+
+          {% if openai_key %}
+          <span class="px-2.5 py-1 rounded-md bg-emerald-50 text-emerald-800 border border-emerald-200 font-medium flex items-center gap-1.5" title="OpenAI ChatGPT configurado en .env">
+            <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span> Agente 2: ChatGPT ({{ openai_model }})
           </span>
+          {% else %}
+          <span class="px-2.5 py-1 rounded-md bg-amber-50 text-amber-800 border border-amber-200 font-medium flex items-center gap-1.5" title="Sin clave OPENAI_API_KEY en .env">
+            <span class="w-2 h-2 rounded-full bg-amber-500"></span> Agente 2: Mock (Sin Key)
+          </span>
+          {% endif %}
+
+          {% if gemini_key %}
+          <span class="px-2.5 py-1 rounded-md bg-purple-50 text-purple-800 border border-purple-200 font-medium flex items-center gap-1.5" title="Google Gemini configurado en .env">
+            <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span> Agente 3: Gemini ({{ gemini_model }})
+          </span>
+          {% else %}
+          <span class="px-2.5 py-1 rounded-md bg-amber-50 text-amber-800 border border-amber-200 font-medium flex items-center gap-1.5" title="Sin clave GEMINI_API_KEY en .env">
+            <span class="w-2 h-2 rounded-full bg-amber-500"></span> Agente 3: Mock (Sin Key)
+          </span>
+          {% endif %}
         </div>
 
         <div id="authStatusBadge" class="text-xs font-medium px-3 py-1 rounded-full bg-amber-100 text-amber-800 border border-amber-200 flex items-center gap-1">
@@ -74,6 +95,34 @@ SIMULADOR_HTML = """<!DOCTYPE html>
       </div>
     </div>
   </header>
+
+  <!-- Developer Diagnostics Bar -->
+  <div class="bg-slate-900 text-slate-100 text-xs py-2 px-4 sm:px-6 lg:px-8 border-b border-slate-800 shadow-inner">
+    <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-3">
+      <div class="flex items-center gap-2">
+        <span class="px-2 py-0.5 rounded bg-sky-950 text-sky-300 font-mono text-[10px] font-bold uppercase tracking-wider border border-sky-800">🛠️ Consola de Desarrollo</span>
+        <span class="text-slate-300 text-[11px]">Transparencia Multi-Agente: Monitoreo en vivo de llamadas reales vs fallbacks Mock</span>
+      </div>
+      <div class="flex flex-wrap items-center gap-4 text-[11px]">
+        <div>
+          <span class="text-slate-400">Gemini:</span>
+          {% if gemini_key %}
+          <span class="text-emerald-400 font-semibold font-mono">🟢 Key Detectada ({{ gemini_model }} ➔ auto 3.5-flash)</span>
+          {% else %}
+          <span class="text-amber-400 font-semibold font-mono">🟡 Key Vacía (Fallback a Mock)</span>
+          {% endif %}
+        </div>
+        <div>
+          <span class="text-slate-400">OpenAI:</span>
+          {% if openai_key %}
+          <span class="text-emerald-400 font-semibold font-mono">🟢 Key Detectada ({{ openai_model }})</span>
+          {% else %}
+          <span class="text-amber-400 font-semibold font-mono">🟡 Key Vacía en .env (Fallback a Mock)</span>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
 
   <!-- Main Content Grid -->
   <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 flex-1 w-full grid grid-cols-1 lg:grid-cols-12 gap-6">
@@ -123,6 +172,9 @@ SIMULADOR_HTML = """<!DOCTYPE html>
 
         <!-- Case Presentation Card -->
         <div id="caseContainer" class="hidden border border-slate-200 rounded-xl p-4 bg-slate-50/70 space-y-3">
+          <!-- Live Telemetry Status Banner -->
+          <div id="caseTelemetryBanner" class="p-3 rounded-lg text-xs flex flex-col gap-1 border"></div>
+
           <div class="flex items-center justify-between">
             <span id="caseIdBadge" class="text-xs font-mono font-bold px-2.5 py-0.5 rounded bg-slate-200 text-slate-800">CASE-GI-001</span>
             <span id="caseGroundTruthHint" class="text-xs font-medium text-emerald-700 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded">🔒 Ground Truth Cargado</span>
@@ -143,6 +195,12 @@ SIMULADOR_HTML = """<!DOCTYPE html>
           </div>
 
           <div class="grid grid-cols-2 sm:grid-cols-5 gap-2 pt-1 border-t border-slate-200 text-center" id="vitalSignsGrid"></div>
+
+          <!-- Collapsible JSON Debugger -->
+          <details class="text-[11px] bg-slate-100 rounded-lg p-2 border border-slate-200">
+            <summary class="cursor-pointer font-bold text-slate-700 hover:text-sky-600">🔍 Ver Telemetría y Payload Completo (Agente 1)</summary>
+            <pre id="caseRawJson" class="mt-2 p-2 bg-slate-900 text-emerald-400 rounded overflow-x-auto text-[10px] max-h-48 chat-scroll"></pre>
+          </details>
         </div>
       </section>
 
@@ -198,15 +256,30 @@ SIMULADOR_HTML = """<!DOCTYPE html>
           <span class="text-xs font-semibold px-2 py-0.5 rounded bg-emerald-100 text-emerald-800">ChatGPT / OpenAI</span>
         </div>
 
+        <!-- OpenAI Key Status Warning / Telemetry -->
+        <div id="patientStatusBanner" class="mb-3 p-2.5 rounded-xl text-xs border {% if openai_key %}bg-emerald-50 border-emerald-200 text-emerald-900{% else %}bg-amber-50 border-amber-300 text-amber-900{% endif %}">
+          <div class="flex items-center justify-between font-bold">
+            <span class="flex items-center gap-1.5">
+              <span>{% if openai_key %}🟢{% else %}⚠️{% endif %}</span>
+              <span id="patientStatusTitle">{% if openai_key %}ChatGPT Real Activo ({{ openai_model }}){% else %}Modo Fallback Mock Activo (OPENAI_API_KEY no configurada){% endif %}</span>
+            </span>
+            <span id="patientLatencyBadge" class="text-[10px] font-mono px-1.5 py-0.5 rounded bg-white/80 border border-slate-200">{% if openai_key %}Listo{% else %}Mock Local{% endif %}</span>
+          </div>
+          <p id="patientStatusDesc" class="text-[11px] mt-1 leading-snug text-slate-600">
+            {% if openai_key %}Las respuestas del paciente serán generadas dinámicamente por la API de ChatGPT ({{ openai_model }}).{% else %}Para que el paciente responda con ChatGPT real, configure su clave <code>OPENAI_API_KEY</code> en <code>backend/flask-api/.env</code>. Actualmente está respondiendo con el Mock determinista local.{% endif %}
+          </p>
+        </div>
+
         <!-- Chat Container -->
         <div id="chatMessages" class="flex-1 overflow-y-auto pr-2 space-y-3 chat-scroll min-h-[260px] max-h-[380px] bg-slate-50/50 p-3 rounded-xl border border-slate-100">
           <div class="flex items-start gap-2.5">
             <div class="w-8 h-8 rounded-full bg-emerald-100 text-emerald-700 font-bold text-xs flex items-center justify-center shrink-0">🤒</div>
-            <div class="bg-white border border-slate-200 rounded-2xl rounded-tl-sm p-3 max-w-[85%] shadow-xs">
+            <div class="bg-white border border-slate-200 rounded-2xl rounded-tl-sm p-3 max-w-[85%] shadow-xs space-y-1">
               <p class="text-xs text-slate-700">Buenos días doctor(a), me siento muy mal desde hace unas horas y el dolor en el estómago no me deja tranquilo.</p>
-              <div class="mt-1 flex items-center gap-2 text-[10px] text-slate-400">
+              <div class="mt-1 flex flex-wrap items-center gap-2 text-[10px] text-slate-400">
                 <span class="px-1.5 py-0.5 rounded bg-amber-50 text-amber-700 border border-amber-200 font-semibold">Dolor: 8/10</span>
                 <span>• Quejumbroso</span>
+                <span class="px-1.5 py-0.5 rounded bg-slate-100 text-slate-600 border border-slate-200 font-mono">Mensaje inicial</span>
               </div>
             </div>
           </div>
@@ -223,6 +296,9 @@ SIMULADOR_HTML = """<!DOCTYPE html>
 
       <!-- Results Display: Evaluation Rubric Card -->
       <section id="evaluationResultsCard" class="hidden bg-white rounded-2xl border border-purple-200 shadow-md p-5 space-y-4">
+        <!-- Live Telemetry Banner -->
+        <div id="evalTelemetryBanner" class="p-3 rounded-lg text-xs flex flex-col gap-1 border"></div>
+
         <div class="flex items-center justify-between border-b border-purple-100 pb-3">
           <div class="flex items-center space-x-2">
             <span class="text-xl">🏆</span>
@@ -261,6 +337,12 @@ SIMULADOR_HTML = """<!DOCTYPE html>
 
         <!-- Summary text -->
         <div class="bg-slate-50 rounded-xl p-3 border border-slate-200 text-xs text-slate-700 leading-relaxed" id="feedbackSummaryText"></div>
+
+        <!-- Collapsible JSON Debugger for Evaluation -->
+        <details class="text-[11px] bg-slate-100 rounded-lg p-2 border border-slate-200">
+          <summary class="cursor-pointer font-bold text-slate-700 hover:text-purple-600">🔍 Ver Telemetría y Rúbrica Completa (Agente 3)</summary>
+          <pre id="evalRawJson" class="mt-2 p-2 bg-slate-900 text-purple-300 rounded overflow-x-auto text-[10px] max-h-48 chat-scroll"></pre>
+        </details>
       </section>
 
     </div>
@@ -365,15 +447,28 @@ SIMULADOR_HTML = """<!DOCTYPE html>
           body: JSON.stringify({ specialty, difficulty, condition })
         });
 
-        const data = await res.json();
+        const text = await res.text();
+        let data;
+        try {
+          data = JSON.parse(text);
+        } catch (pe) {
+          showToast(`Error ${res.status}: Respuesta del servidor no es JSON`, 'error');
+          return;
+        }
+
         if (!res.ok) {
-          showToast(data.message || 'Error al generar caso', 'error');
+          showToast(`Error (${res.status}): ${data.message || data.error || 'Error al generar caso'}`, 'error');
           return;
         }
 
         currentCase = data;
         renderCase(data);
-        showToast('Caso generado exitosamente con Agente 1', 'success');
+
+        if (data.is_mock) {
+          showToast('Caso cargado en Modo Fallback Mock (Revisar diagnóstico)', 'info');
+        } else {
+          showToast(`¡Caso generado en vivo con ${data.provider_used || 'Gemini'} [${data.model_used || ''}]!`, 'success');
+        }
 
         // Reset chat with patient
         chatHistory = [];
@@ -381,17 +476,18 @@ SIMULADOR_HTML = """<!DOCTYPE html>
         chatBox.innerHTML = `
           <div class="flex items-start gap-2.5">
             <div class="w-8 h-8 rounded-full bg-emerald-100 text-emerald-700 font-bold text-xs flex items-center justify-center shrink-0">🤒</div>
-            <div class="bg-white border border-slate-200 rounded-2xl rounded-tl-sm p-3 max-w-[85%] shadow-xs">
-              <p class="text-xs text-slate-700">Buenos días doctor(a), ${data.chief_complaint || 'tengo un malestar intenso y necesito ayuda.'}</p>
-              <div class="mt-1 flex items-center gap-2 text-[10px] text-slate-400">
+            <div class="bg-white border border-slate-200 rounded-2xl rounded-tl-sm p-3 max-w-[85%] shadow-xs space-y-1">
+              <p class="text-xs text-slate-700">Buenos días doctor(a), ${escapeHtml(data.chief_complaint || 'tengo un malestar intenso y necesito ayuda.')}</p>
+              <div class="mt-1 flex flex-wrap items-center gap-2 text-[10px] text-slate-400">
                 <span class="px-1.5 py-0.5 rounded bg-amber-50 text-amber-700 border border-amber-200 font-semibold">Dolor: 8/10</span>
                 <span>• Inquieto</span>
+                <span class="px-1.5 py-0.5 rounded bg-slate-100 text-slate-600 border border-slate-200 font-mono">Mensaje inicial del caso</span>
               </div>
             </div>
           </div>
         `;
       } catch (err) {
-        showToast('Error de red al contactar al Agente 1', 'error');
+        showToast(`Fallo de conexión con Agente 1: ${err.message}`, 'error');
       } finally {
         btn.innerHTML = `<span>✨ Generar Caso Clínico con Gemini</span>`;
         btn.disabled = false;
@@ -404,6 +500,31 @@ SIMULADOR_HTML = """<!DOCTYPE html>
       document.getElementById('caseTitle').innerText = c.title || 'Caso Clínico Simulado';
       document.getElementById('caseChiefComplaint').innerText = `"${c.chief_complaint || ''}"`;
       document.getElementById('casePresentIllness').innerText = c.present_illness || '';
+
+      // Telemetry Banner for Step 1
+      const tel = document.getElementById('caseTelemetryBanner');
+      if (c.is_mock) {
+        tel.className = 'p-3 rounded-xl bg-amber-50 border border-amber-300 text-amber-900 text-xs space-y-1';
+        tel.innerHTML = `
+          <div class="flex items-center justify-between font-bold">
+            <span class="flex items-center gap-1.5">⚠️ MODO FALLBACK MOCK ACTIVO</span>
+            <span class="text-[10px] font-mono bg-amber-200/80 px-2 py-0.5 rounded text-amber-900">MOCK DETERMINISTA</span>
+          </div>
+          <p class="text-[11px] text-amber-800">El caso fue cargado desde el repositorio de casos locales de respaldo porque el modelo no pudo responder.</p>
+          ${c.error_details ? `<div class="mt-1 p-1.5 bg-amber-100/70 rounded text-[10px] font-mono text-amber-900 break-all"><b>Detalle técnico:</b> ${escapeHtml(c.error_details)}</div>` : ''}
+        `;
+      } else {
+        tel.className = 'p-3 rounded-xl bg-emerald-50 border border-emerald-300 text-emerald-900 text-xs space-y-1';
+        tel.innerHTML = `
+          <div class="flex items-center justify-between font-bold">
+            <span class="flex items-center gap-1.5">🟢 MODELO REAL EJECUTADO: ${escapeHtml(c.provider_used || 'Google Gemini')}</span>
+            <span class="text-[10px] font-mono bg-emerald-200/80 px-2 py-0.5 rounded text-emerald-900 font-bold">${c.latency_ms || 0} ms</span>
+          </div>
+          <p class="text-[11px] text-emerald-800">Caso generado dinámicamente por Google Gemini usando el modelo <b>${escapeHtml(c.model_used || 'gemini')}</b>.</p>
+        `;
+      }
+
+      document.getElementById('caseRawJson').innerText = JSON.stringify(c, null, 2);
 
       const demo = c.demographics || {};
       document.getElementById('caseDemographics').innerHTML = `
@@ -456,7 +577,7 @@ SIMULADOR_HTML = """<!DOCTYPE html>
         <div id="${typingId}" class="flex items-start gap-2.5">
           <div class="w-8 h-8 rounded-full bg-emerald-100 text-emerald-700 font-bold text-xs flex items-center justify-center shrink-0">🤒</div>
           <div class="bg-white border border-slate-200 rounded-2xl rounded-tl-sm p-2.5 text-xs text-slate-400 italic flex items-center gap-1">
-            <span>Paciente pensando respuesta con ChatGPT...</span>
+            <span>Paciente formulando respuesta...</span>
           </div>
         </div>
       `;
@@ -478,26 +599,62 @@ SIMULADOR_HTML = """<!DOCTYPE html>
         const typingEl = document.getElementById(typingId);
         if (typingEl) typingEl.remove();
 
-        const data = await res.json();
+        const rawText = await res.text();
+        let data;
+        try {
+          data = JSON.parse(rawText);
+        } catch (pe) {
+          showToast(`Error ${res.status}: Respuesta no es JSON válido`, 'error');
+          return;
+        }
+
         if (!res.ok) {
-          showToast(data.message || 'Error al interrogar paciente', 'error');
+          showToast(`Error (${res.status}): ${data.message || data.error || 'Error al interrogar paciente'}`, 'error');
           return;
         }
 
         const reply = data.reply || 'Sí doctor.';
         const pain = data.pain_scale_reported ?? 8;
         const emotion = data.emotional_state || 'adolorido';
+        const isMock = !!data.is_mock;
+        const latency = data.latency_ms ? `${data.latency_ms} ms` : '';
+        const model = data.model_used || (isMock ? 'Mock Local' : 'ChatGPT');
 
         chatHistory.push({ sender: 'patient', message: reply });
+
+        // Update top patient status banner
+        const pBanner = document.getElementById('patientStatusBanner');
+        const pTitle = document.getElementById('patientStatusTitle');
+        const pDesc = document.getElementById('patientStatusDesc');
+        const pLat = document.getElementById('patientLatencyBadge');
+
+        if (isMock) {
+          pBanner.className = 'mb-3 p-2.5 rounded-xl text-xs border bg-amber-50 border-amber-300 text-amber-900';
+          pTitle.innerText = 'Modo Fallback Mock Activo (Agente 2)';
+          pDesc.innerHTML = data.error_details ?
+            `<b>Causa técnica:</b> ${escapeHtml(data.error_details)}` :
+            'Respondiendo mediante reglas heurísticas locales preprogramadas.';
+          pLat.innerText = latency ? `${latency} (Mock)` : 'Mock Local';
+        } else {
+          pBanner.className = 'mb-3 p-2.5 rounded-xl text-xs border bg-emerald-50 border-emerald-200 text-emerald-900';
+          pTitle.innerText = `ChatGPT Real Activo: ${model}`;
+          pDesc.innerText = 'Respuesta generada en vivo por la API de OpenAI en lenguaje natural.';
+          pLat.innerText = latency;
+        }
+
+        const badgeHtml = isMock
+          ? `<span class="px-1.5 py-0.5 rounded bg-amber-100 text-amber-800 border border-amber-300 font-mono font-semibold">🟡 Mock Local</span>`
+          : `<span class="px-1.5 py-0.5 rounded bg-emerald-100 text-emerald-800 border border-emerald-300 font-mono font-semibold">🟢 ChatGPT (${escapeHtml(model)}${latency ? ' | ' + latency : ''})</span>`;
 
         chatBox.innerHTML += `
           <div class="flex items-start gap-2.5">
             <div class="w-8 h-8 rounded-full bg-emerald-100 text-emerald-700 font-bold text-xs flex items-center justify-center shrink-0">🤒</div>
-            <div class="bg-white border border-slate-200 rounded-2xl rounded-tl-sm p-3 max-w-[85%] shadow-xs">
-              <p class="text-xs text-slate-700">${escapeHtml(reply)}</p>
-              <div class="mt-1 flex items-center gap-2 text-[10px] text-slate-400">
+            <div class="bg-white border border-slate-200 rounded-2xl rounded-tl-sm p-3 max-w-[85%] shadow-xs space-y-1.5">
+              <p class="text-xs text-slate-700 leading-relaxed">${escapeHtml(reply)}</p>
+              <div class="mt-1 flex flex-wrap items-center gap-1.5 text-[10px] text-slate-400">
                 <span class="px-1.5 py-0.5 rounded bg-amber-50 text-amber-700 border border-amber-200 font-semibold">Dolor: ${pain}/10</span>
                 <span>• ${escapeHtml(emotion)}</span>
+                ${badgeHtml}
               </div>
             </div>
           </div>
@@ -506,7 +663,7 @@ SIMULADOR_HTML = """<!DOCTYPE html>
       } catch (err) {
         const typingEl = document.getElementById(typingId);
         if (typingEl) typingEl.remove();
-        showToast('Error de red al comunicar con ChatGPT', 'error');
+        showToast(`Fallo de conexión al comunicar con paciente: ${err.message}`, 'error');
       }
     }
 
@@ -546,16 +703,29 @@ SIMULADOR_HTML = """<!DOCTYPE html>
           })
         });
 
-        const data = await res.json();
+        const rawText = await res.text();
+        let data;
+        try {
+          data = JSON.parse(rawText);
+        } catch (pe) {
+          showToast(`Error ${res.status}: Respuesta del evaluador no es JSON válido (${rawText.slice(0, 100)})`, 'error');
+          return;
+        }
+
         if (!res.ok) {
-          showToast(data.message || 'Error al evaluar sesión', 'error');
+          showToast(`Error (${res.status}): ${data.message || data.error || 'Error al evaluar sesión'}`, 'error');
           return;
         }
 
         renderEvaluation(data);
-        showToast('¡Evaluación generada con éxito!', 'success');
+
+        if (data.is_mock) {
+          showToast('Evaluación generada con Mock de respaldo', 'info');
+        } else {
+          showToast(`¡Evaluación completada exitosamente con ${data.provider_used || 'Gemini'} [${data.model_used || ''}]!`, 'success');
+        }
       } catch (err) {
-        showToast('Error de red al evaluar con Gemini', 'error');
+        showToast(`Fallo de conexión al evaluar: ${err.message}`, 'error');
       } finally {
         btn.innerHTML = `<span>📊 Evaluar Razonamiento Clínico con Gemini</span>`;
         btn.disabled = false;
@@ -566,6 +736,31 @@ SIMULADOR_HTML = """<!DOCTYPE html>
       const card = document.getElementById('evaluationResultsCard');
       card.classList.remove('hidden');
       card.scrollIntoView({ behavior: 'smooth' });
+
+      // Telemetry Banner for Step 3
+      const tel = document.getElementById('evalTelemetryBanner');
+      if (evalData.is_mock) {
+        tel.className = 'p-3 rounded-xl bg-amber-50 border border-amber-300 text-amber-900 text-xs space-y-1';
+        tel.innerHTML = `
+          <div class="flex items-center justify-between font-bold">
+            <span class="flex items-center gap-1.5">⚠️ EVALUACIÓN POR FALLBACK MOCK</span>
+            <span class="text-[10px] font-mono bg-amber-200/80 px-2 py-0.5 rounded text-amber-900">MOCK DETERMINISTA</span>
+          </div>
+          <p class="text-[11px] text-amber-800">La rúbrica fue evaluada con el motor local de contingencia.</p>
+          ${evalData.error_details ? `<div class="mt-1 p-1.5 bg-amber-100/70 rounded text-[10px] font-mono text-amber-900 break-all"><b>Detalle técnico:</b> ${escapeHtml(evalData.error_details)}</div>` : ''}
+        `;
+      } else {
+        tel.className = 'p-3 rounded-xl bg-emerald-50 border border-emerald-300 text-emerald-900 text-xs space-y-1';
+        tel.innerHTML = `
+          <div class="flex items-center justify-between font-bold">
+            <span class="flex items-center gap-1.5">🟢 EVALUACIÓN REAL CON GOOGLE GEMINI: ${escapeHtml(evalData.provider_used || 'Google Gemini')}</span>
+            <span class="text-[10px] font-mono bg-emerald-200/80 px-2 py-0.5 rounded text-emerald-900 font-bold">${evalData.latency_ms || 0} ms</span>
+          </div>
+          <p class="text-[11px] text-emerald-800">Evaluación de razonamiento clínico y sesgos cognitivos calculada por el modelo <b>${escapeHtml(evalData.model_used || 'gemini')}</b>.</p>
+        `;
+      }
+
+      document.getElementById('evalRawJson').innerText = JSON.stringify(evalData, null, 2);
 
       const score = evalData.final_score ?? 0;
       const scoreBadge = document.getElementById('finalScoreBadge');
@@ -617,6 +812,17 @@ SIMULADOR_HTML = """<!DOCTYPE html>
 
 @simulador_bp.route("/simulador", methods=["GET"])
 def simulador_interfaz():
-    """Renderiza la consola web interactiva para probar el simulador clínico."""
-    return render_template_string(SIMULADOR_HTML)
+    """Renderiza la consola web interactiva para probar el simulador clínico con telemetría de desarrollador."""
+    gemini_key = bool(os.getenv("GEMINI_API_KEY", "").strip())
+    openai_key = bool(os.getenv("OPENAI_API_KEY", "").strip())
+    gemini_model = os.getenv("GEMINI_MODEL", "gemini-3.8-flash")
+    openai_model = os.getenv("OPENAI_MODEL", "gpt-4o-mini")
+
+    return render_template_string(
+        SIMULADOR_HTML,
+        gemini_key=gemini_key,
+        openai_key=openai_key,
+        gemini_model=gemini_model,
+        openai_model=openai_model,
+    )
 

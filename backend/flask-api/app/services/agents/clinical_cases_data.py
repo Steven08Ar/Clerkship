@@ -365,5 +365,9 @@ def get_case_as_response(case_id: str, include_ground_truth: bool = True) -> Gen
         vital_signs=vital_signs,
         physical_exam=data["physical_exam"],
         ground_truth=ground_truth,
+        provider_used="Mock (Modo Local)",
+        model_used="deterministic-mock",
+        is_mock=True,
+        error_details=None,
     )
 

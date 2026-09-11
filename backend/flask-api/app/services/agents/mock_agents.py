@@ -165,6 +165,10 @@ class MockVirtualPatientAgent(BaseVirtualPatientAgent):
             emotional_state=emotional_states_by_case.get(case_id, "ansioso"),
             pain_scale_reported=pain_by_case.get(case_id, 8),
             timestamp=datetime.now(timezone.utc).isoformat(),
+            provider_used="Mock (Modo Local)",
+            model_used="deterministic-mock",
+            is_mock=True,
+            error_details=None,
         )
 
 
@@ -411,4 +415,8 @@ class MockClinicalEvaluatorAgent(BaseClinicalEvaluatorAgent):
                 "acceptable_differentials": acceptable_differentials,
                 "clinical_summary": ground_truth.get("clinical_summary", ""),
             },
+            provider_used="Mock (Modo Local)",
+            model_used="deterministic-mock",
+            is_mock=True,
+            error_details=None,
         )

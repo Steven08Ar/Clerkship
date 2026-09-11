@@ -12,7 +12,8 @@ si la API key no está configurada o ante fallos de cuota/red.
 import json
 import logging
 import os
-from typing import Optional
+import time
+from typing import Any, Dict, List, Optional, Union
 
 from app.schemas.agentes import (
     EvaluateSessionRequest,
@@ -36,6 +37,17 @@ from app.services.agents.mock_agents import (
 logger = logging.getLogger(__name__)
 
 
+def _format_chat_item(m: Union[Dict[str, Any], Any]) -> str:
+    """Safely format a chat message dictionary or object into a dialogue line."""
+    if isinstance(m, dict):
+        sender = m.get("sender", "médico")
+        msg = m.get("message", "")
+    else:
+        sender = getattr(m, "sender", "médico")
+        msg = getattr(m, "message", "")
+    return f"- [{sender}]: {msg}"
+
+
 class GeminiCaseGeneratorAgent(BaseCaseGeneratorAgent):
     """
     Agente 1: Generador / Presentador de Casos Clínicos impulsado por Google Gemini.
@@ -43,7 +55,7 @@ class GeminiCaseGeneratorAgent(BaseCaseGeneratorAgent):
     """
 
     def __init__(self, api_key: Optional[str] = None, model: Optional[str] = None):
-        self.api_key = (api_key or os.getenv("GEMINI_API_KEY", "")).strip()
+        self.api_key = (api_key if api_key is not None else os.getenv("GEMINI_API_KEY", "")).strip()
         self.model_name = model or os.getenv("GEMINI_MODEL", "gemini-3.8-flash")
         self._fallback_agent = MockCaseGeneratorAgent()
         self._client = None
@@ -59,9 +71,17 @@ class GeminiCaseGeneratorAgent(BaseCaseGeneratorAgent):
 
     def generate_case(self, request: GenerateCaseRequest) -> GeneratedCaseResponse:
         """Genera una viñeta clínica estructurada utilizando Gemini o recurre al Mock de respaldo."""
+        start_time = time.perf_counter()
+
         if not self._client:
             logger.info("GEMINI_API_KEY no configurada. Utilizando Agente 1 Mock de respaldo.")
-            return self._fallback_agent.generate_case(request)
+            res = self._fallback_agent.generate_case(request)
+            res.is_mock = True
+            res.provider_used = "Mock (GEMINI_API_KEY no configurada)"
+            res.model_used = None
+            res.error_details = "GEMINI_API_KEY no está configurada en el archivo .env"
+            res.latency_ms = round((time.perf_counter() - start_time) * 1000, 1)
+            return res
 
         specialty = request.specialty or "Gastroenterología"
         difficulty = request.difficulty or "MEDIUM"
@@ -87,25 +107,56 @@ INSTRUCCIONES CLÍNICAS:
 8. En 'ground_truth' establece el diagnóstico definitivo de referencia, el código CIE-10 estimado, los exámenes paraclínicos indispensables para confirmarlo, y al menos 2 diagnósticos diferenciales plausibles.
 """
 
-        try:
-            from google.genai import types
+        # Jerarquía de modelos: intentar primero el configurado, con fallback automático a gemini-3.5-flash
+        models_to_try = [self.model_name]
+        if "3.5-flash" not in self.model_name:
+            models_to_try.append("gemini-3.5-flash")
 
-            response = self._client.models.generate_content(
-                model=self.model_name,
-                contents=prompt,
-                config=types.GenerateContentConfig(
-                    response_mime_type="application/json",
-                    response_json_schema=GeneratedCaseResponse.model_json_schema(),
-                    temperature=0.3,
-                ),
-            )
+        last_error = None
 
-            raw_text = response.text.strip()
-            return GeneratedCaseResponse.model_validate_json(raw_text)
+        for model_candidate in models_to_try:
+            try:
+                from google.genai import types
 
-        except Exception as exc:
-            logger.error("Error al invocar Google Gemini en Agente 1 (Generador de Casos): %s. Activando fallback a Mock.", exc)
-            return self._fallback_agent.generate_case(request)
+                response = self._client.models.generate_content(
+                    model=model_candidate,
+                    contents=prompt,
+                    config=types.GenerateContentConfig(
+                        response_mime_type="application/json",
+                        response_json_schema=GeneratedCaseResponse.model_json_schema(),
+                        temperature=0.3,
+                    ),
+                )
+
+                raw_text = response.text.strip()
+                parsed = GeneratedCaseResponse.model_validate_json(raw_text)
+                parsed.provider_used = "Google Gemini"
+                parsed.model_used = model_candidate
+                parsed.is_mock = False
+                parsed.error_details = None
+                parsed.latency_ms = round((time.perf_counter() - start_time) * 1000, 1)
+                return parsed
+
+            except Exception as exc:
+                last_error = exc
+                logger.warning(
+                    "Error al invocar Gemini modelo '%s' en Agente 1: %s. Reintentando siguiente modelo...",
+                    model_candidate,
+                    exc,
+                )
+
+        # Fallback a Mock si todos los modelos de Gemini fallaron
+        logger.error(
+            "Todos los modelos de Gemini fallaron en Agente 1: %s. Activando fallback a Mock.",
+            last_error,
+        )
+        res = self._fallback_agent.generate_case(request)
+        res.is_mock = True
+        res.provider_used = "Mock (Fallback por Error en Gemini)"
+        res.model_used = None
+        res.error_details = str(last_error)
+        res.latency_ms = round((time.perf_counter() - start_time) * 1000, 1)
+        return res
 
 
 class GeminiClinicalEvaluatorAgent(BaseClinicalEvaluatorAgent):
@@ -116,7 +167,7 @@ class GeminiClinicalEvaluatorAgent(BaseClinicalEvaluatorAgent):
     """
 
     def __init__(self, api_key: Optional[str] = None, model: Optional[str] = None):
-        self.api_key = (api_key or os.getenv("GEMINI_API_KEY", "")).strip()
+        self.api_key = (api_key if api_key is not None else os.getenv("GEMINI_API_KEY", "")).strip()
         self.model_name = model or os.getenv("GEMINI_MODEL", "gemini-3.8-flash")
         self._fallback_agent = MockClinicalEvaluatorAgent()
         self._client = None
@@ -132,23 +183,34 @@ class GeminiClinicalEvaluatorAgent(BaseClinicalEvaluatorAgent):
 
     def evaluate_session(self, request: EvaluateSessionRequest) -> EvaluationResultResponse:
         """Evalúa el desempeño del estudiante con Gemini o recurre al Mock de respaldo."""
+        start_time = time.perf_counter()
+
         if not self._client:
             logger.info("GEMINI_API_KEY no configurada. Utilizando Agente 3 Mock de respaldo.")
-            return self._fallback_agent.evaluate_session(request)
+            res = self._fallback_agent.evaluate_session(request)
+            res.is_mock = True
+            res.provider_used = "Mock (GEMINI_API_KEY no configurada)"
+            res.model_used = None
+            res.error_details = "GEMINI_API_KEY no está configurada en el archivo .env"
+            res.latency_ms = round((time.perf_counter() - start_time) * 1000, 1)
+            return res
 
-        # Contexto del estándar de referencia (Ground Truth)
-        case_data = get_case_by_id(request.case_id) or CLINICAL_CASES_DATA.get("CASE-GI-001", {})
-        ground_truth = case_data.get("ground_truth", {})
-        definitive_diagnosis = ground_truth.get("definitive_diagnosis", "Patología gastrointestinal aguda")
-        key_tests = ground_truth.get("key_diagnostic_tests", [])
-        acceptable_differentials = ground_truth.get("acceptable_differentials", [])
+        last_error = None
 
-        # Formatear transcripción de la conversación
-        dialogue_text = "\n".join(
-            f"- [{m.sender}]: {m.message}" for m in request.chat_history
-        ) if request.chat_history else "Sin mensajes registrados."
+        try:
+            # Contexto del estándar de referencia (Ground Truth)
+            case_data = get_case_by_id(request.case_id) or CLINICAL_CASES_DATA.get("CASE-GI-001", {})
+            ground_truth = case_data.get("ground_truth", {})
+            definitive_diagnosis = ground_truth.get("definitive_diagnosis", "Patología gastrointestinal aguda")
+            key_tests = ground_truth.get("key_diagnostic_tests", [])
+            acceptable_differentials = ground_truth.get("acceptable_differentials", [])
 
-        prompt = f"""
+            # Formatear transcripción de la conversación de manera segura (maneja dict y objetos)
+            dialogue_text = "\n".join(
+                _format_chat_item(m) for m in request.chat_history
+            ) if request.chat_history else "Sin mensajes registrados."
+
+            prompt = f"""
 Actúa como un Médico Tutor Evaluador de Educación Médica Superior experto en Razonamiento Clínico y Metacognición Médica.
 Tu misión es evaluar el desempeño de un estudiante de medicina / médico interno durante una simulación clínica.
 
@@ -184,26 +246,57 @@ TAREAS DE EVALUACIÓN:
 5. Completa 'comparison_with_ground_truth' contrastando el diagnóstico y exámenes del estudiante con el estándar de oro.
 """
 
-        try:
-            from google.genai import types
+            # Jerarquía de modelos: intentar el configurado, con respaldo a gemini-3.5-flash
+            models_to_try = [self.model_name]
+            if "3.5-flash" not in self.model_name:
+                models_to_try.append("gemini-3.5-flash")
 
-            response = self._client.models.generate_content(
-                model=self.model_name,
-                contents=prompt,
-                config=types.GenerateContentConfig(
-                    response_mime_type="application/json",
-                    response_json_schema=EvaluationResultResponse.model_json_schema(),
-                    temperature=0.2,
-                ),
-            )
+            for model_candidate in models_to_try:
+                try:
+                    from google.genai import types
 
-            raw_text = response.text.strip()
-            parsed: EvaluationResultResponse = EvaluationResultResponse.model_validate_json(raw_text)
-            if request.consultation_id and not parsed.consultation_id:
-                parsed.consultation_id = request.consultation_id
-            return parsed
+                    response = self._client.models.generate_content(
+                        model=model_candidate,
+                        contents=prompt,
+                        config=types.GenerateContentConfig(
+                            response_mime_type="application/json",
+                            response_json_schema=EvaluationResultResponse.model_json_schema(),
+                            temperature=0.2,
+                        ),
+                    )
 
-        except Exception as exc:
-            logger.error("Error al invocar Google Gemini en Agente 3 (Evaluador): %s. Activando fallback a Mock.", exc)
-            return self._fallback_agent.evaluate_session(request)
+                    raw_text = response.text.strip()
+                    parsed: EvaluationResultResponse = EvaluationResultResponse.model_validate_json(raw_text)
+                    if request.consultation_id and not parsed.consultation_id:
+                        parsed.consultation_id = request.consultation_id
+
+                    parsed.provider_used = "Google Gemini"
+                    parsed.model_used = model_candidate
+                    parsed.is_mock = False
+                    parsed.error_details = None
+                    parsed.latency_ms = round((time.perf_counter() - start_time) * 1000, 1)
+                    return parsed
+
+                except Exception as exc:
+                    last_error = exc
+                    logger.warning(
+                        "Error al invocar Gemini modelo '%s' en Agente 3: %s. Reintentando siguiente modelo...",
+                        model_candidate,
+                        exc,
+                    )
+
+        except Exception as outer_exc:
+            last_error = outer_exc
+
+        logger.error(
+            "Error al invocar Google Gemini en Agente 3 (Evaluador): %s. Activando fallback a Mock.",
+            last_error,
+        )
+        res = self._fallback_agent.evaluate_session(request)
+        res.is_mock = True
+        res.provider_used = "Mock (Fallback por Error en Gemini)"
+        res.model_used = None
+        res.error_details = str(last_error)
+        res.latency_ms = round((time.perf_counter() - start_time) * 1000, 1)
+        return res
 
