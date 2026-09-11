@@ -125,4 +125,10 @@ def create_app():
     # Acceso directo en /docs también
     app.add_url_rule("/docs", endpoint="root_docs", view_func=swagger_ui)
 
+    @app.cli.command("seed-mock")
+    def run_seed_mock():
+        """Siembra datos clínicos mock para pruebas de desarrollo y frontend."""
+        from seed_mock_data import seed_mock_data
+        seed_mock_data(verbose=True)
+
     return app

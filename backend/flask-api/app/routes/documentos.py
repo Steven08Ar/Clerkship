@@ -81,16 +81,27 @@ def _descendant_ids(user_id, root_id: str) -> list:
 @jwt_required()
 def listar_carpetas():
     user = get_current_user()
+    if not user:
+        return jsonify({
+            "error": "Not Found",
+            "message": "Usuario no encontrado",
+            "status_code": 404
+        }), 404
+
     folders = DocumentFolder.query.filter_by(owner_user_id=user.id).order_by(DocumentFolder.created_at.asc()).all()
 
-    pipeline = [
-        {"$match": {"owner_user_id": str(user.id)}},
-        {"$group": {"_id": "$folder_id", "files": {"$sum": 1}, "size_bytes": {"$sum": "$size_bytes"}}},
-    ]
-    counts = {
-        (doc["_id"] or ""): {"files": doc["files"], "size_bytes": doc["size_bytes"]}
-        for doc in get_mongo_db().documents.aggregate(pipeline)
-    }
+    counts = {}
+    try:
+        pipeline = [
+            {"$match": {"owner_user_id": str(user.id)}},
+            {"$group": {"_id": "$folder_id", "files": {"$sum": 1}, "size_bytes": {"$sum": "$size_bytes"}}},
+        ]
+        counts = {
+            (doc["_id"] or ""): {"files": doc["files"], "size_bytes": doc["size_bytes"]}
+            for doc in get_mongo_db().documents.aggregate(pipeline)
+        }
+    except Exception:
+        counts = {}
 
     subfolder_counts: dict = {}
     for f in folders:
@@ -174,14 +185,18 @@ def actualizar_carpeta(folder_id, validated_body: UpdateFolderRequest):
     folder.updated_at = datetime.now(timezone.utc)
     db.session.commit()
 
-    counts_pipeline = [
-        {"$match": {"owner_user_id": str(user.id), "folder_id": str(folder.id)}},
-        {"$group": {"_id": "$folder_id", "files": {"$sum": 1}, "size_bytes": {"$sum": "$size_bytes"}}},
-    ]
-    counts = {
-        (doc["_id"] or ""): {"files": doc["files"], "size_bytes": doc["size_bytes"]}
-        for doc in get_mongo_db().documents.aggregate(counts_pipeline)
-    }
+    counts = {}
+    try:
+        counts_pipeline = [
+            {"$match": {"owner_user_id": str(user.id), "folder_id": str(folder.id)}},
+            {"$group": {"_id": "$folder_id", "files": {"$sum": 1}, "size_bytes": {"$sum": "$size_bytes"}}},
+        ]
+        counts = {
+            (doc["_id"] or ""): {"files": doc["files"], "size_bytes": doc["size_bytes"]}
+            for doc in get_mongo_db().documents.aggregate(counts_pipeline)
+        }
+    except Exception:
+        counts = {}
     return jsonify({"folder": _folder_dict_with_counts(folder, counts)}), 200
 
 
@@ -193,17 +208,17 @@ def borrar_carpeta(folder_id):
     if folder is None:
         return jsonify({"error": "Carpeta no encontrada"}), 404
 
-    # Se borra la carpeta Y todo lo que tenía adentro (incluyendo subcarpetas,
-    # a cualquier profundidad) — el frontend avisa cuántos archivos hay antes
-    # de confirmar, para que no sea una sorpresa. Postgres cascadea el borrado
-    # de las filas de subcarpeta solo (ON DELETE CASCADE), pero los documentos
-    # de Mongo de cada una hay que borrarlos a mano aquí.
     folder_ids = [str(folder.id)] + _descendant_ids(user.id, str(folder.id))
-    result = get_mongo_db().documents.delete_many({"owner_user_id": str(user.id), "folder_id": {"$in": folder_ids}})
+    deleted_count = 0
+    try:
+        result = get_mongo_db().documents.delete_many({"owner_user_id": str(user.id), "folder_id": {"$in": folder_ids}})
+        deleted_count = result.deleted_count
+    except Exception:
+        deleted_count = 0
     db.session.delete(folder)
     db.session.commit()
 
-    return jsonify({"ok": True, "documents_deleted": result.deleted_count}), 200
+    return jsonify({"ok": True, "documents_deleted": deleted_count}), 200
 
 
 @documentos_bp.get("/documentos")

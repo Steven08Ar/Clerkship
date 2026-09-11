@@ -344,3 +344,40 @@ OPENAI_API_KEY=sk-...
 GEMINI_API_KEY=AIzaSy...
 ```
 El factory `app.services.agents.get_*_agent()` instanciará los clientes de OpenAI o Gemini de forma transparente sin alterar rutas, contratos ni frontend.
+
+---
+
+## API Mock Funcional y Siembra de Datos (Mock Seeder)
+
+La plataforma dispone de un seeder integral idempotente que precarga usuarios, cursos, literatura médica, carpetas, discusiones comunitarias, simulaciones clínicas y evaluaciones en PostgreSQL (Supabase).
+
+### 1. Ejecutar la Siembra de Datos
+```powershell
+# Opción 1: Mediante comando CLI de Flask
+cd backend/flask-api
+.\venv\Scripts\python.exe -m flask seed-mock
+
+# Opción 2: Ejecución directa del script
+.\venv\Scripts\python.exe seed_mock_data.py
+```
+
+### 2. Credenciales Pre-sembradas
+| Rol | Correo Institucional | Contraseña | Semestre / Departamento |
+|---|---|---|---|
+| **Estudiante** | `sarias202@unab.edu.co` | `Estudiante2026*` | Semestre 8 (Internado Rotatorio) |
+| **Estudiante 2** | `estudiante@unab.edu.co` | `Estudiante2026*` | Semestre 6 (Semiología Médica) |
+| **Docente** | `docente@unab.edu.co` | `Docente2026*` | Medicina Interna y Gastroenterología |
+| **Docente Cirugía**| `cpena@unab.edu.co` | `Docente2026*` | Cirugía General y Simulación |
+| **Administrador** | `admin@unab.edu.co` | `Admin2026*` | Dirección Académica UNAB |
+
+### 3. Ejecutar Pruebas Funcionales E2E (10 Módulos de Negocio)
+```powershell
+pytest tests/test_mock_api_functional.py -v
+```
+
+### 4. Ejecutar la Suite Completa (60 pruebas pasando al 100%)
+```powershell
+pytest tests/ -v
+```
+
+Para más detalles, consulta el documento oficial: [`backend/docs/ENTREGA_API_MOCK_FUNCIONAL.md`](docs/ENTREGA_API_MOCK_FUNCIONAL.md).

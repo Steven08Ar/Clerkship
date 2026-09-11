@@ -7,7 +7,22 @@ from app.models import User
 
 
 def get_current_user():
-    return User.query.get(get_jwt_identity())
+    identity = get_jwt_identity()
+    if not identity:
+        return None
+    try:
+        user = User.query.get(identity)
+        if user:
+            return user
+    except Exception:
+        pass
+    try:
+        user = User.query.filter_by(email=identity).first()
+        if user:
+            return user
+    except Exception:
+        pass
+    return None
 
 
 def role_required(*roles):
