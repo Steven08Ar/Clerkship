@@ -1,0 +1,622 @@
+"""
+Route and interactive testing console for ClinicAI UNAB Multi-Agent Simulator.
+
+Serves an interactive single-page application at `/simulador` allowing direct testing
+of the complete 3-step clinical reasoning workflow:
+1. Agente 1 (Generador de Casos - Google Gemini)
+2. Agente 2 (Paciente Virtual - ChatGPT / OpenAI)
+3. Agente 3 (Tutor Evaluador - Google Gemini)
+"""
+
+from flask import Blueprint, render_template_string
+
+simulador_bp = Blueprint("simulador", __name__)
+
+SIMULADOR_HTML = """<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ClinicAI UNAB — Consola de Pruebas del Simulador Clínico</title>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%230284c7'><path d='M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-2 10h-4v4h-2v-4H7v-2h4V7h2v4h4v2z'/></svg>">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            brand: { 50: '#f0f9ff', 100: '#e0f2fe', 500: '#0ea5e9', 600: '#0284c7', 700: '#0369a1' }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    .chat-scroll::-webkit-scrollbar { width: 6px; }
+    .chat-scroll::-webkit-scrollbar-thumb { background-color: #cbd5e1; border-radius: 9999px; }
+  </style>
+</head>
+<body class="bg-slate-50 text-slate-800 font-sans min-h-screen flex flex-col">
+
+  <!-- Header -->
+  <header class="bg-white border-b border-slate-200 sticky top-0 z-30 shadow-sm">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+      <div class="flex items-center space-x-3">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-sky-600 to-teal-500 flex items-center justify-center text-white font-bold text-xl shadow-md">
+          🩺
+        </div>
+        <div>
+          <h1 class="text-lg font-bold text-slate-900 leading-tight">ClinicAI UNAB <span class="text-xs px-2 py-0.5 rounded-full bg-sky-100 text-sky-800 border border-sky-200 font-semibold uppercase">Consola de Pruebas</span></h1>
+          <p class="text-xs text-slate-500">Simulación Clínica Multi-Agente (Gemini + ChatGPT)</p>
+        </div>
+      </div>
+
+      <!-- Auth and Provider Badges -->
+      <div class="flex items-center space-x-3">
+        <div class="hidden md:flex items-center space-x-2 text-xs">
+          <span class="px-2.5 py-1 rounded-md bg-blue-50 text-blue-700 border border-blue-200 font-medium flex items-center gap-1">
+            <span class="w-2 h-2 rounded-full bg-blue-500"></span> Agente 1: Gemini
+          </span>
+          <span class="px-2.5 py-1 rounded-md bg-emerald-50 text-emerald-700 border border-emerald-200 font-medium flex items-center gap-1">
+            <span class="w-2 h-2 rounded-full bg-emerald-500"></span> Agente 2: ChatGPT
+          </span>
+          <span class="px-2.5 py-1 rounded-md bg-purple-50 text-purple-700 border border-purple-200 font-medium flex items-center gap-1">
+            <span class="w-2 h-2 rounded-full bg-purple-500"></span> Agente 3: Gemini
+          </span>
+        </div>
+
+        <div id="authStatusBadge" class="text-xs font-medium px-3 py-1 rounded-full bg-amber-100 text-amber-800 border border-amber-200 flex items-center gap-1">
+          <span>⚠️ Sin sesión</span>
+        </div>
+        <button id="quickLoginBtn" onclick="quickLogin()" class="text-xs px-3 py-1.5 rounded-lg bg-sky-600 hover:bg-sky-700 text-white font-medium shadow-sm transition">
+          🔑 Login Rápido
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Content Grid -->
+  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 flex-1 w-full grid grid-cols-1 lg:grid-cols-12 gap-6">
+
+    <!-- Left Column: Step 1 (Case Generator) & Step 3 (Evaluation Form) -->
+    <div class="lg:col-span-6 space-y-6">
+
+      <!-- STEP 1: Agente 1 (Generador de Casos) -->
+      <section class="bg-white rounded-2xl border border-slate-200 shadow-sm p-5 space-y-4">
+        <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+          <div class="flex items-center space-x-2">
+            <span class="w-7 h-7 rounded-full bg-blue-600 text-white text-xs font-bold flex items-center justify-center">1</span>
+            <h2 class="font-bold text-slate-900 text-base">Generador de Casos Clínicos</h2>
+          </div>
+          <span class="text-xs font-semibold px-2 py-0.5 rounded bg-blue-100 text-blue-800">Google Gemini</span>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          <div>
+            <label class="block text-xs font-semibold text-slate-600 mb-1">Especialidad</label>
+            <select id="caseSpecialty" class="w-full text-sm rounded-lg border-slate-200 border p-2 bg-slate-50 focus:ring-2 focus:ring-sky-500 focus:bg-white transition">
+              <option value="Gastroenterología">Gastroenterología</option>
+              <option value="Cirugía General">Cirugía General</option>
+              <option value="Medicina Interna">Medicina Interna</option>
+              <option value="Urgencias Médicas">Urgencias Médicas</option>
+            </select>
+          </div>
+
+          <div>
+            <label class="block text-xs font-semibold text-slate-600 mb-1">Dificultad</label>
+            <select id="caseDifficulty" class="w-full text-sm rounded-lg border-slate-200 border p-2 bg-slate-50 focus:ring-2 focus:ring-sky-500 focus:bg-white transition">
+              <option value="MEDIUM">Media (Intermedia)</option>
+              <option value="EASY">Básica (Semiología)</option>
+              <option value="HARD">Avanzada (Alta Complejidad)</option>
+            </select>
+          </div>
+
+          <div>
+            <label class="block text-xs font-semibold text-slate-600 mb-1">Condición Sugerida</label>
+            <input id="caseCondition" type="text" placeholder="Ej: Pancreatitis aguda" class="w-full text-sm rounded-lg border-slate-200 border p-2 bg-slate-50 focus:ring-2 focus:ring-sky-500 focus:bg-white transition" value="Pancreatitis Aguda">
+          </div>
+        </div>
+
+        <button id="generateCaseBtn" onclick="generateCase()" class="w-full py-2.5 rounded-xl bg-gradient-to-r from-sky-600 to-blue-700 hover:from-sky-700 hover:to-blue-800 text-white font-semibold text-sm shadow-md transition flex items-center justify-center gap-2">
+          <span>✨ Generar Caso Clínico con Gemini</span>
+        </button>
+
+        <!-- Case Presentation Card -->
+        <div id="caseContainer" class="hidden border border-slate-200 rounded-xl p-4 bg-slate-50/70 space-y-3">
+          <div class="flex items-center justify-between">
+            <span id="caseIdBadge" class="text-xs font-mono font-bold px-2.5 py-0.5 rounded bg-slate-200 text-slate-800">CASE-GI-001</span>
+            <span id="caseGroundTruthHint" class="text-xs font-medium text-emerald-700 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded">🔒 Ground Truth Cargado</span>
+          </div>
+
+          <h3 id="caseTitle" class="font-bold text-slate-900 text-sm">Título del caso</h3>
+
+          <div id="caseDemographics" class="text-xs text-slate-600 flex flex-wrap gap-2"></div>
+
+          <div class="bg-amber-50 border-l-4 border-amber-500 p-3 rounded-r-lg">
+            <p class="text-xs font-bold text-amber-900 uppercase">Motivo de Consulta:</p>
+            <p id="caseChiefComplaint" class="text-xs text-amber-950 italic mt-0.5">"..."</p>
+          </div>
+
+          <div class="space-y-1">
+            <p class="text-xs font-bold text-slate-700">Enfermedad Actual:</p>
+            <p id="casePresentIllness" class="text-xs text-slate-600 leading-relaxed text-justify max-h-36 overflow-y-auto pr-1 chat-scroll"></p>
+          </div>
+
+          <div class="grid grid-cols-2 sm:grid-cols-5 gap-2 pt-1 border-t border-slate-200 text-center" id="vitalSignsGrid"></div>
+        </div>
+      </section>
+
+      <!-- STEP 3: Formulario de Evaluación y Diagnóstico (Agente 3) -->
+      <section class="bg-white rounded-2xl border border-slate-200 shadow-sm p-5 space-y-4">
+        <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+          <div class="flex items-center space-x-2">
+            <span class="w-7 h-7 rounded-full bg-purple-600 text-white text-xs font-bold flex items-center justify-center">3</span>
+            <h2 class="font-bold text-slate-900 text-base">Razonamiento Clínico y Evaluación</h2>
+          </div>
+          <span class="text-xs font-semibold px-2 py-0.5 rounded bg-purple-100 text-purple-800">Google Gemini</span>
+        </div>
+
+        <p class="text-xs text-slate-500">Una vez interrogado el paciente virtual, formula tus solicitudes diagnósticas y conclusión clínica:</p>
+
+        <div class="space-y-3">
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">Exámenes Paraclínicos e Imágenes Solicitados (separados por coma)</label>
+            <input id="evalTests" type="text" placeholder="Ej: Lipasa sérica, Amilasa sérica, Ecografía abdominal" class="w-full text-sm rounded-lg border-slate-200 border p-2 focus:ring-2 focus:ring-purple-500 transition" value="Lipasa sérica, Ecografía abdominal, Hemograma">
+          </div>
+
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">Diagnósticos Diferenciales Planteados (separados por coma)</label>
+            <input id="evalDifferentials" type="text" placeholder="Ej: Colecistitis aguda, Úlcera péptica" class="w-full text-sm rounded-lg border-slate-200 border p-2 focus:ring-2 focus:ring-purple-500 transition" value="Colecistitis aguda, Úlcera péptica perforada">
+          </div>
+
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">Diagnóstico Final Definitivo <span class="text-red-500">*</span></label>
+            <input id="evalFinalDiag" type="text" placeholder="Ej: Pancreatitis aguda de origen litiásico" class="w-full text-sm rounded-lg border-slate-200 border p-2 focus:ring-2 focus:ring-purple-500 transition" value="Pancreatitis aguda de origen litiásico">
+          </div>
+        </div>
+
+        <button id="evaluateBtn" onclick="evaluateSession()" class="w-full py-2.5 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-700 hover:from-purple-700 hover:to-indigo-800 text-white font-semibold text-sm shadow-md transition flex items-center justify-center gap-2">
+          <span>📊 Evaluar Razonamiento Clínico con Gemini</span>
+        </button>
+      </section>
+
+    </div>
+
+    <!-- Right Column: Step 2 (Virtual Patient Chat) & Step 3 Output (Evaluation Rubric) -->
+    <div class="lg:col-span-6 space-y-6 flex flex-col">
+
+      <!-- STEP 2: Agente 2 (Paciente Virtual Estandarizado) -->
+      <section class="bg-white rounded-2xl border border-slate-200 shadow-sm p-5 flex flex-col flex-1 min-h-[460px]">
+        <div class="flex items-center justify-between border-b border-slate-100 pb-3 mb-3">
+          <div class="flex items-center space-x-2">
+            <span class="w-7 h-7 rounded-full bg-emerald-600 text-white text-xs font-bold flex items-center justify-center">2</span>
+            <div>
+              <h2 class="font-bold text-slate-900 text-base">Paciente Virtual Estandarizado</h2>
+              <p class="text-[11px] text-slate-500">Interrogatorio clínico en lenguaje natural coloquial</p>
+            </div>
+          </div>
+          <span class="text-xs font-semibold px-2 py-0.5 rounded bg-emerald-100 text-emerald-800">ChatGPT / OpenAI</span>
+        </div>
+
+        <!-- Chat Container -->
+        <div id="chatMessages" class="flex-1 overflow-y-auto pr-2 space-y-3 chat-scroll min-h-[260px] max-h-[380px] bg-slate-50/50 p-3 rounded-xl border border-slate-100">
+          <div class="flex items-start gap-2.5">
+            <div class="w-8 h-8 rounded-full bg-emerald-100 text-emerald-700 font-bold text-xs flex items-center justify-center shrink-0">🤒</div>
+            <div class="bg-white border border-slate-200 rounded-2xl rounded-tl-sm p-3 max-w-[85%] shadow-xs">
+              <p class="text-xs text-slate-700">Buenos días doctor(a), me siento muy mal desde hace unas horas y el dolor en el estómago no me deja tranquilo.</p>
+              <div class="mt-1 flex items-center gap-2 text-[10px] text-slate-400">
+                <span class="px-1.5 py-0.5 rounded bg-amber-50 text-amber-700 border border-amber-200 font-semibold">Dolor: 8/10</span>
+                <span>• Quejumbroso</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Chat Input Bar -->
+        <form id="chatForm" onsubmit="sendPatientMessage(event)" class="mt-3 flex gap-2">
+          <input id="chatInput" type="text" placeholder="Escribe tu pregunta clínica (ej: ¿Dónde le duele exactamente y desde qué horas?)..." class="flex-1 text-sm rounded-xl border-slate-200 border p-2.5 focus:ring-2 focus:ring-emerald-500 transition">
+          <button type="submit" class="px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-medium text-sm transition shrink-0 flex items-center gap-1 shadow-sm">
+            <span>Enviar</span> 💬
+          </button>
+        </form>
+      </section>
+
+      <!-- Results Display: Evaluation Rubric Card -->
+      <section id="evaluationResultsCard" class="hidden bg-white rounded-2xl border border-purple-200 shadow-md p-5 space-y-4">
+        <div class="flex items-center justify-between border-b border-purple-100 pb-3">
+          <div class="flex items-center space-x-2">
+            <span class="text-xl">🏆</span>
+            <div>
+              <h3 class="font-bold text-slate-900 text-base">Resultado de la Evaluación Clínica</h3>
+              <p class="text-xs text-slate-500">Rúbrica cuantitativa y Detección de Sesgos Cognitivos</p>
+            </div>
+          </div>
+          <div id="finalScoreBadge" class="px-3 py-1 rounded-xl text-lg font-extrabold bg-purple-100 text-purple-800 border border-purple-300">
+            -- / 100
+          </div>
+        </div>
+
+        <!-- 4 Domains Progress -->
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-2" id="domainsGrid"></div>
+
+        <!-- Cognitive Biases Card (Dual Process Theory) -->
+        <div class="space-y-2 pt-2 border-t border-slate-100">
+          <h4 class="text-xs font-bold text-slate-800 uppercase tracking-wide flex items-center gap-1.5">
+            <span>🧠</span> Sesgos Cognitivos (Teoría de Procesamiento Dual - Sistema 1 vs 2):
+          </h4>
+          <div id="biasesContainer" class="space-y-2"></div>
+        </div>
+
+        <!-- Strengths and Areas for Improvement -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2 text-xs">
+          <div class="bg-emerald-50 border border-emerald-200 rounded-xl p-3">
+            <h5 class="font-bold text-emerald-900 flex items-center gap-1 mb-1"><span>✅</span> Fortalezas:</h5>
+            <ul id="strengthsList" class="list-disc list-inside space-y-1 text-emerald-800"></ul>
+          </div>
+          <div class="bg-amber-50 border border-amber-200 rounded-xl p-3">
+            <h5 class="font-bold text-amber-900 flex items-center gap-1 mb-1"><span>💡</span> Áreas de Mejora:</h5>
+            <ul id="improvementsList" class="list-disc list-inside space-y-1 text-amber-800"></ul>
+          </div>
+        </div>
+
+        <!-- Summary text -->
+        <div class="bg-slate-50 rounded-xl p-3 border border-slate-200 text-xs text-slate-700 leading-relaxed" id="feedbackSummaryText"></div>
+      </section>
+
+    </div>
+
+  </main>
+
+  <!-- Notification Toast -->
+  <div id="toast" class="fixed bottom-5 right-5 z-50 transform transition-all duration-300 translate-y-20 opacity-0 pointer-events-none px-4 py-2.5 rounded-xl shadow-lg text-xs font-medium"></div>
+
+  <!-- Client-side Application Logic -->
+  <script>
+    let authToken = localStorage.getItem('clerkship_token') || '';
+    let currentCase = null;
+    let chatHistory = [];
+
+    // Initialize UI on load
+    window.addEventListener('DOMContentLoaded', () => {
+      if (authToken) {
+        updateAuthBadge(true);
+      }
+    });
+
+    function showToast(message, type = 'info') {
+      const toast = document.getElementById('toast');
+      toast.innerText = message;
+      toast.className = `fixed bottom-5 right-5 z-50 transform transition-all duration-300 px-4 py-3 rounded-xl shadow-xl text-xs font-semibold flex items-center gap-2 ${
+        type === 'error' ? 'bg-rose-600 text-white' : type === 'success' ? 'bg-emerald-600 text-white' : 'bg-slate-900 text-white'
+      }`;
+      toast.style.opacity = '1';
+      toast.style.transform = 'translateY(0)';
+      setTimeout(() => {
+        toast.style.opacity = '0';
+        toast.style.transform = 'translateY(20px)';
+      }, 3500);
+    }
+
+    function updateAuthBadge(isAuth, email = 'sarias202@unab.edu.co') {
+      const badge = document.getElementById('authStatusBadge');
+      if (isAuth) {
+        badge.className = 'text-xs font-medium px-3 py-1 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-200 flex items-center gap-1';
+        badge.innerHTML = `<span>🟢 Autenticado: ${email}</span>`;
+      } else {
+        badge.className = 'text-xs font-medium px-3 py-1 rounded-full bg-amber-100 text-amber-800 border border-amber-200 flex items-center gap-1';
+        badge.innerHTML = `<span>⚠️ Sin sesión activa</span>`;
+      }
+    }
+
+    async function quickLogin() {
+      const btn = document.getElementById('quickLoginBtn');
+      btn.innerText = 'Autenticando...';
+      btn.disabled = true;
+
+      try {
+        const res = await fetch('/api/auth/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email: 'sarias202@unab.edu.co', password: 'Estudiante2026*' })
+        });
+        const data = await res.json();
+        if (res.ok) {
+          authToken = data.access_token || (data.tokens && data.tokens.access_token);
+          localStorage.setItem('clerkship_token', authToken);
+          updateAuthBadge(true, data.user?.email || 'sarias202@unab.edu.co');
+          showToast('Sesión iniciada exitosamente como Estudiante UNAB', 'success');
+        } else {
+          showToast(`Error al iniciar sesión: ${data.message || 'Credenciales inválidas'}`, 'error');
+        }
+      } catch (err) {
+        showToast('Error de conexión con el servidor', 'error');
+      } finally {
+        btn.innerText = '🔑 Login Rápido';
+        btn.disabled = false;
+      }
+    }
+
+    async function checkAuth() {
+      if (!authToken) {
+        await quickLogin();
+      }
+      return !!authToken;
+    }
+
+    // --- STEP 1: GENERAR CASO CON GEMINI ---
+    async function generateCase() {
+      if (!await checkAuth()) return;
+
+      const btn = document.getElementById('generateCaseBtn');
+      btn.innerHTML = `<span>⏳ Invocando Agente 1 (Google Gemini)...</span>`;
+      btn.disabled = true;
+
+      const specialty = document.getElementById('caseSpecialty').value;
+      const difficulty = document.getElementById('caseDifficulty').value;
+      const condition = document.getElementById('caseCondition').value;
+
+      try {
+        const res = await fetch('/api/agentes/caso', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${authToken}`
+          },
+          body: JSON.stringify({ specialty, difficulty, condition })
+        });
+
+        const data = await res.json();
+        if (!res.ok) {
+          showToast(data.message || 'Error al generar caso', 'error');
+          return;
+        }
+
+        currentCase = data;
+        renderCase(data);
+        showToast('Caso generado exitosamente con Agente 1', 'success');
+
+        // Reset chat with patient
+        chatHistory = [];
+        const chatBox = document.getElementById('chatMessages');
+        chatBox.innerHTML = `
+          <div class="flex items-start gap-2.5">
+            <div class="w-8 h-8 rounded-full bg-emerald-100 text-emerald-700 font-bold text-xs flex items-center justify-center shrink-0">🤒</div>
+            <div class="bg-white border border-slate-200 rounded-2xl rounded-tl-sm p-3 max-w-[85%] shadow-xs">
+              <p class="text-xs text-slate-700">Buenos días doctor(a), ${data.chief_complaint || 'tengo un malestar intenso y necesito ayuda.'}</p>
+              <div class="mt-1 flex items-center gap-2 text-[10px] text-slate-400">
+                <span class="px-1.5 py-0.5 rounded bg-amber-50 text-amber-700 border border-amber-200 font-semibold">Dolor: 8/10</span>
+                <span>• Inquieto</span>
+              </div>
+            </div>
+          </div>
+        `;
+      } catch (err) {
+        showToast('Error de red al contactar al Agente 1', 'error');
+      } finally {
+        btn.innerHTML = `<span>✨ Generar Caso Clínico con Gemini</span>`;
+        btn.disabled = false;
+      }
+    }
+
+    function renderCase(c) {
+      document.getElementById('caseContainer').classList.remove('hidden');
+      document.getElementById('caseIdBadge').innerText = c.case_id || 'CASE-001';
+      document.getElementById('caseTitle').innerText = c.title || 'Caso Clínico Simulado';
+      document.getElementById('caseChiefComplaint').innerText = `"${c.chief_complaint || ''}"`;
+      document.getElementById('casePresentIllness').innerText = c.present_illness || '';
+
+      const demo = c.demographics || {};
+      document.getElementById('caseDemographics').innerHTML = `
+        <span class="px-2 py-0.5 bg-slate-200 rounded font-medium">Edad: ${demo.age || 45} años</span>
+        <span class="px-2 py-0.5 bg-slate-200 rounded font-medium">Sexo: ${demo.gender === 'M' ? 'Masculino' : 'Femenino'}</span>
+        <span class="px-2 py-0.5 bg-slate-200 rounded font-medium">Ocupación: ${demo.occupation || 'No especificada'}</span>
+      `;
+
+      const vs = c.vital_signs || {};
+      document.getElementById('vitalSignsGrid').innerHTML = `
+        <div class="bg-white border rounded-lg p-1.5"><p class="text-[10px] text-slate-400">PA</p><p class="text-xs font-bold text-slate-800">${vs.blood_pressure || '120/80'}</p></div>
+        <div class="bg-white border rounded-lg p-1.5"><p class="text-[10px] text-slate-400">FC</p><p class="text-xs font-bold text-slate-800">${vs.heart_rate || 80} lpm</p></div>
+        <div class="bg-white border rounded-lg p-1.5"><p class="text-[10px] text-slate-400">FR</p><p class="text-xs font-bold text-slate-800">${vs.respiratory_rate || 18} rpm</p></div>
+        <div class="bg-white border rounded-lg p-1.5"><p class="text-[10px] text-slate-400">Temp</p><p class="text-xs font-bold text-slate-800">${vs.temperature || 37.0} °C</p></div>
+        <div class="bg-white border rounded-lg p-1.5"><p class="text-[10px] text-slate-400">SpO2</p><p class="text-xs font-bold text-slate-800">${vs.oxygen_saturation || 98}%</p></div>
+      `;
+    }
+
+    // --- STEP 2: CHAT CON PACIENTE VIRTUAL (CHATGPT) ---
+    async function sendPatientMessage(e) {
+      e.preventDefault();
+      if (!await checkAuth()) return;
+
+      const input = document.getElementById('chatInput');
+      const text = input.value.trim();
+      if (!text) return;
+
+      input.value = '';
+      input.focus();
+
+      const chatBox = document.getElementById('chatMessages');
+
+      // Append student message
+      chatBox.innerHTML += `
+        <div class="flex items-start gap-2.5 justify-end">
+          <div class="bg-sky-600 text-white rounded-2xl rounded-tr-sm p-3 max-w-[85%] shadow-xs">
+            <p class="text-xs">${escapeHtml(text)}</p>
+            <span class="text-[10px] text-sky-200 block text-right mt-1">Doctor (Estudiante)</span>
+          </div>
+          <div class="w-8 h-8 rounded-full bg-sky-100 text-sky-800 font-bold text-xs flex items-center justify-center shrink-0">👨‍⚕️</div>
+        </div>
+      `;
+      chatBox.scrollTop = chatBox.scrollHeight;
+
+      chatHistory.push({ sender: 'doctor', message: text });
+
+      // Temporary typing bubble
+      const typingId = 'typing_' + Date.now();
+      chatBox.innerHTML += `
+        <div id="${typingId}" class="flex items-start gap-2.5">
+          <div class="w-8 h-8 rounded-full bg-emerald-100 text-emerald-700 font-bold text-xs flex items-center justify-center shrink-0">🤒</div>
+          <div class="bg-white border border-slate-200 rounded-2xl rounded-tl-sm p-2.5 text-xs text-slate-400 italic flex items-center gap-1">
+            <span>Paciente pensando respuesta con ChatGPT...</span>
+          </div>
+        </div>
+      `;
+      chatBox.scrollTop = chatBox.scrollHeight;
+
+      try {
+        const res = await fetch('/api/agentes/paciente/chat', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${authToken}`
+          },
+          body: JSON.stringify({
+            case_id: currentCase?.case_id || 'CASE-GI-001',
+            message: text
+          })
+        });
+
+        const typingEl = document.getElementById(typingId);
+        if (typingEl) typingEl.remove();
+
+        const data = await res.json();
+        if (!res.ok) {
+          showToast(data.message || 'Error al interrogar paciente', 'error');
+          return;
+        }
+
+        const reply = data.reply || 'Sí doctor.';
+        const pain = data.pain_scale_reported ?? 8;
+        const emotion = data.emotional_state || 'adolorido';
+
+        chatHistory.push({ sender: 'patient', message: reply });
+
+        chatBox.innerHTML += `
+          <div class="flex items-start gap-2.5">
+            <div class="w-8 h-8 rounded-full bg-emerald-100 text-emerald-700 font-bold text-xs flex items-center justify-center shrink-0">🤒</div>
+            <div class="bg-white border border-slate-200 rounded-2xl rounded-tl-sm p-3 max-w-[85%] shadow-xs">
+              <p class="text-xs text-slate-700">${escapeHtml(reply)}</p>
+              <div class="mt-1 flex items-center gap-2 text-[10px] text-slate-400">
+                <span class="px-1.5 py-0.5 rounded bg-amber-50 text-amber-700 border border-amber-200 font-semibold">Dolor: ${pain}/10</span>
+                <span>• ${escapeHtml(emotion)}</span>
+              </div>
+            </div>
+          </div>
+        `;
+        chatBox.scrollTop = chatBox.scrollHeight;
+      } catch (err) {
+        const typingEl = document.getElementById(typingId);
+        if (typingEl) typingEl.remove();
+        showToast('Error de red al comunicar con ChatGPT', 'error');
+      }
+    }
+
+    // --- STEP 3: EVALUAR CON GEMINI ---
+    async function evaluateSession() {
+      if (!await checkAuth()) return;
+
+      const finalDiag = document.getElementById('evalFinalDiag').value.trim();
+      if (!finalDiag) {
+        showToast('Por favor escribe tu diagnóstico final definitivo', 'error');
+        return;
+      }
+
+      const tests = document.getElementById('evalTests').value.split(',').map(s => s.trim()).filter(Boolean);
+      const diffs = document.getElementById('evalDifferentials').value.split(',').map(s => s.trim()).filter(Boolean);
+
+      const btn = document.getElementById('evaluateBtn');
+      btn.innerHTML = `<span>⏳ Evaluando con Agente 3 (Google Gemini)...</span>`;
+      btn.disabled = true;
+
+      try {
+        const res = await fetch('/api/agentes/evaluar', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${authToken}`
+          },
+          body: JSON.stringify({
+            case_id: currentCase?.case_id || 'CASE-GI-001',
+            chat_history: chatHistory.length > 0 ? chatHistory : [
+              { sender: 'doctor', message: '¿Dónde le duele y desde cuándo?' },
+              { sender: 'patient', message: 'En la boca del estómago desde anoche.' }
+            ],
+            requested_tests: tests,
+            differential_diagnoses: diffs,
+            final_diagnosis: finalDiag
+          })
+        });
+
+        const data = await res.json();
+        if (!res.ok) {
+          showToast(data.message || 'Error al evaluar sesión', 'error');
+          return;
+        }
+
+        renderEvaluation(data);
+        showToast('¡Evaluación generada con éxito!', 'success');
+      } catch (err) {
+        showToast('Error de red al evaluar con Gemini', 'error');
+      } finally {
+        btn.innerHTML = `<span>📊 Evaluar Razonamiento Clínico con Gemini</span>`;
+        btn.disabled = false;
+      }
+    }
+
+    function renderEvaluation(evalData) {
+      const card = document.getElementById('evaluationResultsCard');
+      card.classList.remove('hidden');
+      card.scrollIntoView({ behavior: 'smooth' });
+
+      const score = evalData.final_score ?? 0;
+      const scoreBadge = document.getElementById('finalScoreBadge');
+      scoreBadge.innerText = `${score} / 100`;
+
+      if (score >= 85) scoreBadge.className = 'px-3 py-1 rounded-xl text-lg font-extrabold bg-emerald-100 text-emerald-800 border border-emerald-300';
+      else if (score >= 70) scoreBadge.className = 'px-3 py-1 rounded-xl text-lg font-extrabold bg-blue-100 text-blue-800 border border-blue-300';
+      else scoreBadge.className = 'px-3 py-1 rounded-xl text-lg font-extrabold bg-amber-100 text-amber-800 border border-amber-300';
+
+      const ds = evalData.domain_scores || {};
+      document.getElementById('domainsGrid').innerHTML = `
+        <div class="bg-slate-50 border rounded-lg p-2 text-center"><p class="text-[10px] text-slate-500 font-semibold">Anamnesis (30%)</p><p class="text-sm font-extrabold text-slate-800">${ds.anamnesis || 0}</p></div>
+        <div class="bg-slate-50 border rounded-lg p-2 text-center"><p class="text-[10px] text-slate-500 font-semibold">Paraclínicos (25%)</p><p class="text-sm font-extrabold text-slate-800">${ds.diagnostic_tests || 0}</p></div>
+        <div class="bg-slate-50 border rounded-lg p-2 text-center"><p class="text-[10px] text-slate-500 font-semibold">Diferenciales (20%)</p><p class="text-sm font-extrabold text-slate-800">${ds.differential_hypotheses || 0}</p></div>
+        <div class="bg-slate-50 border rounded-lg p-2 text-center"><p class="text-[10px] text-slate-500 font-semibold">Diagnóstico (25%)</p><p class="text-sm font-extrabold text-slate-800">${ds.final_diagnosis || 0}</p></div>
+      `;
+
+      // Cognitive Biases
+      const biasesBox = document.getElementById('biasesContainer');
+      const biases = evalData.detected_biases || [];
+      biasesBox.innerHTML = biases.map(b => `
+        <div class="p-2.5 rounded-lg border text-xs ${b.detected ? 'bg-rose-50 border-rose-200 text-rose-900' : 'bg-slate-50 border-slate-200 text-slate-700'}">
+          <div class="flex items-center justify-between font-bold">
+            <span>${b.bias_name || 'Sesgo Cognitivo'}</span>
+            <span class="px-2 py-0.5 rounded text-[10px] ${b.detected ? 'bg-rose-200 text-rose-800' : 'bg-emerald-100 text-emerald-800'}">${b.detected ? '⚠️ DETECTADO' : '✅ No detectado'}</span>
+          </div>
+          <p class="text-[11px] mt-1 text-slate-600 leading-relaxed">${b.explanation || ''}</p>
+        </div>
+      `).join('');
+
+      // Strengths & Improvements
+      const strengthsList = document.getElementById('strengthsList');
+      strengthsList.innerHTML = (evalData.strengths || ['Interrogatorio ordenado']).map(s => `<li>${escapeHtml(s)}</li>`).join('');
+
+      const improvementsList = document.getElementById('improvementsList');
+      improvementsList.innerHTML = (evalData.areas_for_improvement || ['Profundizar en antecedentes']).map(i => `<li>${escapeHtml(i)}</li>`).join('');
+
+      document.getElementById('feedbackSummaryText').innerText = evalData.feedback_summary || 'Evaluación completada exitosamente.';
+    }
+
+    function escapeHtml(str) {
+      return (str || '').replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+    }
+  </script>
+</body>
+</html>
+"""
+
+
+@simulador_bp.route("/simulador", methods=["GET"])
+def simulador_interfaz():
+    """Renderiza la consola web interactiva para probar el simulador clínico."""
+    return render_template_string(SIMULADOR_HTML)
+
