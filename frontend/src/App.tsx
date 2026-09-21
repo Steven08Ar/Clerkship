@@ -24,9 +24,6 @@ import BibliotecaPage from './pages/contenido/BibliotecaPage';
 import SimulacionPage from './pages/simulacion/SimulacionPage';
 import CasosPage from './pages/simulacion/CasosPage';
 import HistorialPage from './pages/simulacion/HistorialPage';
-import ChatsPage from './pages/chats/ChatsPage';
-import MailboxPage from './pages/mailbox/MailboxPage';
-import TerminosBuzonPage from './pages/mailbox/TerminosBuzonPage';
 import CuestionarioPage from './pages/cuestionario/CuestionarioPage';
 import CronogramaPage from './pages/cronograma/CronogramaPage';
 import DesarrolloPage from './pages/desarrollo/DesarrolloPage';
@@ -70,7 +67,7 @@ function ConsentRoute({ children }: { children: React.ReactNode }) {
 
 /** Rutas cuyas páginas ya traen su propio <Sidebar/> con toggle de tema en
  *  el riel — ahí el botón flotante global queda de más. */
-const SIDEBAR_ROUTE_PREFIXES = ['/dashboard', '/biblioteca', '/casos', '/historial', '/chats', '/buzon', '/desarrollo'];
+const SIDEBAR_ROUTE_PREFIXES = ['/dashboard', '/biblioteca', '/casos', '/historial', '/desarrollo'];
 
 function GlobalThemeToggle() {
   const { pathname } = useLocation();
@@ -127,9 +124,6 @@ export default function App() {
         <Route path="/simulacion"             element={<ProtectedRoute><SimulacionPage /></ProtectedRoute>} />
         <Route path="/casos"                  element={<ProtectedRoute><CasosPage /></ProtectedRoute>} />
         <Route path="/historial"              element={<ProtectedRoute><HistorialPage /></ProtectedRoute>} />
-        <Route path="/chats"                  element={<ProtectedRoute><ChatsPage /></ProtectedRoute>} />
-        <Route path="/buzon"                  element={<ProtectedRoute><MailboxPage /></ProtectedRoute>} />
-        <Route path="/buzon/terminos"         element={<ProtectedRoute><TerminosBuzonPage /></ProtectedRoute>} />
 
         {/* Informative Pages */}
         <Route path="/equipo/desarrolladores" element={<DesarrolladoresPage />} />

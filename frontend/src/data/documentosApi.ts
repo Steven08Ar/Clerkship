@@ -1,8 +1,8 @@
 /**
  * Cliente del backend real para Carpetas y Documentos del Dashboard
- * (/api/documentos). Mismo patrón que chatsApi.ts/mailboxApi.ts: la carpeta
- * (nombre, color) vive en Postgres; el archivo real (bytes + metadata) vive
- * en Mongo, como base64 — no hay bucket de almacenamiento conectado todavía.
+ * (/api/documentos). La carpeta (nombre, color) vive en Postgres; el
+ * archivo real (bytes + metadata) vive en Mongo, como base64 — no hay
+ * bucket de almacenamiento conectado todavía.
  */
 import { apiFetch } from './apiClient';
 

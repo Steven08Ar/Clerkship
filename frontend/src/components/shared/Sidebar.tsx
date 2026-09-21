@@ -57,26 +57,6 @@ const PANEL: Record<string, PanelSection> = {
       { label: 'Todos los recursos', route: '/biblioteca' },
     ],
   },
-  chats: {
-    flat: [
-      { label: 'Todos los chats', route: '/chats' },
-    ],
-    groups: [
-      {
-        label: 'Conversaciones',
-        items: [
-          { label: 'Preceptores', route: '/chats?tipo=direct', dot: '#00B3F8' },
-          { label: 'Casos Clínicos', route: '/chats?tipo=group', dot: '#6366F1' },
-          { label: 'Comunidad', route: '/chats?tipo=public', dot: '#10B981' },
-        ],
-      },
-    ],
-  },
-  mailbox: {
-    flat: [
-      { label: 'Buzón', route: '/buzon' },
-    ],
-  },
 };
 
 /* ── Helpers ────────────────────────────────────────────────── */
@@ -537,9 +517,9 @@ export default function Sidebar() {
           </div>
         </div>
 
-        {/* ── Expandable Panel (Deshabilitado únicamente para Chats) ──────────────────────────────── */}
+        {/* ── Expandable Panel ──────────────────────────────── */}
         <AnimatePresence initial={false}>
-          {panelOpen && activeId !== 'chats' && pathname !== '/chats' && (
+          {panelOpen && (
             <motion.div
               className="sb-panel"
               initial={{ width: 0, opacity: 0 }}

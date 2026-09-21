@@ -6,13 +6,12 @@ import {
   Presentation, Image as ImageIcon, FileCode, File,
   MoreVertical, Pencil, Trash2, ArrowLeft, FolderPlus, UploadCloud, Loader2, Download, Eye,
   LayoutGrid, List, Search, X, Folder, HardDrive, Check,
-  ClipboardList, GraduationCap, Mail, ChevronRight, Share2
+  ClipboardList, GraduationCap, ChevronRight
 } from 'lucide-react';
 import Sidebar from '../../components/shared/Sidebar';
 import WelcomeOverlay from '../../components/shared/WelcomeOverlay';
 import FolderModal from '../../components/dashboard/FolderModal';
 import UploadDocumentModal from '../../components/dashboard/UploadDocumentModal';
-import ShareDocumentModal from '../../components/dashboard/ShareDocumentModal';
 import DocumentPreviewView from '../../components/dashboard/DocumentPreviewView';
 import { formatFileSize, readFileAsBase64 } from '../../utils/fileUpload';
 import { mainAuthErrorMessage } from '../../data/mainAuth';
@@ -22,7 +21,6 @@ import {
   type DocumentFolder, type DocumentSummary,
 } from '../../data/documentosApi';
 import { getStorageUsage, type StorageUsage } from '../../data/usuariosApi';
-import { getMailboxStatus } from '../../data/mailboxApi';
 import { MOCK_PENDING_CASES, MOCK_UNREVIEWED_GRADES } from '../../data/mockAcademicData';
 
 const SORT_OPTIONS = ['Más reciente', 'Más antiguo', 'Nombre A–Z', 'Tamaño (Mayor)'] as const;
@@ -241,7 +239,6 @@ export default function DashboardPage() {
   const [uploadModalOpen, setUploadModalOpen] = useState(false);
   const [confirmDeleteFolder, setConfirmDeleteFolder] = useState<DocumentFolder | null>(null);
   const [previewDoc, setPreviewDoc] = useState<DocumentSummary | null>(null);
-  const [shareDoc, setShareDoc] = useState<DocumentSummary | null>(null);
 
   const [openFolder, setOpenFolder] = useState<DocumentFolder | null>(null);
   const [folderStack, setFolderStack] = useState<DocumentFolder[]>([]);
@@ -256,9 +253,8 @@ export default function DashboardPage() {
   const [isDraggingOver, setIsDraggingOver] = useState(false);
   const [isDropUploading, setIsDropUploading] = useState(false);
 
-  /* ── Datos de Almacenamiento, Trabajos, Calificaciones y Buzón ── */
+  /* ── Datos de Almacenamiento, Trabajos y Calificaciones ── */
   const [storageUsage, setStorageUsage] = useState<StorageUsage | null>(null);
-  const [mailboxUnread, setMailboxUnread] = useState(0);
   const [activeWidgetPopover, setActiveWidgetPopover] = useState<'trabajos' | 'calificaciones' | null>(null);
 
   const menuRef = useRef<HTMLDivElement>(null);
@@ -279,18 +275,16 @@ export default function DashboardPage() {
     setLoading(true);
     setError(null);
     try {
-      const [{ folders: f }, { documents: d }, { documents: fullDocs }, storageRes, mbStatus] = await Promise.all([
+      const [{ folders: f }, { documents: d }, { documents: fullDocs }, storageRes] = await Promise.all([
         listFolders(),
         listDocuments(undefined, 18),
         listDocuments(undefined, 300),
         getStorageUsage().catch(() => null),
-        getMailboxStatus().catch(() => null),
       ]);
       setFolders(f);
       setRecent(d);
       setAllDocs(fullDocs || []);
       if (storageRes) setStorageUsage(storageRes);
-      if (mbStatus) setMailboxUnread(mbStatus.unread_count || 0);
     } catch (err) {
       setError(mainAuthErrorMessage(err));
     } finally {
@@ -787,7 +781,6 @@ export default function DashboardPage() {
                   <><Download size={13} /> Descargar</>
                 )}
               </button>
-              <button type="button" onClick={() => { setShareDoc(doc); setMenuFor(null); }}><Share2 size={13} /> Compartir</button>
               <button type="button" onClick={() => startRename(doc)}><Pencil size={13} /> Renombrar</button>
               <button type="button" className="danger" onClick={() => handleDeleteDocument(doc, fromFolder)}>
                 <Trash2 size={13} /> Eliminar
@@ -885,7 +878,6 @@ export default function DashboardPage() {
               </button>
               {menuFor === doc.id && (
                 <div className="bib2-file-menu gdrive-menu-fix">
-                  <button type="button" onClick={() => { setShareDoc(doc); setMenuFor(null); }}><Share2 size={13} /> Compartir</button>
                   <button type="button" onClick={() => startRename(doc)}><Pencil size={13} /> Renombrar</button>
                   <button type="button" className="danger" onClick={() => handleDeleteDocument(doc, fromFolder)}>
                     <Trash2 size={13} /> Eliminar
@@ -1156,7 +1148,7 @@ export default function DashboardPage() {
                   </div>
                 </div>
 
-                {/* Derecha: Indicadores Interactivos (Trabajos, Calificaciones, Buzón) */}
+                {/* Derecha: Indicadores Interactivos (Trabajos, Calificaciones) */}
                 <div className="gdrive-bar-right" ref={widgetPopoverRef}>
                   <div className="gdrive-quick-widgets">
                     {/* Widget 1: Trabajos pendientes */}
@@ -1186,20 +1178,6 @@ export default function DashboardPage() {
                         <span className="gdrive-widget-badge badge-calificaciones">{MOCK_UNREVIEWED_GRADES.length}</span>
                       </button>
                     </div>
-
-                    {/* Widget 3: Buzón */}
-                    <button
-                      type="button"
-                      className="gdrive-widget-chip gdrive-chip-buzon"
-                      onClick={() => navigate('/buzon')}
-                      title="Ir a mi buzón de correo"
-                    >
-                      <Mail size={15} className="gdrive-widget-icon icon-buzon" />
-                      <span className="gdrive-widget-label">Buzón</span>
-                      {mailboxUnread > 0 && (
-                        <span className="gdrive-widget-badge badge-buzon">{mailboxUnread}</span>
-                      )}
-                    </button>
                   </div>
                 </div>
               </div>
@@ -1422,12 +1400,6 @@ export default function DashboardPage() {
             defaultFolderId={openFolder?.id}
             onClose={() => setUploadModalOpen(false)}
             onUpload={handleUpload}
-          />
-        )}
-        {shareDoc && (
-          <ShareDocumentModal
-            document={shareDoc}
-            onClose={() => setShareDoc(null)}
           />
         )}
         {confirmDeleteFolder && (
