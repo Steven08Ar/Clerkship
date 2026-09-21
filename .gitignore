@@ -47,3 +47,6 @@ next-env.d.ts
 #Databases
 /backend/database/postgres/data/
 /backend/database/mongo/data/
+
+#Pruebas
+/archivado_buzon_chats/
