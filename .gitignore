@@ -43,3 +43,7 @@ next-env.d.ts
 
 #pruebas
 /pruebas/
+
+#Databases
+/backend/database/postgres/data/
+/backend/database/mongo/data/
