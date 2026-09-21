@@ -50,3 +50,6 @@ next-env.d.ts
 
 #Pruebas
 /archivado_buzon_chats/
+
+#Repo externo clonado (jrojas710/simulador-clinico-gastro) - trae su propio .git
+/simulador-clinico-gastro/
